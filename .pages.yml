@@ -1,0 +1,15 @@
+media: public/images
+
+content:
+  - name: posts
+    label: Публикации
+    type: collection
+    path: src/content/posts
+    fields:
+      - name: title
+        label: Заглавие
+        type: string
+        required: true
+      - name: body
+        label: Съдържание
+        type: rich-text
