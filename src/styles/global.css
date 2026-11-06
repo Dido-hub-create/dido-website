@@ -363,7 +363,7 @@ p {
   font-weight: 700;
 }
 .record small {
-  font-size: 9px;
+  font-size: 12px;
   color: var(--muted);
 }
 .record-highlight strong {
@@ -391,14 +391,14 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 .text-link svg {
   color: var(--accent);
 }
 .section-note {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
 }
 .latest-layout {
@@ -446,7 +446,7 @@ p {
   padding: 4px 10px;
   border-radius: 3px;
   color: var(--text);
-  font-size: 9px;
+  font-size: 12px;
 }
 .post-card-body {
   padding: 27px;
@@ -459,7 +459,7 @@ p {
   gap: 12px;
   flex-wrap: wrap;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.8px;
 }
 .post-card h3 {
@@ -469,7 +469,7 @@ p {
   overflow-wrap: anywhere;
 }
 .post-card p {
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.9;
   margin-bottom: 23px;
 }
@@ -538,7 +538,7 @@ p {
 }
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 15px;
 }
 .project-card {
@@ -565,7 +565,7 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 8px;
+  font-size: 13px;
   letter-spacing: 0.4px;
   color: var(--muted);
   padding: 2px 6px;
@@ -580,16 +580,17 @@ p {
   background: var(--accent);
 }
 .project-card h3 {
-  font-size: 15px;
+  font-size: 19px;
   letter-spacing: -0.45px;
   margin: 11px 0;
+  line-height: 1.4;
 }
 .project-card p {
-  font-size: 10px;
-  line-height: 1.9;
+  font-size: 15px;
+  line-height: 1.7;
 }
 .projects-note {
-  font-size: 9px;
+  font-size: 13px;
   margin-top: 15px;
 }
 .bottom-features {
@@ -697,7 +698,7 @@ p {
   flex-wrap: wrap;
   gap: 13px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   padding-top: 28px;
 }
 .breadcrumbs > span:last-child {
@@ -742,7 +743,12 @@ p {
   padding: 9px 15px;
   background: transparent;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 15px;
+  min-height: 44px;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
 }
 .topic-filter:hover {
   color: var(--text);
@@ -802,7 +808,7 @@ p {
   overflow-wrap: anywhere;
 }
 .article-header .post-meta {
-  font-size: 10px;
+  font-size: 12px;
 }
 .article-description {
   font-size: 18px;
@@ -883,10 +889,13 @@ p {
   padding: 20px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 14px;
 }
 .prose code {
   font-size: 0.85em;
+}
+.prose pre code {
+  font-size: inherit;
 }
 .prose table {
   display: block;
@@ -978,10 +987,10 @@ p {
   background: var(--panel);
   border-radius: 4px;
   padding: 4px 12px;
-  font-size: 12px;
+  font-size: 13px;
 }
 .lightbox-caption {
-  font-size: 11px;
+  font-size: 13px;
   text-align: center;
   margin-top: 12px;
   max-width: 750px;
@@ -1127,7 +1136,7 @@ p {
     padding: 20px 16px;
   }
   .project-card h3 {
-    font-size: 14px;
+    font-size: 19px;
   }
   .projects-grid {
     gap: 12px;
@@ -1265,7 +1274,7 @@ p {
     font-size: 8px;
   }
   .record small {
-    font-size: 8px;
+    font-size: 12px;
   }
   .latest-layout {
     grid-template-columns: 1fr;
@@ -1289,17 +1298,17 @@ p {
     display: none;
   }
   .projects-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
   }
   .project-card {
     padding: 25px;
   }
   .project-card h3 {
-    font-size: 18px;
+    font-size: 19px;
   }
   .project-card p {
-    font-size: 12px;
+    font-size: 15px;
   }
   .project-top {
     margin-bottom: 22px;
@@ -1468,7 +1477,7 @@ p {
     letter-spacing: 1.3px;
   }
   .record small {
-    font-size: 9px;
+    font-size: 12px;
   }
   .section {
     padding-top: 43px;
@@ -1487,7 +1496,7 @@ p {
     margin-top: 8px;
   }
   .section-heading > .text-link {
-    font-size: 9px;
+    font-size: 13px;
     gap: 6px;
     white-space: nowrap;
     margin-bottom: 4px;
@@ -1496,7 +1505,7 @@ p {
     width: 16px;
   }
   .section-note {
-    font-size: 9px;
+    font-size: 13px;
     max-width: 115px;
     text-align: right;
   }
@@ -1514,17 +1523,17 @@ p {
     padding: 24px;
   }
   .post-meta {
-    font-size: 8px;
+    font-size: 12px;
   }
   .post-card h3 {
     font-size: 24px;
     margin-top: 14px;
   }
   .post-card p {
-    font-size: 12px;
+    font-size: 14px;
   }
   .text-link {
-    font-size: 11px;
+    font-size: 13px;
   }
   .explore-topics {
     grid-template-columns: 1fr;
@@ -1554,13 +1563,13 @@ p {
     padding: 19px 15px;
   }
   .project-card h3 {
-    font-size: 16px;
+    font-size: 19px;
     line-height: 1.4;
     letter-spacing: -0.4px;
   }
   .project-card p {
-    font-size: 10px;
-    line-height: 1.9;
+    font-size: 15px;
+    line-height: 1.7;
   }
   .project-top {
     margin-bottom: 21px;
@@ -1569,7 +1578,7 @@ p {
     width: 25px;
   }
   .projects-note {
-    font-size: 9px;
+    font-size: 13px;
     line-height: 1.8;
   }
   .bottom-features {
@@ -1602,7 +1611,7 @@ p {
     gap: 15px;
   }
   .footer-top > .text-link {
-    font-size: 10px;
+    font-size: 13px;
   }
   .footer-bottom {
     flex-wrap: wrap;
@@ -1614,7 +1623,7 @@ p {
   }
   .breadcrumbs {
     padding-top: 23px;
-    font-size: 9px;
+    font-size: 12px;
     gap: 10px;
   }
   .page-intro {
@@ -1634,7 +1643,7 @@ p {
     gap: 7px;
   }
   .topic-filter {
-    font-size: 10px;
+    font-size: 15px;
     padding: 8px 12px;
   }
   .category-posts {
@@ -1663,7 +1672,7 @@ p {
     font-size: 15px;
   }
   .article-header .post-meta {
-    font-size: 8px;
+    font-size: 12px;
   }
   .article-cover {
     margin-bottom: 30px;
@@ -1672,7 +1681,7 @@ p {
     max-height: 580px;
   }
   .prose {
-    font-size: 15px;
+    font-size: 17px;
     line-height: 1.95;
   }
   .prose h1 {
@@ -1696,7 +1705,7 @@ p {
   }
   .article-gallery .section-note {
     max-width: 110px;
-    font-size: 8px;
+    font-size: 13px;
   }
   .article-page {
     padding-bottom: 45px;
@@ -1753,7 +1762,7 @@ p {
   .section-heading > .text-link {
     white-space: normal;
     text-align: right;
-    font-size: 9px;
+    font-size: 13px;
     max-width: 90px;
   }
   .records-title > span {

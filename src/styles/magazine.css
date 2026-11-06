@@ -204,7 +204,7 @@ body {
   margin: 5px 0 9px;
 }
 .records-title > p:last-child {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
   color: #edf1f5;
 }
@@ -287,7 +287,7 @@ body {
 }
 .home-category-heading .text-link {
   color: var(--accent);
-  font-size: 11px;
+  font-size: 13px;
   gap: 7px;
   white-space: nowrap;
 }
@@ -324,7 +324,7 @@ body {
 }
 .home-category .post-meta {
   order: 1;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0;
   line-height: 1.6;
   color: #d5dfe8;
@@ -334,13 +334,13 @@ body {
   display: none;
 }
 .home-category .post-card p {
-  font-size: 10px;
+  font-size: 14px;
   line-height: 1.6;
   margin-bottom: 12px;
   order: 2;
 }
 .home-category .post-card .text-link {
-  font-size: 10px;
+  font-size: 13px;
   gap: 6px;
   order: 3;
 }
@@ -425,7 +425,7 @@ body {
   color: var(--accent);
 }
 .home-feature p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
   margin: 11px 0;
   color: #edf1f5;
@@ -468,7 +468,7 @@ body {
 .projects-compact .project-card {
   padding: 13px 16px;
   display: grid;
-  grid-template-columns: 26px 1fr;
+  grid-template-columns: 26px minmax(0, 1fr);
   gap: 0 12px;
   align-items: center;
   border-radius: 10px;
@@ -482,11 +482,11 @@ body {
 }
 .projects-compact .status {
   width: max-content;
-  font-size: 8px;
+  font-size: 13px;
   padding: 0 5px;
 }
 .projects-compact .project-card h3 {
-  font-size: 13px;
+  font-size: 19px;
   margin: 6px 0 0;
   letter-spacing: -0.2px;
 }
@@ -531,7 +531,7 @@ body {
   display: flex;
   justify-content: space-between;
   padding-bottom: 12px;
-  font-size: 8px;
+  font-size: 12px;
   color: var(--muted);
 }
 @media (max-width: 1200px) {
@@ -557,7 +557,7 @@ body {
     font-size: 22px;
   }
   .records-title > p:last-child {
-    font-size: 11px;
+    font-size: 13px;
   }
   .record {
     padding-inline: 7px;
@@ -579,7 +579,7 @@ body {
     width: 26px;
   }
   .home-category-heading .text-link {
-    font-size: 9px;
+    font-size: 13px;
   }
   .home-columns {
     gap: 18px;
@@ -594,7 +594,7 @@ body {
     font-size: 20px;
   }
   .home-feature p {
-    font-size: 11px;
+    font-size: 14px;
   }
   .feature-picture {
     height: 152px;
@@ -690,7 +690,7 @@ body {
     font-size: 21px;
   }
   .home-category-heading .text-link {
-    font-size: 10px;
+    font-size: 13px;
   }
   .home-category-posts {
     grid-template-columns: 1fr;
@@ -729,7 +729,7 @@ body {
     font-size: 22px;
   }
   .home-feature p {
-    font-size: 12px;
+    font-size: 14px;
   }
   .about-feature .feature-picture img {
     width: 100%;
@@ -748,7 +748,7 @@ body {
     grid-row: auto;
   }
   .projects-compact .project-card h3 {
-    font-size: 12px;
+    font-size: 19px;
   }
 }
 @media (max-width: 640px) {
@@ -853,7 +853,7 @@ body {
     margin: 4px 0 7px;
   }
   .records-title > p:last-child {
-    font-size: 10px;
+    font-size: 13px;
     line-height: 1.5;
   }
   .record {
@@ -876,7 +876,7 @@ body {
     margin: 1px 0;
   }
   .record small {
-    font-size: 10px;
+    font-size: 12px;
   }
   .record-highlight {
     margin: 6px 0 0 6px;
@@ -913,7 +913,7 @@ body {
     width: 29px;
   }
   .home-category-heading .text-link {
-    font-size: 11px;
+    font-size: 13px;
     gap: 8px;
   }
   .home-category-posts {
@@ -928,7 +928,7 @@ body {
     font-size: 15px;
   }
   .home-category .post-card p {
-    font-size: 10px;
+    font-size: 14px;
   }
   .home-category .post-card-body {
     padding: 9px 2px;
@@ -948,7 +948,7 @@ body {
     max-width: 320px;
   }
   .home-category .post-meta {
-    font-size: 9px;
+    font-size: 12px;
   }
   .home-features {
     grid-template-columns: 1fr;
@@ -978,7 +978,7 @@ body {
     height: 22px;
   }
   .home-feature p {
-    font-size: 11px;
+    font-size: 14px;
     line-height: 1.5;
     margin: 10px 0 12px;
   }
@@ -1004,7 +1004,7 @@ body {
     gap: 10px;
   }
   .projects-compact .project-card {
-    grid-template-columns: 23px 1fr;
+    grid-template-columns: 23px minmax(0, 1fr);
     gap: 0 8px;
     padding: 13px 11px;
   }
@@ -1015,7 +1015,7 @@ body {
     width: 21px;
   }
   .projects-compact .project-card h3 {
-    font-size: 11px;
+    font-size: 19px;
     line-height: 1.4;
   }
   .magazine-footer {
@@ -1037,7 +1037,7 @@ body {
     font-size: 12px;
   }
   .magazine-copyright {
-    font-size: 8px;
+    font-size: 12px;
     gap: 20px;
     padding-bottom: 16px;
   }
@@ -1091,7 +1091,7 @@ body {
     font-size: 22px;
   }
   .home-feature p {
-    font-size: 12px;
+    font-size: 14px;
   }
   .home-feature > div {
     padding: 4px 6px 7px;

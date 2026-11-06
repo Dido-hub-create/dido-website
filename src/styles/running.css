@@ -331,7 +331,7 @@
   .homepage .home-category .post-card p,
   .homepage .home-category .post-meta,
   .homepage .home-category .post-card .text-link {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.7;
   }
   .homepage .home-category .post-card .text-link {
@@ -356,22 +356,22 @@
   }
   .projects-compact .project-card {
     padding: 18px 14px;
-    grid-template-columns: 26px 1fr;
+    grid-template-columns: 26px minmax(0, 1fr);
     gap: 0 12px;
   }
   .projects-compact .project-top {
     grid-row: 1/3;
   }
   .projects-compact .project-card h3 {
-    font-size: 15px;
+    font-size: 19px;
     line-height: 1.5;
   }
   .projects-compact .status {
-    font-size: 11px;
+    font-size: 13px;
     padding: 2px 6px;
   }
   .project-card p {
-    font-size: 14px !important;
+    font-size: 15px !important;
   }
   .projects-note {
     font-size: 13px;
@@ -398,7 +398,7 @@
     font-size: 14px;
   }
   .magazine-copyright {
-    font-size: 11px;
+    font-size: 12px;
   }
   .footer-identity .brand-caption {
     font-size: 15px;
@@ -450,7 +450,7 @@
     padding-top: 14px;
   }
   .topic-filter {
-    font-size: 13px;
+    font-size: 15px;
     min-height: 44px;
   }
   .prose {
@@ -460,7 +460,7 @@
     font-size: 14px;
   }
   .post-meta {
-    font-size: 11px;
+    font-size: 12px;
   }
   .post-card .text-link {
     font-size: 13px;
@@ -572,12 +572,12 @@
     grid-row: auto;
   }
   .projects-compact .project-card h3 {
-    font-size: 15px;
+    font-size: 19px;
     margin-top: 3px;
     overflow-wrap: anywhere;
   }
   .projects-compact .status {
-    font-size: 11px;
+    font-size: 13px;
   }
   .section-heading .eyebrow {
     font-size: 11px;
@@ -691,10 +691,10 @@
     overflow-wrap: anywhere;
   }
   .section-note {
-    font-size: 12px;
+    font-size: 13px;
   }
   .article-gallery .section-note {
-    font-size: 12px;
+    font-size: 13px;
   }
   .lightbox-close {
     font-size: 14px;
@@ -735,7 +735,7 @@
     font-size: 20px;
   }
   .records-title > p:last-child {
-    font-size: 12px;
+    font-size: 13px;
   }
   .magazine-footer nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -750,7 +750,7 @@
     grid-template-columns: 1fr;
   }
   .projects-compact .project-card {
-    grid-template-columns: 26px 1fr;
+    grid-template-columns: 26px minmax(0, 1fr);
     gap: 0 14px;
   }
   .projects-compact .project-top {
