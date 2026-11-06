@@ -60,6 +60,14 @@ test(
         "qa-old-draft",
         "---\ntitle: Стара чернова\ndraft: true\n---\nСкрита публикация.",
       );
+      // An invalid filename must never reach Astro's Markdown parser.
+      fixture("Bad.gpx", "---\ninvalid: [\n---\nPRIVATE_BAD_POST");
+      const settingsPath = join(fixtureRoot, "src/data/site.json");
+      const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
+      writeFileSync(settingsPath, JSON.stringify({ ...settings,
+        siteName: 'Тест & <име>', siteSubtitle: "Моят дневник",
+        logoImage: "/images/dido-bitcoin.svg", navigation: { home: "Старт", running: "Тичане" },
+      }));
       execFileSync(
         process.execPath,
         [join(root, "node_modules/astro/bin/astro.mjs"), "build"],
@@ -96,6 +104,14 @@ test(
         /src="\/images\/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg"/,
       );
       assert.match(page("byagane/index.html"), /Ново състезание/);
+      const home = page("index.html");
+      assert.match(home, /Моят дневник/);
+      assert.match(home, /class="brand-logo"/);
+      assert.match(home, /Тест &amp; &lt;име&gt;/);
+      assert.match(home, /href="\/byagane\/"[^>]*>Тичане<\/a>/);
+      assert.match(home, /href="\/"[^>]*>Старт<\/a>/);
+      assert.ok(!existsSync(join(fixtureRoot, "dist/posts/Bad.gpx")));
+      assert.doesNotMatch(home, /PRIVATE_BAD_POST/);
       assert.ok(!existsSync(join(fixtureRoot, "dist/posts/qa-draft")));
       assert.ok(!existsSync(join(fixtureRoot, "dist/posts/qa-old-draft")));
       assert.doesNotMatch(

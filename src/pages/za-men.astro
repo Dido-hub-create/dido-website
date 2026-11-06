@@ -4,6 +4,8 @@ import Icon from "../components/Icon.astro";
 import FramedImage from "../components/FramedImage.astro";
 import site from "../data/site.json";
 import { usableImage } from "../lib/posts";
+import { siteIdentity } from "../lib/site.mjs";
+const identity = siteIdentity();
 const portrait = usableImage(site.portrait);
 const contactUrl = /^https:\/\//i.test(site.contactUrl ?? "")
   ? site.contactUrl
@@ -15,14 +17,14 @@ const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(site.email ?? "")
 
 <Layout
   title="За мен"
-  description="Човекът зад DIDO. Лично пространство за бягане, технологии и полезни идеи."
+  description={`Човекът зад ${identity.name}. Лично пространство за бягане, технологии и полезни идеи.`}
 >
   <div class="container about-page">
     <div class="breadcrumbs">
       <a href="/">Начало</a><span>/</span><span>За мен</span>
     </div><section class="page-intro">
       <div>
-        <p class="eyebrow">ЧОВЕКЪТ ЗАД DIDO</p><h1>За мен<span>.</span></h1><p>
+        <p class="eyebrow">ЧОВЕКЪТ ЗАД {identity.name}</p><h1>За мен<span>.</span></h1><p>
           Един сайт. Няколко интереса. Много посоки за откриване.
         </p>
       </div>
@@ -57,7 +59,7 @@ const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(site.email ?? "")
             <>
               <>
                 <p>
-                  DIDO събира на едно място лични преживявания, бягане,
+                  {identity.name} събира на едно място лични преживявания, бягане,
                   технологични впечатления и идеи за полезни приложения.
                 </p>
                 <p>

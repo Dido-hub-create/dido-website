@@ -4,6 +4,7 @@ import {
   readFileSync,
   lstatSync,
   realpathSync,
+  writeFileSync,
 } from "node:fs";
 import { resolve, join, relative, extname, sep } from "node:path";
 import {
@@ -13,6 +14,8 @@ import {
   publicMapData,
   serializeGpx,
 } from "./gpx.mjs";
+import { readEntries, validEntryId } from "./entry-files.mjs";
+import { gpxFilename } from "./download-name.mjs";
 
 const text = (value) => (typeof value === "string" ? value.trim() : "");
 export const routeTypes = {
@@ -31,32 +34,13 @@ export function safeExternalLink(value) {
     return undefined;
   }
 }
-function readEntries(root, name) {
-  const directory = resolve(root, "src/content", name);
-  if (!existsSync(directory)) return [];
-  return readdirSync(directory)
-    .filter((file) => file.endsWith(".json"))
-    .sort()
-    .map((file) => {
-      const id = file.slice(0, -5);
-      if (!/^[\p{L}\p{N}_-]+$/u.test(id))
-        throw new Error(`Невалидно име на запис в ${name}.`);
-      const value = JSON.parse(readFileSync(join(directory, file), "utf8"));
-      if (!value || Array.isArray(value) || typeof value !== "object")
-        throw new Error(`Невалиден запис в ${name}.`);
-      return { id, data: value };
-    });
-}
 export function referenceId(value, collection) {
   const source = text(value).replace(/^\//, "");
   const prefix = `src/content/${collection}/`;
   const id = source.startsWith(prefix)
     ? source.slice(prefix.length).replace(/\.(json|md)$/, "")
     : source;
-  const valid =
-    collection === "posts"
-      ? /^[\p{L}\p{N}_-]+(?:\/[\p{L}\p{N}_-]+)*$/u.test(id)
-      : /^[\p{L}\p{N}_-]+$/u.test(id);
+  const valid = validEntryId(id, collection === "posts");
   return valid ? id : undefined;
 }
 export function resolveGpxSource(root, value) {
@@ -149,6 +133,7 @@ export function loadRoutes(root = process.cwd()) {
       return {
         id,
         title: text(data.title) || "Маршрут без заглавие",
+        downloadName: gpxFilename(text(data.title) || "Маршрут без заглавие"),
         description: text(data.description),
         location: text(data.location),
         surface: routeTypes[data.surface] ? data.surface : "mixed",
@@ -215,7 +200,15 @@ export function mapPayload(route) {
   return publicMapData(route.segments);
 }
 export function downloadPayload(route) {
-  return serializeGpx(route.segments);
+  return serializeGpx(route.segments, route.title);
+}
+// Static Astro endpoints do not preserve Response headers. Cloudflare reads this
+// generated file instead; filenames are ASCII and contain no header delimiters.
+export function writeGpxHeaders(root = process.cwd()) {
+  const rules = loadRoutes(root).filter((route) => route.gpxHref).map((route) =>
+    `${route.gpxHref}\n  Content-Type: application/gpx+xml; charset=utf-8\n  Content-Disposition: attachment; filename="${route.downloadName}"\n  X-Content-Type-Options: nosniff\n`,
+  );
+  writeFileSync(resolve(root, "dist/_headers"), rules.join("\n"));
 }
 export function allowedGpxFiles(root = process.cwd()) {
   return new Map(

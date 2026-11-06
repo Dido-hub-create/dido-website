@@ -3,12 +3,13 @@ import Layout from "../../../layouts/Layout.astro";
 import RouteCard from "../../../components/RouteCard.astro";
 import Icon from "../../../components/Icon.astro";
 import { loadRoutes } from "../../../lib/running.mjs";
+import { siteIdentity } from "../../../lib/site.mjs";
 const routes = loadRoutes();
 ---
 
 <Layout
   title="Моите маршрути"
-  description="Избрани GPS маршрути за бягане от личния дневник на DIDO."
+  description={`Избрани GPS маршрути за бягане от личния дневник на ${siteIdentity().name}.`}
   ><div class="container running-page">
     <div class="breadcrumbs">
       <a href="/">Начало</a><span>/</span><a href="/byagane/">Бягане</a><span

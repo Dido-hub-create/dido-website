@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 import { rmSync } from "node:fs";
 import { resolve } from "node:path";
-import { assertNoPublicGpx, assertGeneratedGpx } from "./src/lib/running.mjs";
+import { assertNoPublicGpx, assertGeneratedGpx, writeGpxHeaders } from "./src/lib/running.mjs";
 export default defineConfig({
   output: "static",
   trailingSlash: "always",
@@ -13,7 +13,10 @@ export default defineConfig({
           rmSync(resolve("dist"), { recursive: true, force: true });
           assertNoPublicGpx();
         },
-        "astro:build:done": () => assertGeneratedGpx(),
+        "astro:build:done": () => {
+          assertGeneratedGpx();
+          writeGpxHeaders();
+        },
       },
     },
   ],

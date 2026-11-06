@@ -9,7 +9,7 @@ export const GET: APIRoute = ({ props }) =>
   new Response(downloadPayload(props.route), {
     headers: {
       "Content-Type": "application/gpx+xml; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="dido-route.gpx"',
+      "Content-Disposition": `attachment; filename="${props.route.downloadName}"`,
       "X-Content-Type-Options": "nosniff",
     },
   });

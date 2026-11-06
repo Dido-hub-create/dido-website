@@ -8,6 +8,7 @@ import PostCard from "../components/PostCard.astro";
 import { allPosts, usableImage } from "../lib/posts";
 import { categories } from "../lib/content-utils.mjs";
 import site from "../data/site.json";
+import { siteIdentity } from "../lib/site.mjs";
 const posts = await allPosts();
 const latestFinance = posts.find((post) => post.category.slug === "finansi");
 const heroImage = usableImage(site.heroImage);
@@ -120,7 +121,7 @@ const homeCategories = categories.filter((category) =>
           })
         }
       </section>
-      <section class="home-features" aria-label="Още от DIDO">
+      <section class="home-features" aria-label={`Още от ${siteIdentity().name}`}>
         <article class="home-feature finance-feature">
           <a
             class="feature-picture"

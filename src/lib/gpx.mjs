@@ -1,5 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import { SyntaxValidator } from "fast-xml-validator";
+import { xmlText } from "./download-name.mjs";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const MAX_POINTS = 50000;
@@ -158,9 +159,9 @@ export function publicMapData(segments) {
     ),
   };
 }
-export function serializeGpx(segments) {
+export function serializeGpx(segments, title = "Маршрут без заглавие") {
   return (
-    '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="DIDO" xmlns="http://www.topografix.com/GPX/1/1"><trk><name>Маршрут DIDO</name>' +
+    '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="DIDO" xmlns="http://www.topografix.com/GPX/1/1"><trk><name>' + xmlText(title) + '</name>' +
     segments
       .map(
         (segment) =>

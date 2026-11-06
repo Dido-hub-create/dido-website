@@ -1,6 +1,7 @@
 import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
+import { entryFiles } from "./lib/entry-files.mjs";
 
 const optionalText = z.preprocess(
   (value) => (value === null || value === "" ? undefined : value),
@@ -19,7 +20,23 @@ const imageFrame = z
   .nullish();
 
 const posts = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/posts" }),
+  loader: {
+    name: "dido-safe-posts",
+    async load(context) {
+      const files = entryFiles(process.cwd(), "posts", ".md", {
+        nested: true,
+        report: (message: string) => context.logger.warn(message),
+      });
+      // Pass only validated regular files to Astro; its Markdown renderer and
+      // schema remain unchanged. Clearing also removes previously valid entries.
+      context.store.clear();
+      await glob({
+        pattern: files.length ? files : "__no_valid_posts__.md",
+        base: "./src/content/posts",
+        generateId: ({ entry }) => entry.slice(0, -3),
+      }).load(context);
+    },
+  },
   schema: z.object({
     title: z.string(),
     cover: optionalText,

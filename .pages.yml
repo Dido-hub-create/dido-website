@@ -15,6 +15,12 @@ content:
     label: Публикации
     type: collection
     path: src/content/posts
+    filename:
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.md"
+      field: false
+    subfolders: false
+    view:
+      primary: title
     fields:
       - name: title
         label: Заглавие
@@ -101,6 +107,47 @@ content:
     type: file
     path: src/data/site.json
     fields:
+      - name: siteName
+        label: Име на сайта
+        type: string
+        default: DIDO
+      - name: siteSubtitle
+        label: Подзаглавие
+        type: string
+        default: Личен сайт
+      - name: logoImage
+        label: Лого като изображение (празно = текстово лого)
+        type: image
+        options:
+          media: images
+      - name: navigation
+        label: Надписи в главното меню (адресите остават същите)
+        type: object
+        fields:
+          - name: home
+            label: Начало
+            type: string
+            default: Начало
+          - name: running
+            label: Бягане
+            type: string
+            default: Бягане
+          - name: technology
+            label: Технологии
+            type: string
+            default: Технологии
+          - name: useful
+            label: Полезно
+            type: string
+            default: Полезно
+          - name: about
+            label: За мен
+            type: string
+            default: За мен
+          - name: finance
+            label: Финанси
+            type: string
+            default: Финанси
       - name: homeIntro
         label: Представяне на началната страница
         type: text
@@ -180,8 +227,8 @@ content:
       - .gitkeep
     format: json
     filename:
-      template: "{primary}.json"
-      field: create
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.json"
+      field: false
     subfolders: false
     view:
       primary: title
@@ -301,8 +348,8 @@ content:
       - .gitkeep
     format: json
     filename:
-      template: "{primary}.json"
-      field: create
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.json"
+      field: false
     subfolders: false
     view:
       primary: title

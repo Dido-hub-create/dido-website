@@ -4,6 +4,7 @@ import { formatDate } from "../lib/posts";
 import Icon from "./Icon.astro";
 import FramedImage from "./FramedImage.astro";
 import { frameForImage } from "../lib/images.mjs";
+import { siteIdentity } from "../lib/site.mjs";
 interface Props {
   post: Post;
 }
@@ -28,7 +29,7 @@ const { post } = Astro.props;
       ) : (
         <div class="post-placeholder">
           <span>
-            DIDO<span>.</span>
+            {siteIdentity().name}<span>.</span>
           </span>
         </div>
       )

@@ -11,10 +11,11 @@ import {
   existsSync,
   readdirSync,
   statSync,
+  renameSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve, join } from "node:path";
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { parseGpx, publicMapData } from "../src/lib/gpx.mjs";
 import {
   assertNoPublicGpx,
@@ -120,6 +121,7 @@ test(
       writeFileSync(join(fixture, "src/data/gpx/original.gpx"), source);
       writeFileSync(join(fixture, "src/data/gpx/broken.gpx"), "<gpx>");
       writeRoute("allowed", {
+        title: "Маратон Кайлъка 2026 – 21,1 км",
         publishMap: true,
         allowDownload: true,
         elevationTrusted: true,
@@ -152,6 +154,10 @@ test(
         publishMap: true,
         allowDownload: true,
       });
+      writeRoute("MarathonKaylaka21km.gpx", { publishMap: true, allowDownload: true });
+      writeRoute("retired", { publishMap: true, allowDownload: true });
+      writeFileSync(join(fixture, "src/content/routes/bad-json.json"), "{PRIVATE_JSON");
+      writeFileSync(join(fixture, "src/content/races/Invalid.gpx.json"), "{PRIVATE_RACE");
       const image = "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg";
       writeFileSync(
         join(fixture, "src/content/races/future.json"),
@@ -191,8 +197,8 @@ test(
         join(fixture, "src/content/posts/crop-test.md"),
         `---\ntitle: Тест на кадриране\ncover: ${image}\ncoverFrame:\n  fit: cover\n  x: 25\n  y: 10\n  mobileFit: contain\ngallery:\n  - ${image}\ngalleryFrame:\n  fit: contain\n---\nТестов текст.`,
       );
-      const build = () =>
-        execFileSync(
+      const build = () => {
+        const result = spawnSync(
           process.execPath,
           [join(root, "node_modules/astro/bin/astro.mjs"), "build"],
           {
@@ -201,7 +207,13 @@ test(
             stdio: "pipe",
           },
         );
-      build();
+        if (result.error) throw result.error;
+        if (result.status !== 0) throw new Error(result.stderr.toString());
+        return Buffer.concat([result.stdout, result.stderr]);
+      };
+      const logs = build().toString();
+      assert.match(logs, /Пропуснат запис routes\/"MarathonKaylaka21km.gpx.json"/);
+      assert.match(logs, /Пропуснат запис races\/"Invalid.gpx.json"/);
       const output = join(fixture, "dist"),
         path = (id, name) => join(output, "byagane/marshruti", id, name),
         read = (id, name) => readFileSync(path(id, name), "utf8");
@@ -209,6 +221,12 @@ test(
       const map = JSON.parse(read("allowed", "map.json")),
         download = read("allowed", "trace.gpx");
       assert.deepEqual(publicMapData(parseGpx(download)), map);
+      assert.match(download, /<name>Маратон Кайлъка 2026 – 21,1 км<\/name>/);
+      assert.match(read("allowed", "index.html"), /download="maraton-kaylaka-2026-21km.gpx"/);
+      const headers = readFileSync(join(output, "_headers"), "utf8");
+      assert.match(headers, /\/allowed\/trace.gpx\n[^\n]*\n  Content-Disposition: attachment; filename="maraton-kaylaka-2026-21km.gpx"/);
+      assert.doesNotMatch(headers, /map-only|unapproved|MarathonKaylaka21km/);
+      assert.ok(!existsSync(path("MarathonKaylaka21km.gpx", "trace.gpx")));
       assert.match(read("allowed", "index.html"), /Изтегли GPX/);
       assert.match(
         read("allowed", "index.html"),
@@ -286,10 +304,14 @@ test(
       assert.ok(loaded.distanceM > 0);
       assert.equal(loaded.ascentM, 20);
       writeRoute("allowed", { publishMap: false, allowDownload: false });
+      renameSync(join(fixture, "src/content/routes/retired.json"), join(fixture, "src/content/routes/retired.gpx.json"));
       build();
+      assert.ok(!existsSync(path("retired", "index.html")));
+      assert.ok(!existsSync(path("retired", "trace.gpx")));
       assert.ok(!existsSync(path("allowed", "trace.gpx")));
       assert.ok(!existsSync(path("allowed", "map.json")));
       assert.ok(!read("allowed", "index.html").includes("trace.gpx"));
+      assert.doesNotMatch(readFileSync(join(output, "_headers"), "utf8"), /\/allowed\//);
       // A bad public upload must fail the build and remove any previously built output.
       writeFileSync(join(fixture, "public/unsafe.gpx"), source);
       assert.throws(build);

@@ -70,6 +70,18 @@ export function validateCms(source) {
     }
   }
   config.content.forEach((entry) => fields(entry.fields));
+  for (const name of ["posts", "routes", "races"]) {
+    const collection = config.content.find((entry) => entry.name === name);
+    const extension = name === "posts" ? "md" : "json";
+    if (collection?.filename?.field !== false ||
+        collection.filename.template !== `{year}-{month}-{day}-{hour}{minute}{second}-{primary}.${extension}` ||
+        collection.view?.primary !== "title" || collection.subfolders !== false)
+      throw new Error("CMS трябва да генерира безопасни имена от заглавието и датата, без ръчно поле за име.");
+  }
+  const site = config.content.find((entry) => entry.name === "site");
+  for (const name of ["siteName", "siteSubtitle", "logoImage", "navigation"])
+    if (!site?.fields.some((field) => field.name === name))
+      throw new Error("Липсва настройка за идентичността/навигацията на сайта.");
   const gpx = config.media.find((entry) => entry.name === "gpx");
   const route = config.content.find((entry) => entry.name === "routes");
   const field = route?.fields.find((entry) => entry.name === "gpx");
