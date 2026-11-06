@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { loadAlbums } from '../../lib/albums.mjs';
+const albums = await loadAlbums();
+---
+<Layout title="Галерия" description="Моменти от пътувания, природа, бягане и лични събития.">
+<section class="container album-page"><p class="eyebrow">Моменти и истории</p><h1>Галерия<span>.</span></h1><p>От пътеките до далечните места — спомени в снимки.</p>
+{albums.length ? <div class="album-grid">{albums.map(album => <a class="album-card" href={album.href}>
+{album.cover && <img src={album.cover.small} srcset={`${album.cover.small} 400w, ${album.cover.medium} 800w`} sizes="(max-width: 600px) 100vw, 33vw" width="800" height="600" loading="lazy" alt=""/>}
+<div class="album-copy"><h2>{album.title}</h2>{album.date && <time datetime={album.date}>{new Date(album.date+'T12:00:00Z').toLocaleDateString('bg-BG',{timeZone:'Europe/Sofia'})}</time>}{album.description && <p>{album.description}</p>}<p>{album.photos.length} снимки</p></div></a>)}</div> : <p class="empty-state">Първите фотоалбуми предстоят.</p>}
+</section></Layout>

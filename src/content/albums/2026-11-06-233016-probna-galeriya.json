@@ -1,0 +1,14 @@
+{
+  "title": "Пробна галерия ",
+  "description": "Проверка на новата фотогалерия",
+  "date": "2026-11-06",
+  "cover": "/images/img-e0b65c9f5cbf33ad97b7a49ffd13e445-v.jpg",
+  "photos": [
+    "/images/img-5d7cce480c9fd06fc413616a4095b61c-v.jpg",
+    "/images/WA_SOF_MAR_1026_6464.jpeg",
+    "/images/IMG-d061b168fceef8923db1756d22a8710e-V.jpg",
+    "/images/IMG_20261012_095455.jpg",
+    "/images/IMG-0aab0dc46610300c6aea04a51649fec3-V.jpg"
+  ],
+  "status": "published"
+}

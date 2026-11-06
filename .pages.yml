@@ -112,8 +112,7 @@ content:
       - name: youtubeUrl
         label: Или YouTube линк към видео (по желание)
         type: string
-        description: При избран видеоклип от колекцията се използва той. Не въвеждай
-          HTML или iframe.
+        description: При избран видеоклип от колекцията се използва той. Не въвеждай HTML или iframe.
   - name: site
     label: Настройки на сайта
     type: file
@@ -160,6 +159,9 @@ content:
             label: Финанси
             type: string
             default: Финанси
+          - name: gallery
+            label: Галерия
+            type: string
       - name: recordsImage
         label: Снимка до личните рекорди
         type: image
@@ -226,8 +228,7 @@ content:
       - name: publicSiteUrl
         label: Публичен адрес на сайта — https://…pages.dev (след публикуване)
         type: string
-        description: Само основният адрес, без път след домейна. Остави празно до избора
-          на реален адрес; не използвай Codespaces/preview адрес.
+        description: Само основният адрес, без път след домейна. Остави празно до избора на реален адрес; не използвай Codespaces/preview адрес.
       - name: socialImage
         label: Общо изображение за споделяне (по желание, JPG/PNG/WebP)
         type: image
@@ -278,8 +279,7 @@ content:
               label: "{primary}"
             list:
               max: 3
-            description: Показват се само публикувани записи. За обновяване редактирай
-              съществуващата статия.
+            description: Показват се само публикувани записи. За обновяване редактирай съществуващата статия.
           - name: runningDescription
             label: Кратък текст в Бягане, когато няма статии
             type: text
@@ -292,6 +292,18 @@ content:
           - name: aboutDescription
             label: Кратък текст в картата За мен (празно = общото представяне)
             type: text
+          - name: runnerImage
+            label: Отделна снимка на бегача (по желание)
+            type: image
+            options:
+              media: images
+          - name: runnerFrame
+            label: Позиция и кадриране на бегача
+            component: imageFrame
+          - name: runnerSize
+            label: Размер на бегача в проценти (30–100)
+            type: number
+            default: 100
   - name: routes
     label: Моите маршрути
     type: collection
@@ -338,9 +350,7 @@ content:
           extensions:
             - gpx
         required: true
-        description: "Хранилището е публично: каченият оригинал се вижда в GitHub
-          веднага, дори маршрутът да е чернова. Не качвай лични координати без
-          предварително почистване или промяна на репото към Private."
+        description: "Хранилището е публично: каченият оригинал се вижда в GitHub веднага, дори маршрутът да е чернова. Не качвай лични координати без предварително почистване или промяна на репото към Private."
       - name: status
         label: Публикуване
         type: select
@@ -548,8 +558,7 @@ content:
         label: YouTube линк
         type: string
         required: true
-        description: Постави HTTPS линк от youtube.com/watch, youtu.be или
-          youtube.com/shorts.
+        description: Постави HTTPS линк от youtube.com/watch, youtu.be или youtube.com/shorts.
       - name: description
         label: Кратко описание
         type: text
@@ -579,6 +588,63 @@ content:
         default: 100
         options:
           min: 0
+  - name: albums
+    label: Фотоалбуми
+    type: collection
+    path: src/content/albums
+    filename:
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.json"
+      field: false
+    subfolders: false
+    view:
+      primary: title
+    fields:
+      - name: title
+        label: Заглавие
+        type: string
+        required: true
+      - name: description
+        label: Описание
+        type: text
+      - name: date
+        label: Дата
+        type: date
+      - name: cover
+        label: Заглавна снимка (по желание)
+        type: image
+        options:
+          media: images
+          rename: safe
+          extensions:
+            - jpg
+            - jpeg
+            - png
+            - webp
+            - avif
+      - name: photos
+        label: Снимки — подреди чрез влачене
+        type: image
+        options:
+          media: images
+          multiple:
+            max: 100
+          rename: safe
+          extensions:
+            - jpg
+            - jpeg
+            - png
+            - webp
+            - avif
+      - name: status
+        label: Статус
+        type: select
+        default: draft
+        options:
+          values:
+            - label: Чернова
+              value: draft
+            - label: Публикувано
+              value: published
 components:
   imageFrame:
     type: object

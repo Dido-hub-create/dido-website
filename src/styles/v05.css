@@ -1,0 +1,39 @@
+.homepage .welcome-hero {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:420px;height:auto;background:#101827}
+.homepage .welcome-hero:after {display:none}
+.homepage .welcome-content {width:100%;min-width:0;max-width:680px;margin-left:auto;padding:48px 32px;position:relative;z-index:1}
+.hero-visual {position:relative;min-width:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-panorama {position:absolute;inset:0;width:100%;height:100%;opacity:.3;filter:blur(2px)}
+.hero-runner {position:relative;width:var(--runner-size,100%);height:100%;max-height:580px;object-fit:contain}
+.video-grid {grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:20px}
+.video-copy h3 {font-size:19px}.video-copy p {font-size:15px}
+.album-page {padding-block:48px;overflow-wrap:anywhere}.album-page h1 {font-size:clamp(30px,5vw,48px)}
+.album-grid,.photo-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:24px;margin-block:32px}
+.album-card {display:block;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#151f30;height:100%}.album-card img,.photo-grid img {width:100%;aspect-ratio:4/3;object-fit:cover;display:block}.album-copy {padding:20px}.album-copy h2 {font-size:23px;margin:0 0 10px}.photo-grid a {min-width:0}
+.photo-lightbox {width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:16px;border:0;background:#09111bf5;color:white;overflow:hidden}.photo-lightbox::backdrop {background:#09111b}.lightbox-bar {display:flex;align-items:center;justify-content:space-between;gap:10px;height:60px}.lightbox-bar button {font:inherit;background:#18263b;color:white;border:1px solid #788699;border-radius:8px;min-height:44px;padding:8px 14px;cursor:pointer}.lightbox-photo {width:100%;height:calc(100% - 80px);object-fit:contain;touch-action:pan-y pinch-zoom}
+@media(max-width:767px){.homepage .welcome-hero {grid-template-columns:1fr;min-height:0}.homepage .welcome-content{padding:32px 24px;margin:0}.hero-visual{min-height:220px}.hero-runner{height:auto;max-height:440px;object-fit:contain!important}.hero-panorama{object-fit:cover}.header-inner{flex-wrap:wrap}.navigation{flex-wrap:wrap}.video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.video-copy{padding:14px}.video-copy h3{font-size:17px}.video-play{font-size:14px;padding:8px}}
+@media(max-width:380px){.video-grid{grid-template-columns:1fr}}
+.hero-visual .hero-runner {width:var(--runner-size,100%)!important;background:transparent}
+.hero-visual .hero-panorama {background:transparent}
+.video-grid {grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:380px){.video-grid{grid-template-columns:1fr}}
+.photo-grid img {object-fit:contain;background:#151f30}
+/* Controls occupy their own rows, leaving the photograph unobstructed. */
+.photo-lightbox[open] {display:flex;flex-direction:column;gap:8px}
+.lightbox-bar {height:auto;min-height:44px;flex-shrink:0}
+.lightbox-zoom {display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;flex-shrink:0}
+.lightbox-zoom button,.lightbox-zoom a {font:inherit;font-size:14px;min-height:44px;padding:8px 10px;border:1px solid #788699;border-radius:8px;color:white;background:#18263b;cursor:pointer}
+.lightbox-zoom button:disabled {opacity:.45;cursor:default}
+.lightbox-stage {flex:1;min-height:0;width:100%;overflow:hidden;touch-action:none;position:relative;cursor:zoom-in}
+.lightbox-stage[data-zoomed="true"] {cursor:grab}.lightbox-stage[data-zoomed="true"]:active {cursor:grabbing}
+.lightbox-stage .lightbox-photo {width:100%;height:100%;display:block;object-fit:contain;transform-origin:center;user-select:none;pointer-events:none}
+.video-screen {cursor:pointer}
+.video-screen .video-play {width:48px;height:48px;min-height:48px;padding:0;border-radius:50%;background:#10182799;border:1px solid #ffffff88;gap:0}
+.video-play > svg {color:white;margin-left:3px}
+.video-play:hover,.video-play:focus-visible {background:#101827e6;border-color:var(--accent)}
+/* Portrait frame replaces the old wide, shallow crop; CMS fit/focal points still apply. */
+.records .records-photo {height:auto;aspect-ratio:2/3;max-height:240px}
+.records .records-intro {grid-template-columns:minmax(70px,120px) minmax(0,1fr)}
+.skip-link {top:12px;transform:translateY(calc(-100% - 24px));max-width:calc(100vw - 32px)}
+.skip-link:focus {transform:translateY(0)}
+@media(max-width:640px){.records .records-intro{grid-template-columns:minmax(70px,100px) minmax(0,1fr)}.photo-lightbox{padding:8px}.lightbox-zoom{gap:5px}.lightbox-zoom button,.lightbox-zoom a{font-size:13px}}

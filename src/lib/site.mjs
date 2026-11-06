@@ -17,6 +17,7 @@ export function siteIdentity(settings = site) {
       ["/polezno/", label(settings.navigation?.useful, "Полезно")],
       ["/za-men/", label(settings.navigation?.about, "За мен")],
       ["/finansi/", label(settings.navigation?.finance, "Финанси")],
+      ["/galeria/", label(settings.navigation?.gallery, "Галерия")],
     ],
   };
 }

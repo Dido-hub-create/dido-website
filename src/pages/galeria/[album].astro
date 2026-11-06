@@ -1,0 +1,17 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { loadAlbums } from '../../lib/albums.mjs';
+export async function getStaticPaths() { return (await loadAlbums()).map(album => ({params:{album:album.id},props:{album}})); }
+const { album } = Astro.props;
+---
+<Layout title={album.title} description={album.description || album.title}>
+<section class="container album-page"><a class="text-link" href="/galeria/">← Всички албуми</a><h1>{album.title}</h1>{album.date && <time datetime={album.date}>{new Date(album.date+'T12:00:00Z').toLocaleDateString('bg-BG',{timeZone:'Europe/Sofia'})}</time>}{album.description && <p>{album.description}</p>}<p>{album.photos.length} снимки</p>
+<div class="photo-grid">{album.photos.map((photo,index) => <a href={photo.large} data-gallery-photo data-original={photo.original} aria-label={`Отвори снимка ${index+1}`}><img src={photo.small} srcset={`${photo.small} 400w, ${photo.medium} 800w`} sizes="(max-width:600px) 100vw, 33vw" loading="lazy" width="800" height="600" alt={`${album.title} — снимка ${index+1}`}/></a>)}</div>
+<dialog class="photo-lightbox" aria-label="Разглеждане на снимки">
+<div class="lightbox-bar"><button data-prev aria-label="Предишна снимка" title="Предишна снимка (←)">←</button><span aria-live="polite" data-counter></span><button data-next aria-label="Следваща снимка" title="Следваща снимка (→)">→</button><button data-close title="Затваряне (Escape)">Затвори</button></div>
+<div class="lightbox-zoom" role="group" aria-label="Увеличение"><button data-zoom-in title="Увеличи (+)">+ Увеличи</button><button data-zoom-out title="Намали (−)">− Намали</button><button data-fit title="Върни към първоначалния изглед">Побери в екрана</button><span data-zoom-level aria-live="polite">1.0×</span><a data-original target="_blank" rel="noopener noreferrer">Отвори оригинала</a></div>
+<div class="lightbox-stage"><img class="lightbox-photo" alt="" draggable="false"/></div></dialog>
+</section></Layout>
+<script>
+import '../../scripts/photo-lightbox';
+</script>

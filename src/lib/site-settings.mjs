@@ -29,6 +29,7 @@ export function normalizeSiteSettings(value) {
       useful: text(navigation.useful, "Полезно"),
       about: text(navigation.about, "За мен"),
       finance: text(navigation.finance, "Финанси"),
+      gallery: text(navigation.gallery, "Галерия"),
     },
     homeIntro: text(input.homeIntro),
     heroImage: text(input.heroImage),
@@ -55,6 +56,9 @@ export function normalizeSiteSettings(value) {
     publicSiteUrl: text(input.publicSiteUrl),
     socialImage: text(input.socialImage),
     home: {
+      runnerImage: text(home.runnerImage),
+      runnerFrame: frame(home.runnerFrame),
+      runnerSize: typeof home.runnerSize === "number" && Number.isFinite(home.runnerSize) ? Math.max(30, Math.min(100, home.runnerSize)) : 100,
       title: text(home.title),
       intro: text(home.intro),
       heroImage: text(home.heroImage),

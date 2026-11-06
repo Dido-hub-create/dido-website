@@ -1,6 +1,5 @@
 ---
 import { usableImage } from "../lib/posts";
-import Icon from "./Icon.astro";
 interface Props { video: any; featured?: boolean }
 const { video, featured = false } = Astro.props;
 const preview = usableImage(video.cover) || video.thumbnail;
@@ -9,13 +8,12 @@ const preview = usableImage(video.cover) || video.thumbnail;
   <div class="video-screen" data-video-screen>
     <img src={preview} alt="" width="480" height="360" loading="lazy" referrerpolicy="no-referrer" />
     <button class="video-play" type="button" data-video-play data-video-id={video.videoId} data-video-title={video.title} aria-label={`Гледай: ${video.title}`}>
-      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2L18 10L5 18Z" fill="currentColor" /></svg> Гледай видеото
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2L18 10L5 18Z" fill="currentColor" /></svg>
     </button>
   </div>
   <div class="video-copy">
-    <h3>{video.title}</h3>
+    <h3><a href={video.watchUrl} target="_blank" rel="noopener noreferrer">{video.title}</a></h3>
     {video.description && <p>{video.description}</p>}
-    <a class="text-link" href={video.watchUrl} target="_blank" rel="noopener noreferrer">Отвори в YouTube <Icon name="diagonal" size={18} /></a>
     <noscript><p>Използвай връзката към YouTube, за да гледаш видеото.</p></noscript>
   </div>
 </article>
@@ -26,8 +24,8 @@ const preview = usableImage(video.cover) || video.thumbnail;
     card.querySelector("img")?.addEventListener("error", (event) => {
       (event.target as HTMLImageElement).remove();
     }, { once: true });
-    button?.addEventListener("click", () => {
-      const id = button.dataset.videoId;
+    screen?.addEventListener("click", () => {
+      const id = button?.dataset.videoId;
       if (!screen || !id || !/^[a-zA-Z0-9_-]{11}$/.test(id)) return;
       const frame = document.createElement("iframe");
       frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
