@@ -1,0 +1,48 @@
+---
+interface Props { url: string; title: string; description: string }
+const { url, title, description } = Astro.props;
+const facebook = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+---
+<div class="container share-tools" data-share-tools data-share-url={url} data-share-title={title} data-share-text={description}>
+  <a class="button button-outline" data-share href={facebook} target="_blank" rel="noopener noreferrer">Сподели</a>
+  <button class="button button-outline" type="button" data-copy-link hidden>Копирай линк</button>
+  <span class="share-status" role="status" aria-live="polite" data-share-status></span>
+  <input class="share-manual" data-share-manual type="text" value={url} readonly aria-label="Линк за ръчно копиране" hidden />
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>("[data-share-tools]").forEach((tools) => {
+    const url = tools.dataset.shareUrl ?? "";
+    const share = tools.querySelector<HTMLAnchorElement>("[data-share]");
+    const copy = tools.querySelector<HTMLButtonElement>("[data-copy-link]");
+    const status = tools.querySelector<HTMLElement>("[data-share-status]");
+    const manual = tools.querySelector<HTMLInputElement>("[data-share-manual]");
+    let nativeFailed = false;
+    const message = (text: string) => { if (status) status.textContent = text; };
+    if (copy) copy.hidden = false;
+    share?.addEventListener("click", async (event) => {
+      if (nativeFailed || !navigator.share || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      try {
+        await navigator.share({ url, title: tools.dataset.shareTitle, text: tools.dataset.shareText });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        // Leave the normal Facebook link usable on the next click.
+        nativeFailed = true;
+        share.textContent = "Сподели във Facebook";
+        message("Можеш да копираш линка или да го споделиш във Facebook.");
+      }
+    });
+    copy?.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        message("Линкът е копиран.");
+      } catch {
+        if (manual) {
+          manual.hidden = false;
+          manual.focus(); manual.select();
+          message("Задръж върху избрания адрес и избери „Копирай“.");
+        }
+      }
+    });
+  });
+</script>

@@ -53,5 +53,29 @@
     "fit": "contain",
     "x": 50,
     "y": 35
+  },
+  "youtubeChannel": "",
+  "publicSiteUrl": "",
+  "socialImage": "",
+  "home": {
+    "title": "Добре дошли",
+    "intro": "Това е моят личен сайт — място, в което споделям опит, идеи и теми, които ме вълнуват: бягане, технологии, полезни неща и лични теми.",
+    "heroImage": "/images/dido-mountain-hero.webp",
+    "heroFrame": {
+      "fit": "cover",
+      "x": 50,
+      "y": 62,
+      "mobileFit": "cover",
+      "mobileX": 83,
+      "mobileY": 50
+    },
+    "race": "",
+    "raceCaption": "",
+    "featuredPost": "",
+    "selectedPosts": [],
+    "runningDescription": "Тук ще споделям състезания, тренировки и полезно за бегачи.",
+    "technologyDescription": "Приложения, изкуствен интелект и технологични открития — скоро тук.",
+    "financeDescription": "Лични размисли, наблюдения и интерес към Bitcoin — тема, която следя и проучвам.",
+    "aboutDescription": ""
   }
 }

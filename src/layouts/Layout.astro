@@ -4,23 +4,33 @@ import "../styles/global.css";
 import Brand from "../components/Brand.astro";
 import "../styles/magazine.css";
 import "../styles/running.css";
+import "../styles/v04.css";
 import { siteIdentity } from "../lib/site.mjs";
+import site from "../data/site.json";
+import { publicOrigin, absolutePublicUrl, socialImage } from "../lib/social.mjs";
+import Share from "../components/Share.astro";
 interface Props {
   title?: string;
   description?: string;
   image?: string;
+  socialType?: "website" | "article";
 }
 const identity = siteIdentity();
 const {
   title,
   description = `Личният свят на ${identity.name} — бягане, технологии, полезни идеи и нови хоризонти.`,
   image,
+  socialType = "website",
 } = Astro.props;
 const pageTitle = title
   ? `${title} — ${identity.name}`
   : `${identity.name} — В движение. С любопитство.`;
 const navigation = identity.navigation;
 const current = Astro.url.pathname;
+const origin = publicOrigin(import.meta.env.PUBLIC_SITE_URL || site.publicSiteUrl);
+const canonical = current === "/404.html" ? undefined : absolutePublicUrl(current, origin);
+const social = canonical ? await socialImage(image, site) : undefined;
+const socialUrl = social ? absolutePublicUrl(social.path, origin) : undefined;
 ---
 
 <!doctype html>
@@ -32,13 +42,22 @@ const current = Astro.url.pathname;
     <meta name="description" content={description} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={socialType} />
     <meta property="og:locale" content="bg_BG" />
-    {
-      image?.startsWith("https://") && (
-        <meta property="og:image" content={image} />
-      )
-    }
+    <meta property="og:site_name" content={identity.name} />
+    <meta name="twitter:card" content={socialUrl ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {canonical && <><meta property="og:url" content={canonical} /><link rel="canonical" href={canonical} /></>}
+    {socialUrl && <>
+      <meta property="og:image" content={socialUrl} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:type" content="image/jpeg" />
+      <meta property="og:image:alt" content={pageTitle} />
+      <meta name="twitter:image" content={socialUrl} />
+      <meta name="twitter:image:alt" content={pageTitle} />
+    </>}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{pageTitle}</title>
   </head>
@@ -79,7 +98,7 @@ const current = Astro.url.pathname;
         </nav>
       </div>
     </header>
-    <main id="main"><slot /></main>
+    <main id="main"><slot />{canonical && <Share url={canonical} title={pageTitle} description={description} />}</main>
     <footer class="site-footer">
       <div class="container magazine-footer">
         <div class="footer-identity"><Brand footer /></div>

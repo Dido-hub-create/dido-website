@@ -165,6 +165,7 @@ export function loadRaces(root = process.cwd()) {
     .filter(({ data }) => data.publicationStatus === "published")
     .map(({ id, data }) => ({
       id,
+      href: `/byagane/sastezaniya/${encodeURIComponent(id)}/`,
       title: text(data.title) || "Състезание без заглавие",
       date: text(data.date),
       startTime: text(data.startTime),

@@ -23,7 +23,7 @@ const image = usableImage(route.cover),
   post = (await allPosts()).find((item) => item.id === route.postId);
 ---
 
-<Layout title={route.title} description={route.description}
+<Layout title={route.title} description={route.description} image={image}
   ><article class="container running-page route-page">
     <div class="breadcrumbs">
       <a href="/">Начало</a><span>/</span><a href="/byagane/">Бягане</a><span

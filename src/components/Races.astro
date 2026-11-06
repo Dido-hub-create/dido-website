@@ -12,15 +12,16 @@ import RouteGallery from "./RouteGallery.astro";
 import Icon from "./Icon.astro";
 interface Props {
   archive?: boolean;
+  raceId?: string;
 }
-const { archive = false } = Astro.props;
-const races = loadRaces(),
+const { archive = false, raceId } = Astro.props;
+const races = loadRaces().filter((race) => !raceId || race.id === raceId),
   routes = loadRoutes(),
   posts = await allPosts();
 const now = Date.now();
 const upcoming = races.filter((race) => !archivedRace(race, now));
 const past = races.filter((race) => archivedRace(race, now)).reverse();
-const groups = archive
+const groups = (archive
   ? [
       { title: "Предстоящи състезания", id: "upcoming", entries: upcoming },
       { title: "Архив на състезанията", id: "archive", entries: past },
@@ -31,7 +32,7 @@ const groups = archive
         id: "upcoming",
         entries: upcoming.slice(0, 3),
       },
-    ];
+    ]).filter((group) => !raceId || group.entries.length > 0);
 ---
 
 <div
@@ -97,7 +98,7 @@ const groups = archive
                   >
                     {raceStatuses[race.status as keyof typeof raceStatuses]}
                   </span>
-                  <h3>{race.title}</h3>
+                  <h3><a href={race.href}>{race.title}</a></h3>
                   <p class="race-date">{formatRaceDate(race)}</p>
                   <p class="race-countdown" data-countdown aria-live="off">
                     {countdownText(race, now)}

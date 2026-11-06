@@ -6,6 +6,8 @@ import { frameStyle, frameForImage } from "../../lib/images.mjs";
 import Icon from "../../components/Icon.astro";
 import { allPosts, formatDate, usableImage } from "../../lib/posts";
 import { siteIdentity } from "../../lib/site.mjs";
+import { loadVideos, postVideo } from "../../lib/videos.mjs";
+import VideoCard from "../../components/VideoCard.astro";
 export async function getStaticPaths() {
   return (await allPosts()).map((post) => ({
     params: { slug: post.id },
@@ -14,12 +16,13 @@ export async function getStaticPaths() {
 }
 const { post } = Astro.props;
 const { Content } = await render(post);
+const video = postVideo(post.data, loadVideos());
 const gallery = (post.data.gallery ?? [])
   .map(usableImage)
   .filter((image): image is string => Boolean(image));
 ---
 
-<Layout title={post.data.title} description={post.summary} image={post.cover}>
+<Layout title={post.data.title} description={post.summary} image={post.cover} socialType="article">
   <article class="container article-page">
     <div class="breadcrumbs">
       <a href="/">Начало</a><span>/</span><a href={`/${post.category.slug}/`}
@@ -69,6 +72,7 @@ const gallery = (post.data.gallery ?? [])
     >
       <Content />
     </div>
+    {video && <section class="article-video" aria-label="Видео към публикацията"><VideoCard video={video} /></section>}
     {
       gallery.length > 0 && (
         <section class="article-gallery" aria-labelledby="gallery-title">

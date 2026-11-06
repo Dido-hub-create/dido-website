@@ -70,7 +70,7 @@ export function validateCms(source) {
     }
   }
   config.content.forEach((entry) => fields(entry.fields));
-  for (const name of ["posts", "routes", "races"]) {
+  for (const name of ["posts", "routes", "races", "videos"]) {
     const collection = config.content.find((entry) => entry.name === name);
     const extension = name === "posts" ? "md" : "json";
     if (collection?.filename?.field !== false ||
@@ -79,9 +79,12 @@ export function validateCms(source) {
       throw new Error("CMS трябва да генерира безопасни имена от заглавието и датата, без ръчно поле за име.");
   }
   const site = config.content.find((entry) => entry.name === "site");
-  for (const name of ["siteName", "siteSubtitle", "logoImage", "navigation"])
+  for (const name of ["siteName", "siteSubtitle", "logoImage", "navigation", "home", "publicSiteUrl", "youtubeChannel", "socialImage"])
     if (!site?.fields.some((field) => field.name === name))
       throw new Error("Липсва настройка за идентичността/навигацията на сайта.");
+  const home = site.fields.find((entry) => entry.name === "home");
+  for (const name of ["title", "intro", "heroImage", "race", "raceCaption", "featuredPost", "selectedPosts"])
+    if (!home.fields?.some((entry) => entry.name === name)) throw new Error("Липсва CMS поле за началната страница.");
   const gpx = config.media.find((entry) => entry.name === "gpx");
   const route = config.content.find((entry) => entry.name === "routes");
   const field = route?.fields.find((entry) => entry.name === "gpx");

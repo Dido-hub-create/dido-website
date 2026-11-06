@@ -51,6 +51,8 @@ const posts = defineCollection({
       .array(z.object({ image: optionalText, frame: imageFrame }))
       .nullish(),
     description: optionalText,
+    video: optionalText,
+    youtubeUrl: optionalText,
     category: optionalText,
     topic: optionalText,
     date: z.preprocess(

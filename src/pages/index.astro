@@ -9,9 +9,13 @@ import { allPosts, usableImage } from "../lib/posts";
 import { categories } from "../lib/content-utils.mjs";
 import site from "../data/site.json";
 import { siteIdentity } from "../lib/site.mjs";
+import { homeContent } from "../lib/home.mjs";
+import { loadRaces } from "../lib/running.mjs";
+import { formatRaceDate } from "../lib/races.mjs";
 const posts = await allPosts();
+const home = homeContent(site, posts, loadRaces());
 const latestFinance = posts.find((post) => post.category.slug === "finansi");
-const heroImage = usableImage(site.heroImage);
+const heroImage = usableImage(home.heroImage);
 const financeImage = usableImage(site.financeImage);
 const aboutImage = usableImage(site.aboutImage);
 const homeCategories = categories.filter((category) =>
@@ -19,7 +23,7 @@ const homeCategories = categories.filter((category) =>
 );
 ---
 
-<Layout>
+<Layout title={home.title} description={home.intro} image={heroImage}>
   <div class="homepage">
     <section class="welcome-hero" aria-labelledby="welcome-title">
       {
@@ -28,7 +32,7 @@ const homeCategories = categories.filter((category) =>
             class="welcome-scene"
             src={heroImage}
             alt=""
-            frame={site.heroFrame}
+            frame={home.heroFrame}
             loading="eager"
             width={2001}
             height={786}
@@ -37,12 +41,12 @@ const homeCategories = categories.filter((category) =>
         )
       }
       <div class="container welcome-content">
-        <h1 id="welcome-title">Добре дошли</h1>
+        <h1 id="welcome-title">{home.title}</h1>
         <svg class="welcome-stroke" viewBox="0 0 110 13" aria-hidden="true"
           ><path d="M3 10Q49-4 106 8 50 3 3 12Z" fill="currentColor"
           ></path></svg
         >
-        <p>{site.homeIntro}</p>
+        <p>{home.intro}</p>
         <div class="welcome-actions">
           <a class="button" href="#posledni-publikacii"
             >Разгледай статиите <Icon name="arrow" size={22} /></a
@@ -52,6 +56,16 @@ const homeCategories = categories.filter((category) =>
     </section>
     <div class="container magazine-body">
       <Records />
+      {home.race && <aside class="home-race-accent" aria-label="Състезание на фокус">
+        <p class="eyebrow">На фокус</p><h2><a href={home.race.href}>{home.race.title}</a></h2>
+        {home.raceCaption && <p>{home.raceCaption}</p>}
+        <p>{formatRaceDate(home.race)}</p><a class="text-link" href={home.race.href}>Към състезанието →</a>
+      </aside>}
+      {(home.featured || home.selected.length > 0) && <section class="home-spotlight" aria-labelledby="home-featured-title">
+        <div class="section-heading"><h2 id="home-featured-title">Избрани истории<span>.</span></h2></div>
+        {home.featured && <PostCard post={home.featured} />}
+        {home.selected.length > 0 && <div class="home-selected-grid">{home.selected.map((post) => <PostCard post={post} />)}</div>}
+      </section>}
       <section
         class="home-columns"
         id="posledni-publikacii"
@@ -59,7 +73,7 @@ const homeCategories = categories.filter((category) =>
       >
         {
           homeCategories.map((category) => {
-            const categoryPosts = posts
+            const categoryPosts = home.remainingPosts
               .filter((post) => post.category.slug === category.slug)
               .slice(0, 2);
             return (
@@ -98,8 +112,8 @@ const homeCategories = categories.filter((category) =>
                     </h3>
                     <p>
                       {category.slug === "byagane"
-                        ? "Тук ще споделям състезания, тренировки и полезно за бегачи."
-                        : "Приложения, изкуствен интелект и технологични открития — скоро тук."}
+                        ? home.runningDescription
+                        : home.technologyDescription}
                     </p>
                     <a
                       class="text-link"
@@ -152,8 +166,7 @@ const homeCategories = categories.filter((category) =>
                   <a href={latestFinance.href}>{latestFinance.data.title}</a>
                 ) : (
                   <>
-                    Лични размисли, наблюдения и интерес към Bitcoin — тема,
-                    която следя и проучвам.
+                    {home.financeDescription}
                   </>
                 )
               }
@@ -187,7 +200,7 @@ const homeCategories = categories.filter((category) =>
           >
           <div>
             <h2><Icon name="user" size={29} />За мен</h2><p>
-              {site.aboutIntro}
+              {home.aboutDescription}
             </p><a class="button button-outline" href="/za-men/"
               >Научи повече <Icon name="arrow" size={20} /></a
             >

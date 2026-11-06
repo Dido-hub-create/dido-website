@@ -1,5 +1,6 @@
 ---
 import Races from "./Races.astro";
+import Videos from "./Videos.astro";
 import RouteCard from "./RouteCard.astro";
 import Icon from "./Icon.astro";
 import { loadRoutes } from "../lib/running.mjs";
@@ -12,6 +13,7 @@ const routes = loadRoutes().slice(0, 3);
   ><a href="/byagane/sastezaniya/#arhiv-sastezaniya">Архив на състезанията</a>
 </nav>
 <Races />
+<Videos />
 <section
   class="running-section"
   aria-labelledby="routes-preview-title"

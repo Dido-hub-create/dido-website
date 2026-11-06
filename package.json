@@ -1,6 +1,6 @@
 {
   "name": "dido-website",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,7 +20,8 @@
     "astro": "^7.4.7",
     "fast-xml-parser": "^5.12.0",
     "fast-xml-validator": "^1.4.2",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
