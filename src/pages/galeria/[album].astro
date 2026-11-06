@@ -6,21 +6,12 @@ const { album } = Astro.props;
 ---
 <Layout title={album.title} description={album.description || album.title}>
 <section class="container album-page"><a class="text-link" href="/galeria/">← Всички албуми</a><h1>{album.title}</h1>{album.date && <time datetime={album.date}>{new Date(album.date+'T12:00:00Z').toLocaleDateString('bg-BG',{timeZone:'Europe/Sofia'})}</time>}{album.description && <p>{album.description}</p>}<p>{album.photos.length} снимки</p>
-<div class="photo-grid">{album.photos.map((photo,index) => <a href={photo.large} data-gallery-photo aria-label={`Отвори снимка ${index+1}`}><img src={photo.small} srcset={`${photo.small} 400w, ${photo.medium} 800w`} sizes="(max-width:600px) 100vw, 33vw" loading="lazy" width="800" height="600" alt={`${album.title} — снимка ${index+1}`}/></a>)}</div>
-<dialog class="photo-lightbox" aria-label="Разглеждане на снимки"><div class="lightbox-bar"><button data-prev aria-label="Предишна снимка">←</button><span aria-live="polite" data-counter></span><button data-next aria-label="Следваща снимка">→</button><button data-close>Затвори</button></div><img class="lightbox-photo" alt=""/></dialog>
+<div class="photo-grid">{album.photos.map((photo,index) => <a href={photo.large} data-gallery-photo data-original={photo.original} aria-label={`Отвори снимка ${index+1}`}><img src={photo.small} srcset={`${photo.small} 400w, ${photo.medium} 800w`} sizes="(max-width:600px) 100vw, 33vw" loading="lazy" width="800" height="600" alt={`${album.title} — снимка ${index+1}`}/></a>)}</div>
+<dialog class="photo-lightbox" aria-label="Разглеждане на снимки">
+<div class="lightbox-bar"><button data-prev aria-label="Предишна снимка" title="Предишна снимка (←)">←</button><span aria-live="polite" data-counter></span><button data-next aria-label="Следваща снимка" title="Следваща снимка (→)">→</button><button data-close title="Затваряне (Escape)">Затвори</button></div>
+<div class="lightbox-zoom" role="group" aria-label="Увеличение"><button data-zoom-in title="Увеличи (+)">+ Увеличи</button><button data-zoom-out title="Намали (−)">− Намали</button><button data-fit title="Върни към първоначалния изглед">Побери в екрана</button><span data-zoom-level aria-live="polite">1.0×</span><a data-original target="_blank" rel="noopener noreferrer">Отвори оригинала</a></div>
+<div class="lightbox-stage"><img class="lightbox-photo" alt="" draggable="false"/></div></dialog>
 </section></Layout>
 <script>
-const dialog = document.querySelector<HTMLDialogElement>('.photo-lightbox');
-const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-gallery-photo]'));
-const image = dialog?.querySelector<HTMLImageElement>('.lightbox-photo');
-let index = 0, startX = 0;
-function show(next:number) {index=(next+links.length)%links.length;if(image && dialog){image.src=links[index].href;image.alt=links[index].querySelector('img')?.alt || '';dialog.querySelector('[data-counter]')!.textContent=`${index+1} / ${links.length}`;}}
-links.forEach((link,i)=>link.addEventListener('click',event=>{if(!dialog)return;event.preventDefault();show(i);dialog.showModal();document.body.style.overflow='hidden';}));
-dialog?.querySelector('[data-close]')?.addEventListener('click',()=>dialog.close());
-dialog?.querySelector('[data-prev]')?.addEventListener('click',()=>show(index-1));
-dialog?.querySelector('[data-next]')?.addEventListener('click',()=>show(index+1));
-dialog?.addEventListener('close',()=>{document.body.style.overflow='';links[index]?.focus();});
-dialog?.addEventListener('keydown',event=>{if(event.key==='ArrowLeft'){event.preventDefault();show(index-1);}if(event.key==='ArrowRight'){event.preventDefault();show(index+1);}});
-image?.addEventListener('touchstart',event=>{startX=event.touches[0].clientX;},{passive:true});
-image?.addEventListener('touchend',event=>{const delta=event.changedTouches[0].clientX-startX;if(Math.abs(delta)>60)show(index+(delta<0?1:-1));},{passive:true});
+import '../../scripts/photo-lightbox';
 </script>

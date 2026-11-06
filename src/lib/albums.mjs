@@ -28,7 +28,8 @@ export async function albumImage(value, root = process.cwd()) {
       }
       return { small:variants[400], medium:variants[800], large:variants[1920] };
     })().catch(() => undefined));
-    return await pending.get(key);
+    const image = await pending.get(key);
+    return image ? { ...image, original: source } : undefined;
   } catch { return undefined; }
 }
 export async function loadAlbums(root = process.cwd()) {
