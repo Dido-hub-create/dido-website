@@ -73,10 +73,11 @@ test("every generated local link, image, stylesheet, script and fragment has a t
     }
   }
 });
-test("only the confirmed running result is shown and apps have no pretend launch links", () => {
+test("saved running results are shown and apps have no pretend launch links", () => {
   const html = read("index.html");
   assert.match(html, /2:07:14/);
-  assert.equal((html.match(/<small>Предстои<\/small>/g) ?? []).length, 3);
+  assert.equal((html.match(/<small>Предстои<\/small>/g) ?? []).length, 0);
+  for (const time of ["5:13", "28:14", "59:32"]) assert.ok(html.includes(time));
   assert.equal((html.match(/Планирано<\/span>/g) ?? []).length, 4);
   assert.doesNotMatch(html, /href="#"/);
 });

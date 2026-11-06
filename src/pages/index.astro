@@ -14,6 +14,7 @@ import { formatRaceDate } from "../lib/races.mjs";
 const posts = await allPosts();
 const home = homeContent(site, posts, loadRaces());
 const latestFinance = posts.find((post) => post.category.slug === "finansi");
+const runnerImage = usableImage(site.home.runnerImage);
 const heroImage = usableImage(home.heroImage);
 const financeImage = usableImage(site.financeImage);
 const aboutImage = usableImage(site.aboutImage);
@@ -25,20 +26,6 @@ const homeCategories = categories.filter((category) =>
 <Layout title={home.title} description={home.intro} image={heroImage}>
   <div class="homepage">
     <section class="welcome-hero" aria-labelledby="welcome-title">
-      {
-        heroImage && (
-          <FramedImage
-            class="welcome-scene"
-            src={heroImage}
-            alt=""
-            frame={home.heroFrame}
-            loading="eager"
-            width={2001}
-            height={786}
-            fetchpriority="high"
-          />
-        )
-      }
       <div class="container welcome-content">
         <h1 id="welcome-title">{home.title}</h1>
         <svg class="welcome-stroke" viewBox="0 0 110 13" aria-hidden="true"
@@ -52,6 +39,10 @@ const homeCategories = categories.filter((category) =>
           ><a class="button button-secondary" href="/za-men/">За мен</a>
         </div>
       </div>
+      {(runnerImage || heroImage) && <div class="hero-visual" style={`--runner-size:${site.home.runnerSize}%`}>
+        {runnerImage && heroImage && <FramedImage class="hero-panorama" src={heroImage} alt="" frame={home.heroFrame} loading="eager" />}
+        <FramedImage class="hero-runner" src={runnerImage || heroImage!} alt="Бегач сред природата" frame={runnerImage ? site.home.runnerFrame : home.heroFrame} loading="eager" fetchpriority="high" />
+      </div>}
     </section>
     <div class="container magazine-body">
       <Records />

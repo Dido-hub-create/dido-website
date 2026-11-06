@@ -70,7 +70,7 @@ export function validateCms(source) {
     }
   }
   config.content.forEach((entry) => fields(entry.fields));
-  for (const name of ["posts", "routes", "races", "videos"]) {
+  for (const name of ["posts", "routes", "races", "videos", "albums"]) {
     const collection = config.content.find((entry) => entry.name === name);
     const extension = name === "posts" ? "md" : "json";
     if (collection?.filename?.field !== false ||
