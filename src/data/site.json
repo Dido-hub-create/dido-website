@@ -20,7 +20,7 @@
     "halfMarathon": "2:07:14"
   },
   "recordsFrame": {
-    "fit": "contain",
+    "fit": "cover",
     "x": 50,
     "y": 35
   },
