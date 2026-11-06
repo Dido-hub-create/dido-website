@@ -14,5 +14,33 @@
   },
   "recordsImage": "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg",
   "financeImage": "/images/dido-bitcoin.svg",
-  "aboutImage": "/images/dido-mountain-hero.webp"
+  "aboutImage": "/images/dido-mountain-hero.webp",
+  "heroFrame": {
+    "fit": "cover",
+    "x": 50,
+    "y": 62,
+    "mobileFit": "cover",
+    "mobileX": 83,
+    "mobileY": 50
+  },
+  "recordsFrame": {
+    "fit": "contain",
+    "x": 50,
+    "y": 35
+  },
+  "financeFrame": {
+    "fit": "cover",
+    "x": 50,
+    "y": 50
+  },
+  "aboutFrame": {
+    "fit": "cover",
+    "x": 87,
+    "y": 50
+  },
+  "portraitFrame": {
+    "fit": "contain",
+    "x": 50,
+    "y": 35
+  }
 }

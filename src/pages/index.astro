@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import FramedImage from "../components/FramedImage.astro";
 import Icon from "../components/Icon.astro";
 import Records from "../components/Records.astro";
 import Projects from "../components/Projects.astro";
@@ -22,12 +23,14 @@ const homeCategories = categories.filter((category) =>
     <section class="welcome-hero" aria-labelledby="welcome-title">
       {
         heroImage && (
-          <img
+          <FramedImage
             class="welcome-scene"
             src={heroImage}
             alt=""
-            width="2001"
-            height="786"
+            frame={site.heroFrame}
+            loading="eager"
+            width={2001}
+            height={786}
             fetchpriority="high"
           />
         )
@@ -126,11 +129,12 @@ const homeCategories = categories.filter((category) =>
             aria-hidden="true"
             >{
               financeImage ? (
-                <img
+                <FramedImage
                   src={financeImage}
                   alt=""
-                  width="520"
-                  height="340"
+                  frame={site.financeFrame}
+                  width={520}
+                  height={340}
                   loading="lazy"
                 />
               ) : (
@@ -165,11 +169,12 @@ const homeCategories = categories.filter((category) =>
             aria-hidden="true"
             >{
               aboutImage ? (
-                <img
+                <FramedImage
                   src={aboutImage}
                   alt=""
-                  width="520"
-                  height="340"
+                  frame={site.aboutFrame}
+                  width={520}
+                  height={340}
                   loading="lazy"
                 />
               ) : (

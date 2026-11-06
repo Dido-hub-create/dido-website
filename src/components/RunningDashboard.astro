@@ -1,0 +1,47 @@
+---
+import Races from "./Races.astro";
+import RouteCard from "./RouteCard.astro";
+import Icon from "./Icon.astro";
+import { loadRoutes } from "../lib/running.mjs";
+const routes = loadRoutes().slice(0, 3);
+---
+
+<nav class="running-nav" aria-label="В раздел Бягане">
+  <a href="#predstoyashti-sastezaniya">Предстоящи състезания</a><a
+    href="/byagane/marshruti/">Моите маршрути</a
+  ><a href="/byagane/sastezaniya/#arhiv-sastezaniya">Архив на състезанията</a>
+</nav>
+<Races />
+<section
+  class="running-section"
+  aria-labelledby="routes-preview-title"
+  id="moite-marshruti"
+>
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">По моите стъпки</p><h2 id="routes-preview-title">
+        Моите маршрути<span>.</span>
+      </h2>
+    </div><a class="text-link" href="/byagane/marshruti/"
+      >Всички маршрути <Icon name="arrow" size={20} /></a>
+  </div>{
+    routes.length ? (
+      <div class="routes-grid">
+        {routes.map((route) => (
+          <RouteCard route={route} />
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state running-empty">
+        <>
+          <Icon name="run" size={36} />
+          <h3>Маршрутите започват оттук.</h3>
+          <p>
+            Тук ще споделям избрани и одобрени GPS трасета с карта и, когато е
+            разрешено, GPX за изтегляне.
+          </p>
+        </>
+      </div>
+    )
+  }
+</section>

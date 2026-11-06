@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Icon from "../components/Icon.astro";
+import FramedImage from "../components/FramedImage.astro";
 import site from "../data/site.json";
 import { usableImage } from "../lib/posts";
 const portrait = usableImage(site.portrait);
@@ -29,12 +30,13 @@ const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(site.email ?? "")
     <section class="about-layout">
       {
         portrait ? (
-          <img
+          <FramedImage
             class="about-portrait"
             src={portrait}
             alt="Личен портрет на Дидо"
-            width="600"
-            height="800"
+            frame={site.portraitFrame}
+            width={600}
+            height={800}
           />
         ) : (
           <div class="portrait-placeholder">
@@ -100,7 +102,8 @@ const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(site.email ?? "")
       ><a href="/polezno/"
         ><Icon name="book" size={30} /><h3>Полезно</h3><p>
           Знания и открития, които си струва да споделя.
-        </p><Icon name="arrow" size={21} /></a>
+        </p><Icon name="arrow" size={21} /></a
+      >
     </section>
   </div>
 </Layout>

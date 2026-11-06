@@ -1,6 +1,8 @@
 ---
 import { render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import FramedImage from "../../components/FramedImage.astro";
+import { frameStyle, frameForImage } from "../../lib/images.mjs";
 import Icon from "../../components/Icon.astro";
 import { allPosts, formatDate, usableImage } from "../../lib/posts";
 export async function getStaticPaths() {
@@ -43,17 +45,29 @@ const gallery = (post.data.gallery ?? [])
     {
       post.cover && (
         <figure class="article-cover">
-          <img
+          <FramedImage
+            frame={frameForImage(
+              post.cover,
+              post.data.imageFrames,
+              post.data.coverFrame,
+            )}
             src={post.cover}
             alt={`Основна снимка: ${post.data.title}`}
-            width="1200"
-            height="1600"
+            width={1200}
+            height={1600}
+            loading="eager"
             fetchpriority="high"
           />
         </figure>
       )
     }
-    <div class="prose"><Content /></div>
+    <div
+      class="prose"
+      style={frameStyle(post.data.bodyFrame)}
+      data-content-frames={JSON.stringify(post.data.imageFrames ?? [])}
+    >
+      <Content />
+    </div>
     {
       gallery.length > 0 && (
         <section class="article-gallery" aria-labelledby="gallery-title">
@@ -81,12 +95,17 @@ const gallery = (post.data.gallery ?? [])
                   data-gallery-image
                   aria-label={`Отвори снимка ${index + 1} от галерията`}
                 >
-                  <img
+                  <FramedImage
+                    frame={frameForImage(
+                      image,
+                      post.data.imageFrames,
+                      post.data.galleryFrame,
+                    )}
                     src={image}
                     alt={`Снимка ${index + 1} от галерията към „${post.data.title}“`}
                     loading="lazy"
-                    width="600"
-                    height="800"
+                    width={600}
+                    height={800}
                   />
                   <span>
                     <Icon name="diagonal" size={21} />
@@ -100,7 +119,8 @@ const gallery = (post.data.gallery ?? [])
     }
     <div class="article-back">
       <a class="text-link" href={`/${post.category.slug}/`}
-        >← Обратно към {post.category.label}</a>
+        >← Обратно към {post.category.label}</a
+      >
     </div>
   </article>
   {

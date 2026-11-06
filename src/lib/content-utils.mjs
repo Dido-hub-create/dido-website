@@ -96,7 +96,19 @@ export function normalizeImage(value) {
   const path = source
     .replace(/^\.?\/?public\//, "/")
     .replace(/^images\//, "/images/");
-  if (!path.startsWith("/images/") || path.includes("..")) return undefined;
+  let decoded;
+  try {
+    decoded = decodeURIComponent(path);
+  } catch {
+    return undefined;
+  }
+  if (
+    !path.startsWith("/images/") ||
+    decoded.includes("..") ||
+    decoded.includes("\\") ||
+    decoded.includes("\0")
+  )
+    return undefined;
   return path;
 }
 

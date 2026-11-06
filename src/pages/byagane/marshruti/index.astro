@@ -1,0 +1,50 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import RouteCard from "../../../components/RouteCard.astro";
+import Icon from "../../../components/Icon.astro";
+import { loadRoutes } from "../../../lib/running.mjs";
+const routes = loadRoutes();
+---
+
+<Layout
+  title="Моите маршрути"
+  description="Избрани GPS маршрути за бягане от личния дневник на DIDO."
+  ><div class="container running-page">
+    <div class="breadcrumbs">
+      <a href="/">Начало</a><span>/</span><a href="/byagane/">Бягане</a><span
+        >/</span
+      ><span>Моите маршрути</span>
+    </div><section class="page-intro">
+      <div>
+        <p class="eyebrow">По моите стъпки</p><h1>
+          Моите маршрути<span>.</span>
+        </h1><p>
+          Шосе, парк или пътека. Избрани трасета с интерактивна карта и GPX
+          файл, когато изтеглянето е разрешено.
+        </p>
+      </div>
+    </section>{
+      routes.length ? (
+        <div class="routes-grid">
+          {routes.map((route) => (
+            <RouteCard route={route} />
+          ))}
+        </div>
+      ) : (
+        <div class="empty-state running-empty">
+          <>
+            <Icon name="run" size={40} />
+            <h2>Първият маршрут предстои.</h2>
+            <p>
+              Тук ще се появят само трасета, които са подготвени и одобрени за
+              споделяне.
+            </p>
+            <a class="text-link" href="/byagane/">
+              ← Обратно към Бягане
+            </a>
+          </>
+        </div>
+      )
+    }
+  </div></Layout
+>

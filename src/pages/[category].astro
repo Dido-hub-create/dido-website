@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Icon from "../components/Icon.astro";
 import Records from "../components/Records.astro";
+import RunningDashboard from "../components/RunningDashboard.astro";
 import Projects from "../components/Projects.astro";
 import PostCard from "../components/PostCard.astro";
 import { categories } from "../lib/content-utils.mjs";
@@ -32,7 +33,16 @@ const posts = (await allPosts()).filter(
         <Icon name={category.icon} size={72} />
       </div>
     </section>
-    {category.slug === "byagane" && <Records />}
+    {
+      category.slug === "byagane" && (
+        <>
+          <>
+            <Records />
+            <RunningDashboard />
+          </>
+        </>
+      )
+    }
     {category.slug === "tehnologii" && <Projects />}
     <section class="section" aria-labelledby="category-posts-title">
       <div class="section-heading">
@@ -42,7 +52,8 @@ const posts = (await allPosts()).filter(
           </h2>
         </div><span class="section-note"
           >{posts.length}
-          {posts.length === 1 ? "публикация" : "публикации"}</span>
+          {posts.length === 1 ? "публикация" : "публикации"}</span
+        >
       </div>
       <div class="topic-filters" role="group" aria-label="Филтриране по тема">
         <button
@@ -81,7 +92,8 @@ const posts = (await allPosts()).filter(
         </h3><p>Тук ще се появят публикациите по тази тема.</p><a
           class="text-link"
           href="/"
-          >Разгледай началната страница <Icon name="arrow" size={18} /></a>
+          >Разгледай началната страница <Icon name="arrow" size={18} /></a
+        >
       </div>
     </section>
   </div>
@@ -106,21 +118,17 @@ const posts = (await allPosts()).filter(
         });
         if (empty) empty.hidden = visible > 0;
         if (button.dataset.topic === "Моите приложения")
-          document
-            .querySelector("#moite-prilozheniya")
-            ?.scrollIntoView({
-              behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-                ? "instant"
-                : "smooth",
-            });
+          document.querySelector("#moite-prilozheniya")?.scrollIntoView({
+            behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "instant"
+              : "smooth",
+          });
         if (button.dataset.topic === "Лични рекорди")
-          document
-            .querySelector("#lichni-rekordi")
-            ?.scrollIntoView({
-              behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-                ? "instant"
-                : "smooth",
-            });
+          document.querySelector("#lichni-rekordi")?.scrollIntoView({
+            behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "instant"
+              : "smooth",
+          });
       }),
     );
   </script>

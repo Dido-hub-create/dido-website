@@ -3,6 +3,7 @@ import "@fontsource-variable/manrope";
 import "../styles/global.css";
 import Brand from "../components/Brand.astro";
 import "../styles/magazine.css";
+import "../styles/running.css";
 interface Props {
   title?: string;
   description?: string;
@@ -98,6 +99,7 @@ const current = Astro.url.pathname;
       </div>
     </footer>
     <script>
+      import { frameStyle, frameForImage } from "../lib/images.mjs";
       const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
       const nav = document.querySelector<HTMLElement>(".navigation");
       function closeMenu() {
@@ -131,6 +133,20 @@ const current = Astro.url.pathname;
         .querySelectorAll<HTMLImageElement>(".prose img")
         .forEach((img) => {
           img.loading = "lazy";
+          img.classList.add("frame-image");
+          const wrapper = img.closest<HTMLElement>("[data-content-frames]");
+          try {
+            const frames = JSON.parse(wrapper?.dataset.contentFrames ?? "[]");
+            const override = frameForImage(
+              img.getAttribute("src"),
+              frames,
+              undefined,
+            );
+            if (override) img.style.cssText += frameStyle(override);
+          } catch {
+            /* Invalid optional crop metadata keeps the full image. */
+          }
+
           if (img.src.includes("/public/images/"))
             img.src = img.src.replace("/public/images/", "/images/");
           function fallback() {

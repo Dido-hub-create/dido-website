@@ -1,5 +1,6 @@
 ---
 import Icon from "./Icon.astro";
+import FramedImage from "./FramedImage.astro";
 import site from "../data/site.json";
 import { usableImage } from "../lib/posts";
 const image = usableImage(site.recordsImage);
@@ -19,12 +20,13 @@ const records = [
   <div class="records-intro">
     {
       image && (
-        <img
+        <FramedImage
           class="records-photo"
           src={image}
           alt="Момент от личния дневник на бягането"
-          width="400"
-          height="220"
+          frame={site.recordsFrame}
+          width={400}
+          height={220}
           loading="lazy"
         />
       )

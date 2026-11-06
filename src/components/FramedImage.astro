@@ -1,0 +1,34 @@
+---
+import { frameStyle } from "../lib/images.mjs";
+interface Props {
+  src: string;
+  alt: string;
+  frame?: unknown;
+  class?: string;
+  width?: number;
+  height?: number;
+  loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "low" | "auto";
+}
+const {
+  src,
+  alt,
+  frame,
+  class: className,
+  width = 1200,
+  height = 800,
+  loading = "lazy",
+  fetchpriority = "auto",
+} = Astro.props;
+---
+
+<img
+  class:list={["frame-image", className]}
+  src={src}
+  alt={alt}
+  style={frameStyle(frame)}
+  width={width}
+  height={height}
+  loading={loading}
+  fetchpriority={fetchpriority}
+/>

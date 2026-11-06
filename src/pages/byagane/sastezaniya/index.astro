@@ -1,0 +1,22 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import Races from "../../../components/Races.astro";
+---
+
+<Layout
+  title="Състезания"
+  description="Предстоящи състезания и архив с резултати, снимки и лични бележки."
+  ><div class="container running-page">
+    <div class="breadcrumbs">
+      <a href="/">Начало</a><span>/</span><a href="/byagane/">Бягане</a><span
+        >/</span
+      ><span>Състезания</span>
+    </div><section class="page-intro">
+      <div>
+        <p class="eyebrow">От старта до финала</p><h1>
+          Състезания<span>.</span>
+        </h1><p>Следващите стартове и историите, които остават след финала.</p>
+      </div>
+    </section><Races archive />
+  </div></Layout
+>

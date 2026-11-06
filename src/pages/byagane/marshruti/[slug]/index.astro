@@ -1,0 +1,134 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import FramedImage from "../../../../components/FramedImage.astro";
+import RouteMap from "../../../../components/RouteMap.astro";
+import RouteGallery from "../../../../components/RouteGallery.astro";
+import {
+  loadRoutes,
+  loadRaces,
+  routeTypes,
+  distanceLabel,
+  ascentLabel,
+} from "../../../../lib/running.mjs";
+import { allPosts, usableImage } from "../../../../lib/posts";
+export function getStaticPaths() {
+  return loadRoutes().map((route) => ({
+    params: { slug: route.id },
+    props: { route },
+  }));
+}
+const { route } = Astro.props;
+const image = usableImage(route.cover),
+  race = loadRaces().find((item) => item.id === route.raceId),
+  post = (await allPosts()).find((item) => item.id === route.postId);
+---
+
+<Layout title={route.title} description={route.description}
+  ><article class="container running-page route-page">
+    <div class="breadcrumbs">
+      <a href="/">Начало</a><span>/</span><a href="/byagane/">Бягане</a><span
+        >/</span
+      ><a href="/byagane/marshruti/">Моите маршрути</a>
+    </div><header class="page-intro">
+      <div>
+        <p class="eyebrow">
+          {routeTypes[route.surface as keyof typeof routeTypes]}
+        </p><h1>{route.title}</h1>{route.location && <p>{route.location}</p>}
+      </div>
+    </header>{
+      image && (
+        <div class="route-cover">
+          <FramedImage
+            src={image}
+            alt={route.title}
+            frame={route.coverFrame}
+            loading="eager"
+          />
+        </div>
+      )
+    }<p class="route-description">{route.description}</p><dl
+      class="route-stats"
+    >
+      <div>
+        <dt>Дистанция на публичното трасе</dt><dd>
+          {distanceLabel(route.distanceM)}
+        </dd>
+      </div><div>
+        <dt>Положителна денивелация</dt><dd>{ascentLabel(route.ascentM)}</dd>
+      </div><div>
+        <dt>Терен</dt><dd>
+          {routeTypes[route.surface as keyof typeof routeTypes]}
+        </dd>
+      </div>
+    </dl>
+    {
+      route.trimmed && (
+        <p class="content-notice">
+          Началният и/или крайният участък са премахнати от публичната версия.
+          Посочената дистанция се отнася за нея.
+        </p>
+      )
+    }
+    {
+      route.error ? (
+        <div class="empty-state">
+          <>
+            <h2>Трасето временно не е налично.</h2>
+            <p>{route.error}</p>
+            <p>
+              Карта и GPX за изтегляне не се предоставят, докато файлът не бъде
+              коригиран.
+            </p>
+          </>
+        </div>
+      ) : (
+        <>
+          {route.mapHref ? (
+            <RouteMap url={route.mapHref} title={route.title} />
+          ) : (
+            <div class="content-notice">
+              Показването на картата е изключено от собственика.
+            </div>
+          )}
+          {route.gpxHref ? (
+            <a
+              class="button route-download"
+              href={route.gpxHref}
+              download={`${route.id}.gpx`}
+            >
+              Изтегли GPX ↓
+            </a>
+          ) : (
+            <p class="content-notice">
+              Изтеглянето на GPX не е разрешено.
+              {route.mapHref &&
+                " Координатите, необходими за публичната карта, остават технически достъпни за посетителите."}
+            </p>
+          )}
+        </>
+      )
+    }
+    <div class="running-links">
+      {
+        race && (
+          <a class="text-link" href={`/byagane/sastezaniya/#race-${race.id}`}>
+            Към състезанието →
+          </a>
+        )
+      }{
+        post && (
+          <a class="text-link" href={post.href}>
+            Свързана публикация →
+          </a>
+        )
+      }
+    </div><RouteGallery
+      images={route.gallery}
+      frame={route.galleryFrame}
+      overrides={route.imageFrames}
+      title={route.title}
+    /><p class="article-back">
+      <a class="text-link" href="/byagane/marshruti/">← Всички маршрути</a>
+    </p>
+  </article></Layout
+>

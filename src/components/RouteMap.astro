@@ -1,0 +1,40 @@
+---
+interface Props {
+  url: string;
+  title: string;
+}
+const { url, title } = Astro.props;
+---
+
+<section
+  class="route-map-section"
+  aria-label={`Карта на ${title}`}
+  data-route-map
+  data-map-url={url}
+>
+  <div class="map-intro">
+    <h2>Интерактивна карта</h2><p>
+      Картата използва OpenStreetMap. Фоновите плочки се зареждат от външната
+      услуга само след натискане на бутона.
+    </p><button type="button" class="button" data-load-map
+      >Покажи картата</button>
+  </div>
+  <div
+    class="route-map-canvas"
+    data-map-canvas
+    hidden
+    role="region"
+    tabindex="0"
+    aria-label={`Интерактивно трасе: ${title}`}
+  >
+  </div>
+  <p class="map-status" data-map-status role="status"></p><a
+    href="https://www.openstreetmap.org/fixthemap"
+    class="map-issue"
+    rel="external">Съобщи за проблем с фоновата карта</a
+  >
+  <noscript><p>За интерактивната карта е необходим JavaScript.</p></noscript>
+</section>
+<script>
+  import "../scripts/route-map";
+</script>

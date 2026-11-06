@@ -1,0 +1,31 @@
+---
+import { usableImage } from "../lib/posts";
+import { frameForImage } from "../lib/images.mjs";
+import FramedImage from "./FramedImage.astro";
+interface Props {
+  images: string[];
+  frame?: unknown;
+  overrides?: unknown;
+  title: string;
+}
+const { images, frame, overrides, title } = Astro.props;
+const gallery = images
+  .map(usableImage)
+  .filter((value): value is string => Boolean(value));
+---
+
+{
+  gallery.length > 0 && (
+    <div class="running-gallery">
+      {gallery.map((image, index) => (
+        <a href={image} aria-label={`Отвори снимка ${index + 1}: ${title}`}>
+          <FramedImage
+            src={image}
+            alt={`Снимка ${index + 1}: ${title}`}
+            frame={frameForImage(image, overrides, frame)}
+          />
+        </a>
+      ))}
+    </div>
+  )
+}
