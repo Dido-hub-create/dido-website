@@ -1,7 +1,8 @@
 ---
 import "@fontsource-variable/manrope";
 import "../styles/global.css";
-import Icon from "../components/Icon.astro";
+import Brand from "../components/Brand.astro";
+import "../styles/magazine.css";
 interface Props {
   title?: string;
   description?: string;
@@ -49,10 +50,7 @@ const current = Astro.url.pathname;
     <a class="skip-link" href="#main">Към съдържанието</a>
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="/" aria-label="DIDO — Начало"
-          >DIDO<span>.</span></a
-        >
-        <span class="brand-caption">ЛИЧНО ПРОСТРАНСТВО</span>
+        <Brand />
         <button
           class="menu-toggle"
           type="button"
@@ -87,18 +85,16 @@ const current = Astro.url.pathname;
     </header>
     <main id="main"><slot /></main>
     <footer class="site-footer">
-      <div class="container footer-top">
-        <div>
-          <a class="brand" href="/">DIDO<span>.</span></a><p>
-            В движение. С любопитство.
-          </p>
-        </div><a href="/za-men/" class="text-link"
-          >Още за мен <Icon name="diagonal" size={18} /></a>
+      <div class="container magazine-footer">
+        <div class="footer-identity"><Brand footer /></div>
+        <nav aria-label="Навигация в долния колонтитул">
+          {navigation.map(([href, label]) => <a href={href}>{label}</a>)}
+        </nav>
+        <p>Бягане · Технологии · Полезно · Лични теми</p>
       </div>
-      <div class="container footer-bottom">
+      <div class="container magazine-copyright">
         <span>© {new Date().getUTCFullYear()} DIDO. Лично пространство.</span
-        ><span>Бягане · Технологии · Нови идеи</span><a href="#main"
-          >Към началото ↑</a>
+        ><a href="#main">Към началото ↑</a>
       </div>
     </footer>
     <script>

@@ -1,12 +1,14 @@
 ---
 import Icon from "./Icon.astro";
 import site from "../data/site.json";
+import { usableImage } from "../lib/posts";
+const image = usableImage(site.recordsImage);
 const records = [
-  { label: "1 КМ", time: site.records?.oneKm?.trim(), half: false },
-  { label: "5 КМ", time: site.records?.fiveKm?.trim(), half: false },
-  { label: "10 КМ", time: site.records?.tenKm?.trim(), half: false },
+  { label: "1 км", time: site.records?.oneKm?.trim(), half: false },
+  { label: "5 км", time: site.records?.fiveKm?.trim(), half: false },
+  { label: "10 км", time: site.records?.tenKm?.trim(), half: false },
   {
-    label: "ПОЛУМАРАТОН",
+    label: "Полумаратон",
     time: site.records?.halfMarathon?.trim(),
     half: true,
   },
@@ -14,20 +16,39 @@ const records = [
 ---
 
 <section class="records" aria-labelledby="records-title" id="lichni-rekordi">
-  <div class="records-title">
-    <Icon name="trophy" size={23} /><h2 id="records-title">
-      Лични<br />рекорди
-    </h2><span>Всяка крачка е напред.</span>
+  <div class="records-intro">
+    {
+      image && (
+        <img
+          class="records-photo"
+          src={image}
+          alt="Момент от личния дневник на бягането"
+          width="400"
+          height="220"
+          loading="lazy"
+        />
+      )
+    }
+    <div class="records-title">
+      <p class="eyebrow">Бягане</p><h2 id="records-title">Лични рекорди</h2><p>
+        Моите най-добри постижения в бягането до момента.
+      </p>
+    </div>
   </div>
   {
     records.map((record) => (
       <div class:list={["record", { "record-highlight": record.half }]}>
         <>
-          <span>{record.label}</span>
+          <span>
+            {record.half && <Icon name="trophy" size={22} />}
+            {record.label}
+          </span>
           <strong>{record.time || "—"}</strong>
           <small>
             {record.time
-              ? `${record.half ? "21,1 км · " : ""}Личен рекорд`
+              ? record.half
+                ? "час:мин:сек"
+                : "мин:сек"
               : "Предстои"}
           </small>
         </>

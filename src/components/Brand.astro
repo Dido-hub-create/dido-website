@@ -1,0 +1,15 @@
+---
+interface Props {
+  footer?: boolean;
+}
+const { footer = false } = Astro.props;
+---
+
+<a class="brand magazine-brand" href="/" aria-label="DIDO — Начало"
+  >Dido<svg viewBox="0 0 110 13" aria-hidden="true"
+    ><path d="M3 10Q49-4 106 8 50 3 3 12Z" fill="currentColor"></path></svg
+  ></a
+>
+<span class:list={["brand-caption", { "footer-caption": footer }]}
+  >Личен сайт</span
+>

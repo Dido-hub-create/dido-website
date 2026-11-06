@@ -1,7 +1,7 @@
 {
-  "homeIntro": "Бягане, технологии и идеи, които си струва да споделя. Моето лично пространство за преживявания, полезни открития и следващи крачки.",
-  "heroImage": "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg",
-  "aboutIntro": "Тук се срещат интересите ми — бягането, технологиите и създаването на полезни неща. Споделям пътя, а не само финала.",
+  "homeIntro": "Това е моят личен сайт — място, в което споделям опит, идеи и теми, които ме вълнуват: бягане, технологии, полезни неща и лични теми.",
+  "heroImage": "/images/dido-mountain-hero.webp",
+  "aboutIntro": "Кой съм аз, какви са интересите ми и защо създадох този сайт.",
   "biography": "",
   "portrait": "",
   "email": "",
@@ -11,5 +11,8 @@
     "fiveKm": "",
     "tenKm": "",
     "halfMarathon": "2:07:14"
-  }
+  },
+  "recordsImage": "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg",
+  "financeImage": "/images/dido-bitcoin.svg",
+  "aboutImage": "/images/dido-mountain-hero.webp"
 }

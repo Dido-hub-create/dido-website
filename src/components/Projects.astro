@@ -1,10 +1,14 @@
 ---
 import { projects } from "../lib/content-utils.mjs";
 import Icon from "./Icon.astro";
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
 ---
 
 <section
-  class="section projects-section"
+  class:list={["section projects-section", { "projects-compact": compact }]}
   id="moite-prilozheniya"
   aria-labelledby="projects-title"
 >

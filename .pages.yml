@@ -81,6 +81,21 @@ content:
         type: image
         options:
           media: images
+      - name: recordsImage
+        label: Снимка до личните рекорди
+        type: image
+        options:
+          media: images
+      - name: financeImage
+        label: Илюстрация на секция Финанси
+        type: image
+        options:
+          media: images
+      - name: aboutImage
+        label: Илюстрация на секция За мен
+        type: image
+        options:
+          media: images
       - name: aboutIntro
         label: Кратко представяне за мен
         type: text
