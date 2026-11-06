@@ -3,24 +3,34 @@ media:
     label: Снимки
     input: public/images
     output: /images
-
+  - name: gpx
+    label: "Изходни GPX — внимание: GitHub репото е публично"
+    input: src/data/gpx
+    output: /gpx-source
+    extensions:
+      - gpx
+    rename: safe
 content:
   - name: posts
     label: Публикации
     type: collection
     path: src/content/posts
+    filename:
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.md"
+      field: false
+    subfolders: false
+    view:
+      primary: title
     fields:
       - name: title
         label: Заглавие
         type: string
         required: true
-
       - name: cover
         label: Основна снимка
         type: image
         options:
           media: images
-
       - name: gallery
         label: Галерия
         type: image
@@ -28,7 +38,51 @@ content:
           media: images
           multiple:
             max: 10
-
+      - name: category
+        label: Раздел
+        type: select
+        options:
+          values:
+            - Бягане
+            - Технологии
+            - Полезно
+            - Финанси
+      - name: topic
+        label: Тема (по желание)
+        type: select
+        options:
+          values:
+            - Състезания
+            - Тренировки
+            - Лични рекорди
+            - Полезно за бегачи
+            - Екипировка
+            - Моите приложения
+            - Изкуствен интелект
+            - Технологични впечатления
+            - Практически ръководства
+            - Статии
+            - Инструкции
+            - Образователни материали
+            - Ресурси
+            - Bitcoin
+            - Финансови публикации
+      - name: description
+        label: Кратко описание (по желание)
+        type: text
+      - name: date
+        label: Дата (по желание)
+        type: date
+      - name: status
+        label: Статус
+        type: select
+        default: published
+        options:
+          values:
+            - label: Публикувано
+              value: published
+            - label: Чернова
+              value: draft
       - name: body
         label: Съдържание
         type: rich-text
@@ -36,3 +90,554 @@ content:
           media: images
           format: markdown
           switcher: true
+      - name: coverFrame
+        label: Кадриране на основната снимка и картата
+        component: imageFrame
+      - name: galleryFrame
+        label: Кадриране на галерията
+        component: imageFrame
+      - name: bodyFrame
+        label: Кадриране на изображенията в текста
+        component: imageFrame
+      - name: imageFrames
+        label: Отделни настройки за конкретни снимки
+        component: imageOverrides
+      - name: video
+        label: Свързан видеоклип (по желание)
+        type: reference
+        options:
+          collection: videos
+          value: "{path}"
+          label: "{primary}"
+      - name: youtubeUrl
+        label: Или YouTube линк към видео (по желание)
+        type: string
+        description: При избран видеоклип от колекцията се използва той. Не въвеждай
+          HTML или iframe.
+  - name: site
+    label: Настройки на сайта
+    type: file
+    path: src/data/site.json
+    fields:
+      - name: siteName
+        label: Име на сайта
+        type: string
+        default: DIDO
+      - name: siteSubtitle
+        label: Подзаглавие
+        type: string
+        default: Личен сайт
+      - name: logoImage
+        label: Лого като изображение (празно = текстово лого)
+        type: image
+        options:
+          media: images
+      - name: navigation
+        label: Надписи в главното меню (адресите остават същите)
+        type: object
+        fields:
+          - name: home
+            label: Начало
+            type: string
+            default: Начало
+          - name: running
+            label: Бягане
+            type: string
+            default: Бягане
+          - name: technology
+            label: Технологии
+            type: string
+            default: Технологии
+          - name: useful
+            label: Полезно
+            type: string
+            default: Полезно
+          - name: about
+            label: За мен
+            type: string
+            default: За мен
+          - name: finance
+            label: Финанси
+            type: string
+            default: Финанси
+      - name: recordsImage
+        label: Снимка до личните рекорди
+        type: image
+        options:
+          media: images
+      - name: financeImage
+        label: Илюстрация на секция Финанси
+        type: image
+        options:
+          media: images
+      - name: aboutImage
+        label: Илюстрация на секция За мен
+        type: image
+        options:
+          media: images
+      - name: aboutIntro
+        label: Кратко представяне за мен
+        type: text
+      - name: biography
+        label: Биография (по желание)
+        type: text
+      - name: portrait
+        label: Личен портрет (по желание)
+        type: image
+        options:
+          media: images
+      - name: email
+        label: Имейл за връзка (по желание)
+        type: string
+      - name: contactUrl
+        label: Връзка за контакт — пълен HTTPS адрес (по желание)
+        type: string
+      - name: records
+        label: Лични рекорди
+        type: object
+        fields:
+          - name: oneKm
+            label: 1 км — време (празно, ако предстои)
+            type: string
+          - name: fiveKm
+            label: 5 км — време (празно, ако предстои)
+            type: string
+          - name: tenKm
+            label: 10 км — време (празно, ако предстои)
+            type: string
+          - name: halfMarathon
+            label: Полумаратон — време
+            type: string
+      - name: recordsFrame
+        label: Кадриране — Снимка при личните рекорди
+        component: imageFrame
+      - name: financeFrame
+        label: Кадриране — Финанси
+        component: imageFrame
+      - name: aboutFrame
+        label: Кадриране — Карта За мен
+        component: imageFrame
+      - name: portraitFrame
+        label: Кадриране — Личен портрет
+        component: imageFrame
+      - name: youtubeChannel
+        label: YouTube канал — пълен HTTPS адрес (по желание)
+        type: string
+      - name: publicSiteUrl
+        label: Публичен адрес на сайта — https://…pages.dev (след публикуване)
+        type: string
+        description: Само основният адрес, без път след домейна. Остави празно до избора
+          на реален адрес; не използвай Codespaces/preview адрес.
+      - name: socialImage
+        label: Общо изображение за споделяне (по желание, JPG/PNG/WebP)
+        type: image
+        options:
+          media: images
+      - name: home
+        label: Начална страница
+        type: object
+        fields:
+          - name: title
+            label: Основно заглавие
+            type: string
+            default: Добре дошли
+          - name: intro
+            label: Кратко представяне
+            type: text
+          - name: heroImage
+            label: Основна панорамна снимка
+            type: image
+            options:
+              media: images
+          - name: heroFrame
+            label: Кадриране на панорамата
+            component: imageFrame
+          - name: race
+            label: Състезание за акцент (по желание)
+            type: reference
+            options:
+              collection: races
+              value: "{path}"
+              label: "{primary}"
+          - name: raceCaption
+            label: Кратък акцент към избраното състезание (по желание)
+            type: text
+          - name: featuredPost
+            label: Водеща публикация (по желание)
+            type: reference
+            options:
+              collection: posts
+              value: "{path}"
+              label: "{primary}"
+          - name: selectedPosts
+            label: Допълнителни избрани публикации — до 3, подреди чрез преместване
+            type: reference
+            options:
+              collection: posts
+              value: "{path}"
+              label: "{primary}"
+            list:
+              max: 3
+            description: Показват се само публикувани записи. За обновяване редактирай
+              съществуващата статия.
+          - name: runningDescription
+            label: Кратък текст в Бягане, когато няма статии
+            type: text
+          - name: technologyDescription
+            label: Кратък текст в Технологии, когато няма статии
+            type: text
+          - name: financeDescription
+            label: Кратък текст във Финанси, когато няма статии
+            type: text
+          - name: aboutDescription
+            label: Кратък текст в картата За мен (празно = общото представяне)
+            type: text
+  - name: routes
+    label: Моите маршрути
+    type: collection
+    path: src/content/routes
+    exclude:
+      - .gitkeep
+    format: json
+    filename:
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.json"
+      field: false
+    subfolders: false
+    view:
+      primary: title
+    fields:
+      - name: title
+        label: Име на маршрута
+        type: string
+        required: true
+      - name: description
+        label: Описание
+        type: text
+      - name: location
+        label: Местоположение
+        type: string
+      - name: surface
+        label: Терен
+        type: select
+        default: mixed
+        options:
+          values:
+            - value: road
+              label: Шосе
+            - value: park
+              label: Парк
+            - value: trail
+              label: Пътека
+            - value: mixed
+              label: Смесен
+      - name: gpx
+        label: Качи GPX — оригиналът остава в GitHub, не в публичния сайт
+        type: file
+        options:
+          media: gpx
+          extensions:
+            - gpx
+        required: true
+        description: "Хранилището е публично: каченият оригинал се вижда в GitHub
+          веднага, дори маршрутът да е чернова. Не качвай лични координати без
+          предварително почистване или промяна на репото към Private."
+      - name: status
+        label: Публикуване
+        type: select
+        default: draft
+        options:
+          values:
+            - value: draft
+              label: Чернова
+            - value: published
+              label: Публикувано
+      - name: publicApproved
+        label: Одобрявам публичното споделяне на обработеното трасе
+        type: boolean
+        default: false
+      - name: publishMap
+        label: Публикуване на картата
+        type: boolean
+        default: false
+      - name: allowDownload
+        label: Разрешено изтегляне на обработен GPX
+        type: boolean
+        default: false
+      - name: trimStartM
+        label: Премахни метри от началото
+        type: number
+        options:
+          min: 0
+        default: 0
+      - name: trimEndM
+        label: Премахни метри от края
+        type: number
+        options:
+          min: 0
+        default: 0
+      - name: elevationTrusted
+        label: Височинните данни са от проверен надежден източник
+        type: boolean
+        default: false
+      - name: cover
+        label: Основна снимка
+        type: image
+        options:
+          media: images
+      - name: coverFrame
+        label: Кадриране на основната снимка
+        component: imageFrame
+      - name: gallery
+        label: Галерия
+        type: image
+        options:
+          media: images
+          multiple:
+            max: 10
+      - name: galleryFrame
+        label: Кадриране на галерията
+        component: imageFrame
+      - name: imageFrames
+        label: Кадриране на отделни снимки
+        component: imageOverrides
+      - name: race
+        label: Свързано състезание
+        type: reference
+        options:
+          collection: races
+          value: "{path}"
+          label: "{primary}"
+      - name: post
+        label: Свързана публикация
+        type: reference
+        options:
+          collection: posts
+          value: "{path}"
+          label: "{primary}"
+  - name: races
+    label: Състезания
+    type: collection
+    path: src/content/races
+    exclude:
+      - .gitkeep
+    format: json
+    filename:
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.json"
+      field: false
+    subfolders: false
+    view:
+      primary: title
+      sort: date
+      order: asc
+    fields:
+      - name: title
+        label: Име
+        type: string
+        required: true
+      - name: publicationStatus
+        label: Публикуване на записа
+        type: select
+        default: draft
+        options:
+          values:
+            - value: draft
+              label: Чернова
+            - value: published
+              label: Публикувано
+      - name: date
+        label: Дата (по желание)
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: startTime
+        label: Начален час HH:mm (празно, ако не е известен)
+        type: string
+      - name: timeZone
+        label: Часова зона
+        type: string
+        default: Europe/Sofia
+      - name: location
+        label: Място
+        type: string
+      - name: distance
+        label: Дистанция (например 21,1 км)
+        type: string
+      - name: status
+        label: Статус на състезанието
+        type: select
+        default: planned
+        options:
+          values:
+            - value: planned
+              label: Планирано
+            - value: confirmed
+              label: Потвърдено
+            - value: completed
+              label: Завършено
+            - value: cancelled
+              label: Отменено
+      - name: cover
+        label: Снимка или лого
+        type: image
+        options:
+          media: images
+      - name: coverFrame
+        label: Кадриране на снимката
+        component: imageFrame
+      - name: officialUrl
+        label: Официален сайт (HTTPS адрес)
+        type: string
+      - name: route
+        label: Свързан GPS маршрут
+        type: reference
+        options:
+          collection: routes
+          value: "{path}"
+          label: "{primary}"
+      - name: notes
+        label: Лични бележки
+        type: text
+      - name: result
+        label: Резултат (по желание)
+        type: string
+      - name: placing
+        label: Класиране (по желание)
+        type: string
+      - name: gallery
+        label: Галерия
+        type: image
+        options:
+          media: images
+          multiple:
+            max: 10
+      - name: galleryFrame
+        label: Кадриране на галерията
+        component: imageFrame
+      - name: imageFrames
+        label: Кадриране на отделни снимки
+        component: imageOverrides
+      - name: post
+        label: Публикация за състезанието
+        type: reference
+        options:
+          collection: posts
+          value: "{path}"
+          label: "{primary}"
+  - name: videos
+    label: Видеоклипове
+    type: collection
+    path: src/content/videos
+    exclude:
+      - .gitkeep
+    format: json
+    filename:
+      template: "{year}-{month}-{day}-{hour}{minute}{second}-{primary}.json"
+      field: false
+    subfolders: false
+    view:
+      primary: title
+      sort: order
+      order: asc
+    fields:
+      - name: title
+        label: Заглавие
+        type: string
+        required: true
+      - name: url
+        label: YouTube линк
+        type: string
+        required: true
+        description: Постави HTTPS линк от youtube.com/watch, youtu.be или
+          youtube.com/shorts.
+      - name: description
+        label: Кратко описание
+        type: text
+      - name: cover
+        label: Собствено изображение за преглед (по желание)
+        type: image
+        options:
+          media: images
+      - name: status
+        label: Публикуване
+        type: select
+        default: draft
+        options:
+          values:
+            - value: draft
+              label: Чернова
+            - value: published
+              label: Публикувано
+      - name: featured
+        label: Водещо видео
+        type: boolean
+        default: false
+        description: Ако са избрани няколко, води това с най-малък номер за ред.
+      - name: order
+        label: Ред — по-малък номер се показва по-напред
+        type: number
+        default: 100
+        options:
+          min: 0
+components:
+  imageFrame:
+    type: object
+    label: Кадриране
+    fields:
+      - name: fit
+        label: Режим
+        type: select
+        options:
+          values:
+            - value: contain
+              label: Цялата снимка
+            - value: cover
+              label: Запълване
+      - name: x
+        label: Позиция по хоризонтала — 0 ляво, 50 център, 100 дясно
+        type: number
+        options:
+          min: 0
+          max: 100
+      - name: y
+        label: Позиция по вертикала — 0 горе, 50 център, 100 долу
+        type: number
+        options:
+          min: 0
+          max: 100
+      - name: mobileFit
+        label: Режим на телефон (празно = същият)
+        type: select
+        options:
+          values:
+            - value: contain
+              label: Цялата снимка
+            - value: cover
+              label: Запълване
+      - name: mobileX
+        label: Позиция по хоризонтала на телефон
+        type: number
+        options:
+          min: 0
+          max: 100
+      - name: mobileY
+        label: Позиция по вертикала на телефон
+        type: number
+        options:
+          min: 0
+          max: 100
+  imageOverrides:
+    type: object
+    list:
+      collapsible:
+        collapsed: true
+        summary: "{image}"
+    fields:
+      - name: image
+        label: Изображение от галерията или текста
+        type: image
+        options:
+          media: images
+      - name: frame
+        label: Неговото кадриране
+        component: imageFrame

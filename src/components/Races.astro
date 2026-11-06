@@ -1,0 +1,221 @@
+---
+import { loadRaces, loadRoutes } from "../lib/running.mjs";
+import {
+  archivedRace,
+  raceStatuses,
+  formatRaceDate,
+  countdownText,
+} from "../lib/races.mjs";
+import { allPosts, usableImage } from "../lib/posts";
+import FramedImage from "./FramedImage.astro";
+import RouteGallery from "./RouteGallery.astro";
+import Icon from "./Icon.astro";
+interface Props {
+  archive?: boolean;
+  raceId?: string;
+}
+const { archive = false, raceId } = Astro.props;
+const races = loadRaces().filter((race) => !raceId || race.id === raceId),
+  routes = loadRoutes(),
+  posts = await allPosts();
+const now = Date.now();
+const upcoming = races.filter((race) => !archivedRace(race, now));
+const past = races.filter((race) => archivedRace(race, now)).reverse();
+const groups = (archive
+  ? [
+      { title: "Предстоящи състезания", id: "upcoming", entries: upcoming },
+      { title: "Архив на състезанията", id: "archive", entries: past },
+    ]
+  : [
+      {
+        title: "Предстоящи състезания",
+        id: "upcoming",
+        entries: upcoming.slice(0, 3),
+      },
+    ]).filter((group) => !raceId || group.entries.length > 0);
+---
+
+<div
+  class="races-widget"
+  data-races-widget
+  data-full={archive ? "true" : "false"}
+>
+  {
+    groups.map((group) => (
+      <section
+        class="running-section"
+        id={
+          group.id === "upcoming"
+            ? "predstoyashti-sastezaniya"
+            : "arhiv-sastezaniya"
+        }
+        aria-labelledby={`races-${group.id}`}
+      >
+        <div class="section-heading">
+          <div>
+            <>
+              <p class="eyebrow">Следващият старт</p>
+              <h2 id={`races-${group.id}`}>
+                {group.title}
+                <span>.</span>
+              </h2>
+            </>
+          </div>
+          {!archive && (
+            <a class="text-link" href="/byagane/sastezaniya/">
+              Всички и архив <Icon name="arrow" size={20} />
+            </a>
+          )}
+        </div>
+        <div class="race-grid" data-race-group={group.id}>
+          {group.entries.map((race) => {
+            const image = usableImage(race.cover),
+              route = routes.find((item) => item.id === race.routeId),
+              post = posts.find((item) => item.id === race.postId);
+            return (
+              <article
+                class="race-card"
+                id={`race-${race.id}`}
+                data-race={JSON.stringify({
+                  date: race.date,
+                  startTime: race.startTime,
+                  timeZone: race.timeZone,
+                  status: race.status,
+                })}
+              >
+                {image && (
+                  <div class="race-photo">
+                    <FramedImage
+                      src={image}
+                      alt={`Снимка или лого: ${race.title}`}
+                      frame={race.coverFrame}
+                    />
+                  </div>
+                )}
+                <div class="race-card-copy">
+                  <span
+                    class:list={["race-status", `race-status-${race.status}`]}
+                  >
+                    {raceStatuses[race.status as keyof typeof raceStatuses]}
+                  </span>
+                  <h3><a href={race.href}>{race.title}</a></h3>
+                  <p class="race-date">{formatRaceDate(race)}</p>
+                  <p class="race-countdown" data-countdown aria-live="off">
+                    {countdownText(race, now)}
+                  </p>
+                  <dl class="race-details">
+                    {race.location && (
+                      <>
+                        <dt>Място</dt>
+                        <dd>{race.location}</dd>
+                      </>
+                    )}
+                    {race.distance && (
+                      <>
+                        <dt>Дистанция</dt>
+                        <dd>{race.distance}</dd>
+                      </>
+                    )}
+                    {race.result && (
+                      <>
+                        <dt>Резултат</dt>
+                        <dd>{race.result}</dd>
+                      </>
+                    )}
+                    {race.placing && (
+                      <>
+                        <dt>Класиране</dt>
+                        <dd>{race.placing}</dd>
+                      </>
+                    )}
+                  </dl>
+                  {race.notes && <p class="running-notes">{race.notes}</p>}
+                  <div class="running-links">
+                    {race.officialUrl && (
+                      <a
+                        href={race.officialUrl}
+                        class="text-link"
+                        rel="external"
+                      >
+                        Официален сайт <Icon name="diagonal" size={18} />
+                      </a>
+                    )}
+                    {route && (
+                      <a class="text-link" href={route.href}>
+                        GPS маршрут <Icon name="arrow" size={18} />
+                      </a>
+                    )}
+                    {post && (
+                      <a class="text-link" href={post.href}>
+                        Публикация <Icon name="arrow" size={18} />
+                      </a>
+                    )}
+                  </div>
+                  <RouteGallery
+                    images={race.gallery}
+                    frame={race.galleryFrame}
+                    overrides={race.imageFrames}
+                    title={race.title}
+                  />
+                </div>
+              </article>
+            );
+          })}
+        </div>
+        <div
+          class="empty-state running-empty"
+          data-race-empty={group.id}
+          hidden={group.entries.length > 0}
+        >
+          <>
+            <Icon
+              name={group.id === "archive" ? "trophy" : "calendar"}
+              size={36}
+            />
+            <h3>
+              {group.id === "archive"
+                ? "Всеки финал оставя история."
+                : "Следващият старт предстои."}
+            </h3>
+            <p>
+              {group.id === "archive"
+                ? "Тук ще се събират минали състезания, резултати, снимки и публикации."
+                : "Когато има планирано или потвърдено състезание, то ще се появи тук."}
+            </p>
+          </>
+        </div>
+      </section>
+    ))
+  }
+</div>
+<script>
+  import { archivedRace, countdownText } from "../lib/races.mjs";
+  document
+    .querySelectorAll<HTMLElement>("[data-races-widget]")
+    .forEach((widget) => {
+      function update() {
+        widget.querySelectorAll<HTMLElement>("[data-race]").forEach((card) => {
+          const race = JSON.parse(card.dataset.race ?? "{}");
+          const counter = card.querySelector<HTMLElement>("[data-countdown]");
+          if (counter) counter.textContent = countdownText(race);
+          if (archivedRace(race)) {
+            const archive = widget.querySelector('[data-race-group="archive"]');
+            if (archive) {
+              if (!archive.contains(card)) archive.prepend(card);
+            } else card.hidden = true;
+          }
+        });
+        ["upcoming", "archive"].forEach((group) => {
+          const empty = widget.querySelector<HTMLElement>(
+            `[data-race-empty="${group}"]`,
+          );
+          const cards = widget.querySelectorAll(
+            `[data-race-group="${group}"] > .race-card:not([hidden])`,
+          );
+          if (empty) empty.hidden = cards.length > 0;
+        });
+      }
+      update();
+      setInterval(update, 60000);
+    });
+</script>

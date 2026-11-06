@@ -1,0 +1,176 @@
+---
+import "@fontsource-variable/manrope";
+import "../styles/global.css";
+import Brand from "../components/Brand.astro";
+import "../styles/magazine.css";
+import "../styles/running.css";
+import "../styles/v04.css";
+import { site, siteIdentity } from "../lib/site.mjs";
+import { publicOrigin, absolutePublicUrl, socialImage } from "../lib/social.mjs";
+import Share from "../components/Share.astro";
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  socialType?: "website" | "article";
+}
+const identity = siteIdentity();
+const {
+  title,
+  description = `Личният свят на ${identity.name} — бягане, технологии, полезни идеи и нови хоризонти.`,
+  image,
+  socialType = "website",
+} = Astro.props;
+const pageTitle = title
+  ? `${title} — ${identity.name}`
+  : `${identity.name} — В движение. С любопитство.`;
+const navigation = identity.navigation;
+const current = Astro.url.pathname;
+const origin = publicOrigin(import.meta.env.PUBLIC_SITE_URL || site.publicSiteUrl);
+const canonical = current === "/404.html" ? undefined : absolutePublicUrl(current, origin);
+const social = canonical ? await socialImage(image, site) : undefined;
+const socialUrl = social ? absolutePublicUrl(social.path, origin) : undefined;
+---
+
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101827" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={socialType} />
+    <meta property="og:locale" content="bg_BG" />
+    <meta property="og:site_name" content={identity.name} />
+    <meta name="twitter:card" content={socialUrl ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {canonical && <><meta property="og:url" content={canonical} /><link rel="canonical" href={canonical} /></>}
+    {socialUrl && <>
+      <meta property="og:image" content={socialUrl} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:type" content="image/jpeg" />
+      <meta property="og:image:alt" content={pageTitle} />
+      <meta name="twitter:image" content={socialUrl} />
+      <meta name="twitter:image:alt" content={pageTitle} />
+    </>}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Към съдържанието</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <Brand />
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="main-navigation"
+          ><span class="menu-label">Меню</span><span
+            class="menu-lines"
+            aria-hidden="true"></span></button
+        >
+        <nav
+          id="main-navigation"
+          class="navigation"
+          aria-label="Главна навигация"
+        >
+          {
+            navigation.map(([href, label]) => (
+              <a
+                href={href}
+                class:list={{
+                  active:
+                    current === href ||
+                    (href !== "/" && current.startsWith(href)),
+                }}
+                aria-current={current === href ? "page" : undefined}
+              >
+                {label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+    <main id="main"><slot />{canonical && <Share url={canonical} title={pageTitle} description={description} />}</main>
+    <footer class="site-footer">
+      <div class="container magazine-footer">
+        <div class="footer-identity"><Brand footer /></div>
+        <nav aria-label="Навигация в долния колонтитул">
+          {navigation.map(([href, label]) => <a href={href}>{label}</a>)}
+        </nav>
+        <p>Бягане · Технологии · Полезно · Лични теми</p>
+      </div>
+      <div class="container magazine-copyright">
+        <span>© {new Date().getUTCFullYear()} {identity.name}. Лично пространство.</span
+        ><a href="#main">Към началото ↑</a>
+      </div>
+    </footer>
+    <script>
+      import { frameStyle, frameForImage } from "../lib/images.mjs";
+      const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
+      const nav = document.querySelector<HTMLElement>(".navigation");
+      function closeMenu() {
+        toggle?.setAttribute("aria-expanded", "false");
+        nav?.classList.remove("is-open");
+      }
+      toggle?.addEventListener("click", () => {
+        const open = toggle.getAttribute("aria-expanded") !== "true";
+        toggle.setAttribute("aria-expanded", String(open));
+        nav?.classList.toggle("is-open", open);
+      });
+      nav
+        ?.querySelectorAll("a")
+        .forEach((link) => link.addEventListener("click", closeMenu));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeMenu();
+          if (nav?.contains(document.activeElement)) toggle?.focus();
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (
+          event.target instanceof Node &&
+          !nav?.contains(event.target) &&
+          !toggle?.contains(event.target)
+        )
+          closeMenu();
+      });
+      matchMedia("(min-width: 961px)").addEventListener("change", closeMenu);
+      document
+        .querySelectorAll<HTMLImageElement>(".prose img")
+        .forEach((img) => {
+          img.loading = "lazy";
+          img.classList.add("frame-image");
+          const wrapper = img.closest<HTMLElement>("[data-content-frames]");
+          try {
+            const frames = JSON.parse(wrapper?.dataset.contentFrames ?? "[]");
+            const override = frameForImage(
+              img.getAttribute("src"),
+              frames,
+              undefined,
+            );
+            if (override) img.style.cssText += frameStyle(override);
+          } catch {
+            /* Invalid optional crop metadata keeps the full image. */
+          }
+
+          if (img.src.includes("/public/images/"))
+            img.src = img.src.replace("/public/images/", "/images/");
+          function fallback() {
+            const note = document.createElement("span");
+            note.className = "image-unavailable";
+            note.textContent = img.alt || "Изображението не е налично.";
+            img.replaceWith(note);
+          }
+          img.addEventListener("error", fallback, { once: true });
+          if (img.complete && img.naturalWidth === 0) fallback();
+        });
+    </script>
+  </body>
+</html>

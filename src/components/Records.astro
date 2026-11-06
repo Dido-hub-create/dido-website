@@ -1,0 +1,60 @@
+---
+import Icon from "./Icon.astro";
+import FramedImage from "./FramedImage.astro";
+import { site } from "../lib/site.mjs";
+import { usableImage } from "../lib/posts";
+const image = usableImage(site.recordsImage);
+const records = [
+  { label: "1 км", time: site.records?.oneKm?.trim(), half: false },
+  { label: "5 км", time: site.records?.fiveKm?.trim(), half: false },
+  { label: "10 км", time: site.records?.tenKm?.trim(), half: false },
+  {
+    label: "Полумаратон",
+    time: site.records?.halfMarathon?.trim(),
+    half: true,
+  },
+];
+---
+
+<section class="records" aria-labelledby="records-title" id="lichni-rekordi">
+  <div class="records-intro">
+    {
+      image && (
+        <FramedImage
+          class="records-photo"
+          src={image}
+          alt="Момент от личния дневник на бягането"
+          frame={site.recordsFrame}
+          width={400}
+          height={220}
+          loading="lazy"
+        />
+      )
+    }
+    <div class="records-title">
+      <p class="eyebrow">Бягане</p><h2 id="records-title">Лични рекорди</h2><p>
+        Моите най-добри постижения в бягането до момента.
+      </p>
+    </div>
+  </div>
+  {
+    records.map((record) => (
+      <div class:list={["record", { "record-highlight": record.half }]}>
+        <>
+          <span>
+            {record.half && <Icon name="trophy" size={22} />}
+            {record.label}
+          </span>
+          <strong>{record.time || "—"}</strong>
+          <small>
+            {record.time
+              ? record.half
+                ? "час:мин:сек"
+                : "мин:сек"
+              : "Предстои"}
+          </small>
+        </>
+      </div>
+    ))
+  }
+</section>

@@ -1,0 +1,41 @@
+---
+import FramedImage from "./FramedImage.astro";
+import Icon from "./Icon.astro";
+import { usableImage } from "../lib/posts";
+import { routeTypes, distanceLabel, ascentLabel } from "../lib/running.mjs";
+interface Props {
+  route: ReturnType<typeof import("../lib/running.mjs").loadRoutes>[number];
+}
+const { route } = Astro.props;
+const image = usableImage(route.cover);
+---
+
+<article class="route-card">
+  {
+    image && (
+      <a
+        class="route-card-photo"
+        href={route.href}
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <FramedImage src={image} alt="" frame={route.coverFrame} />
+      </a>
+    )
+  }
+  <div class="route-card-copy">
+    <p class="eyebrow">
+      {routeTypes[route.surface as keyof typeof routeTypes]}
+    </p><h3><a href={route.href}>{route.title}</a></h3>{
+      route.location && <p>{route.location}</p>
+    }<div class="route-card-stats">
+      <span>{distanceLabel(route.distanceM)}</span><span
+        >Д+ {ascentLabel(route.ascentM)}</span>
+    </div>{
+      route.error && (
+        <p class="content-notice">GPX файлът се нуждае от корекция.</p>
+      )
+    }<a class="text-link" href={route.href}
+      >Разгледай маршрута <Icon name="arrow" size={20} /></a>
+  </div>
+</article>

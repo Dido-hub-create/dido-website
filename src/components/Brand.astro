@@ -1,0 +1,35 @@
+---
+import { siteIdentity } from "../lib/site.mjs";
+import { usableImage } from "../lib/posts";
+interface Props {
+  footer?: boolean;
+}
+const { footer = false } = Astro.props;
+const identity = siteIdentity();
+const logo = usableImage(identity.logo);
+---
+
+<a
+  class="brand magazine-brand"
+  href="/"
+  aria-label={`${identity.name} — ${identity.navigation[0][1]}`}
+>{logo ? (
+  <img class="brand-logo" src={logo} alt={identity.name} />
+) : (
+  <>{identity.name === "DIDO" ? "Dido" : identity.name}<svg viewBox="0 0 110 13" aria-hidden="true">
+    <path d="M3 10Q49-4 106 8 50 3 3 12Z" fill="currentColor"></path>
+  </svg></>
+)}</a>
+<span class:list={["brand-caption", { "footer-caption": footer }]}
+  >{identity.subtitle}</span
+>
+
+<style>
+  .brand-logo {
+    display: block;
+    width: auto;
+    max-width: 140px;
+    height: 1.3em;
+    object-fit: contain;
+  }
+</style>

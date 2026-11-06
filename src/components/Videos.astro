@@ -1,0 +1,16 @@
+---
+import VideoCard from "./VideoCard.astro";
+import { loadVideos, youtubeChannelUrl } from "../lib/videos.mjs";
+import { site } from "../lib/site.mjs";
+import Icon from "./Icon.astro";
+const videos = loadVideos().slice(0, 4);
+const channel = youtubeChannelUrl(site.youtubeChannel);
+---
+<section class="running-section video-section" id="moite-videa" aria-labelledby="videos-title">
+  <div class="section-heading">
+    <div><p class="eyebrow">В движение</p><h2 id="videos-title">Моите видеа от бягания и състезания<span>.</span></h2></div>
+  </div>
+  {videos.length ? <div class="video-grid">{videos.map((video, index) => <VideoCard video={video} featured={index === 0} />)}</div> :
+    <div class="empty-state running-empty"><h3>Видеата предстоят.</h3><p>Тук ще споделям видеа от бягания и състезания.</p></div>}
+  {channel && <p class="video-channel"><a class="button button-outline" href={channel} target="_blank" rel="noopener noreferrer">Виж всички видеа в YouTube <Icon name="diagonal" size={18} /></a></p>}
+</section>

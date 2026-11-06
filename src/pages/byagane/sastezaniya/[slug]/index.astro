@@ -1,0 +1,19 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import Races from "../../../../components/Races.astro";
+import { loadRaces } from "../../../../lib/running.mjs";
+import { usableImage } from "../../../../lib/posts";
+export function getStaticPaths() {
+  return loadRaces().map((race) => ({ params: { slug: race.id }, props: { race } }));
+}
+const { race } = Astro.props;
+const description = race.notes || [race.location, race.distance].filter(Boolean).join(" · ");
+---
+<Layout title={race.title} description={description} image={usableImage(race.cover)} socialType="article">
+  <article class="container running-page">
+    <div class="breadcrumbs"><a href="/">Начало</a><span>/</span><a href="/byagane/sastezaniya/">Състезания</a></div>
+    <header class="page-intro"><h1>{race.title}</h1></header>
+    <Races archive raceId={race.id} />
+    <p class="article-back"><a class="text-link" href="/byagane/sastezaniya/">← Всички състезания</a></p>
+  </article>
+</Layout>

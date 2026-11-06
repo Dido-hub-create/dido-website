@@ -1,0 +1,782 @@
+/* Shared crop controls. The old hard-coded bottom crop and zoomed images
+   cannot override these explicit, CMS-controlled values. */
+.frame-image,
+.prose img {
+  object-fit: var(--image-fit, contain) !important;
+  object-position: var(--image-x, 50%) var(--image-y, 35%) !important;
+  transform: none !important;
+  max-width: 100% !important;
+}
+.frame-image {
+  width: 100% !important;
+  background: var(--panel-soft);
+}
+.prose img {
+  width: 100%;
+  height: auto;
+  max-height: 850px;
+}
+.article-cover {
+  background: var(--panel-soft);
+}
+.article-cover img {
+  height: clamp(340px, 70vh, 700px);
+  max-height: none;
+}
+.running-page {
+  padding-bottom: 60px;
+}
+.running-page .page-intro h1 {
+  overflow-wrap: anywhere;
+}
+.running-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 24px 0 5px;
+}
+.running-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 17px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 14px;
+  background: var(--panel-soft);
+}
+.running-nav a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.running-section {
+  padding-top: 42px;
+  scroll-margin-top: 20px;
+}
+.running-section .section-heading h2 {
+  font-size: 29px;
+}
+.running-section .section-heading .text-link {
+  font-size: 13px;
+  min-height: 44px;
+}
+.running-empty {
+  padding: 45px 25px;
+}
+.running-empty p {
+  font-size: 15px;
+  max-width: 600px;
+  margin: 14px auto 20px;
+}
+.routes-grid,
+.race-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.route-card,
+.race-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(140deg, var(--panel), var(--panel-soft));
+}
+.route-card-photo,
+.race-photo {
+  height: 230px;
+  display: block;
+  background: var(--panel-soft);
+}
+.route-card-photo img,
+.race-photo img {
+  height: 100%;
+}
+.route-card-copy,
+.race-card-copy {
+  padding: 23px;
+}
+.route-card h3,
+.race-card h3 {
+  font-size: 24px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  margin: 10px 0 12px;
+}
+.route-card p,
+.race-card p {
+  font-size: 14px;
+}
+.route-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  font-size: 14px;
+  font-weight: 750;
+  margin: 19px 0;
+}
+.route-card .text-link,
+.running-links .text-link {
+  font-size: 13px;
+  min-height: 44px;
+}
+.race-status {
+  display: inline-block;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 9px;
+  color: var(--muted);
+}
+.race-status-confirmed {
+  color: #6ce6b5;
+  border-color: #3f745f;
+}
+.race-status-cancelled {
+  color: #ffb5a0;
+}
+.race-status-completed {
+  color: #a9c9ff;
+}
+.race-countdown {
+  color: var(--accent);
+  font-weight: 750;
+  min-height: 24px;
+  margin-top: 12px;
+}
+.race-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 15px;
+  font-size: 14px;
+  margin: 17px 0;
+}
+.race-details dt {
+  color: var(--muted);
+}
+.race-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.running-notes,
+.route-description {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.running-links {
+  display: flex;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.running-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 25px;
+}
+.running-gallery a {
+  display: block;
+  height: 220px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--panel-soft);
+}
+.running-gallery img {
+  height: 100%;
+}
+.race-card .running-gallery {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+.race-card .running-gallery a {
+  height: 150px;
+}
+.route-cover {
+  height: clamp(320px, 60vh, 660px);
+  margin-bottom: 30px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+.route-cover img {
+  height: 100%;
+}
+.route-description {
+  max-width: 900px;
+  font-size: 17px;
+  line-height: 1.9;
+}
+.route-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding: 25px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin: 28px 0;
+}
+.route-stats dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.route-stats dd {
+  margin: 8px 0 0;
+  font-size: 25px;
+  font-weight: 800;
+}
+.content-notice {
+  padding: 15px 18px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-soft);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin-block: 20px;
+}
+.route-map-section {
+  margin: 28px 0;
+  border: 1px solid var(--line);
+  padding: 24px;
+  border-radius: 13px;
+  background: var(--panel-soft);
+}
+.map-intro h2 {
+  font-size: 25px;
+}
+.map-intro p {
+  font-size: 14px;
+  line-height: 1.8;
+  margin: 15px 0 20px;
+  max-width: 750px;
+}
+.route-map-canvas {
+  height: 450px;
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 9px;
+  background: #e1e5df;
+  color: #17212e;
+  z-index: 0;
+}
+.route-map-canvas .leaflet-control-attribution {
+  color: #253344;
+  background: #fffe;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.route-map-canvas .leaflet-control-attribution a {
+  color: #135882;
+}
+.route-map-canvas .leaflet-control-zoom a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  color: #17212e;
+}
+.route-map-canvas .leaflet-tooltip {
+  color: #17212e;
+}
+.map-status {
+  font-size: 14px;
+  margin-top: 15px;
+}
+.map-issue {
+  display: inline-flex;
+  font-size: 13px;
+  text-decoration: underline;
+  min-height: 44px;
+  align-items: center;
+}
+.route-download {
+  margin: 12px 0 22px;
+}
+@media (max-width: 960px) {
+  .routes-grid,
+  .race-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .running-section .section-heading {
+    align-items: flex-start;
+  }
+  .route-stats {
+    gap: 15px;
+  }
+  .running-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  .section-note,
+  .text-link {
+    font-size: 13px;
+  }
+  .eyebrow {
+    font-size: 11px;
+  }
+  .homepage .home-category-heading .text-link {
+    font-size: 13px;
+    min-height: 44px;
+  }
+  .homepage .home-category .post-card h3 {
+    font-size: 18px;
+  }
+  .homepage .home-category .post-card p,
+  .homepage .home-category .post-meta,
+  .homepage .home-category .post-card .text-link {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .homepage .home-category .post-card .text-link {
+    min-height: 44px;
+  }
+  .homepage .home-category-empty h3 {
+    font-size: 21px;
+  }
+  .homepage .home-category-empty p,
+  .homepage .home-feature p {
+    font-size: 14px;
+  }
+  .homepage .home-category-empty .text-link {
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .home-category-heading .text-link svg {
+    width: 20px;
+  }
+  .projects-compact .projects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .projects-compact .project-card {
+    padding: 18px 14px;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 0 12px;
+  }
+  .projects-compact .project-top {
+    grid-row: 1/3;
+  }
+  .projects-compact .project-card h3 {
+    font-size: 19px;
+    line-height: 1.5;
+  }
+  .projects-compact .status {
+    font-size: 13px;
+    padding: 2px 6px;
+  }
+  .project-card p {
+    font-size: 15px !important;
+  }
+  .projects-note {
+    font-size: 13px;
+  }
+  .magazine-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .magazine-footer nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+  .magazine-footer nav a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .magazine-copyright {
+    font-size: 12px;
+  }
+  .footer-identity .brand-caption {
+    font-size: 15px;
+  }
+  .records-title > p:last-child {
+    font-size: 13px;
+  }
+  .record small {
+    font-size: 12px;
+  }
+  .record > span {
+    font-size: 15px;
+  }
+  .button,
+  .button-outline {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .home-feature h2 {
+    font-size: 23px;
+  }
+  .home-feature .button-outline {
+    padding: 7px 12px;
+  }
+  .home-columns {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .home-category + .home-category {
+    border-left: 0;
+    padding-left: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .home-category-heading {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .home-category-posts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .homepage .home-category .post-image {
+    height: 190px;
+  }
+  .home-category-empty {
+    min-height: 210px;
+  }
+  .home-category .post-card-body {
+    padding-top: 14px;
+  }
+  .topic-filter {
+    font-size: 15px;
+    min-height: 44px;
+  }
+  .prose {
+    font-size: 17px;
+  }
+  .post-card p {
+    font-size: 14px;
+  }
+  .post-meta {
+    font-size: 12px;
+  }
+  .post-card .text-link {
+    font-size: 13px;
+    min-height: 44px;
+  }
+}
+@media (max-width: 640px) {
+  .frame-image,
+  .prose img {
+    object-fit: var(--image-mobile-fit, var(--image-fit, contain)) !important;
+    object-position: var(--image-mobile-x, var(--image-x, 50%))
+      var(--image-mobile-y, var(--image-y, 35%)) !important;
+  }
+  .welcome-hero {
+    height: 540px;
+    min-height: 540px;
+  }
+  .welcome-scene.frame-image {
+    height: 100%;
+  }
+  .welcome-content {
+    padding-top: 30px;
+  }
+  .welcome-content h1 {
+    font-size: clamp(32px, 9.6vw, 44px);
+  }
+  .welcome-content > p {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+  .welcome-hero:after {
+    background: linear-gradient(
+      180deg,
+      #0b1725fa 0%,
+      #0b1725ee 35%,
+      #0b17258c 60%,
+      #0b17251a
+    );
+  }
+  .welcome-actions {
+    gap: 12px;
+  }
+  .welcome-actions .button {
+    font-size: 14px;
+    padding: 10px 15px;
+    min-height: 46px;
+  }
+  .welcome-actions .button-secondary {
+    min-width: 100px;
+  }
+  .records-intro {
+    grid-template-columns: 100px 1fr;
+    gap: 14px;
+  }
+  .records-photo {
+    height: 140px;
+    background: #101a26;
+  }
+  .records-title h2 {
+    font-size: 22px;
+  }
+  .records-title .eyebrow {
+    font-size: 11px;
+  }
+  .records-title > p:last-child {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .record-highlight > span {
+    font-size: 13px;
+  }
+  .record-highlight strong {
+    font-size: 32px;
+  }
+  .home-features {
+    grid-template-columns: 1fr;
+  }
+  .home-feature {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 15px;
+  }
+  .feature-picture {
+    height: 200px;
+  }
+  .home-feature > div {
+    padding: 0 3px 5px;
+  }
+  .homepage .home-feature p {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .home-feature h2 {
+    font-size: 25px;
+  }
+  .button-outline {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .projects-compact .projects-grid {
+    gap: 12px;
+  }
+  .projects-compact .project-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 17px 14px;
+  }
+  .projects-compact .project-top {
+    grid-row: auto;
+  }
+  .projects-compact .project-card h3 {
+    font-size: 19px;
+    margin-top: 3px;
+    overflow-wrap: anywhere;
+  }
+  .projects-compact .status {
+    font-size: 13px;
+  }
+  .section-heading .eyebrow {
+    font-size: 11px;
+  }
+  .routes-grid,
+  .race-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .running-section {
+    padding-top: 32px;
+  }
+  .running-section .section-heading {
+    flex-direction: column;
+    gap: 7px;
+  }
+  .running-section .section-heading h2 {
+    font-size: 27px;
+  }
+  .running-empty p {
+    font-size: 15px;
+  }
+  .running-nav {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .running-nav a {
+    font-size: 14px;
+    min-height: 46px;
+  }
+  .route-card-copy,
+  .race-card-copy {
+    padding: 20px;
+  }
+  .race-card h3,
+  .route-card h3 {
+    font-size: 24px;
+  }
+  .race-card p,
+  .route-card p,
+  .race-details {
+    font-size: 15px;
+  }
+  .route-card-stats {
+    font-size: 15px;
+  }
+  .route-card .text-link,
+  .running-links .text-link {
+    font-size: 14px;
+  }
+  .race-countdown {
+    font-size: 15px !important;
+    line-height: 1.8;
+  }
+  .race-date {
+    line-height: 1.8;
+  }
+  .route-stats {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 19px;
+  }
+  .route-stats dt {
+    font-size: 14px;
+  }
+  .route-stats dd {
+    font-size: 25px;
+  }
+  .route-description {
+    font-size: 16px;
+  }
+  .route-map-section {
+    padding: 16px;
+  }
+  .route-map-canvas {
+    height: 360px;
+  }
+  .map-intro p,
+  .map-status,
+  .map-issue {
+    font-size: 14px;
+  }
+  .content-notice {
+    padding: 14px;
+    font-size: 14px;
+  }
+  .running-gallery a {
+    height: 200px;
+  }
+  .route-cover {
+    height: 400px;
+  }
+  .running-page {
+    padding-bottom: 40px;
+  }
+  .article-header .post-meta {
+    font-size: 12px;
+  }
+  .article-description {
+    font-size: 17px;
+  }
+  .breadcrumbs {
+    font-size: 12px;
+  }
+  .page-intro > div > p:last-child {
+    font-size: 16px;
+  }
+  .page-intro h1 {
+    font-size: 43px;
+    overflow-wrap: anywhere;
+  }
+  .section-note {
+    font-size: 13px;
+  }
+  .article-gallery .section-note {
+    font-size: 13px;
+  }
+  .lightbox-close {
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .lightbox-caption {
+    font-size: 13px;
+  }
+  .magazine-copyright a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .magazine-copyright {
+    align-items: center;
+  }
+}
+@media (max-width: 360px) {
+  .welcome-hero {
+    height: 600px;
+    min-height: 600px;
+  }
+  .welcome-actions {
+    gap: 10px;
+  }
+  .welcome-actions .button {
+    font-size: 13px;
+    padding-inline: 13px;
+  }
+  .welcome-actions .button-secondary {
+    min-width: 90px;
+  }
+  .records-intro {
+    grid-template-columns: 82px 1fr;
+    gap: 12px;
+  }
+  .records-title h2 {
+    font-size: 20px;
+  }
+  .records-title > p:last-child {
+    font-size: 13px;
+  }
+  .magazine-footer nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .home-category-posts {
+    grid-template-columns: 1fr;
+  }
+  .homepage .home-category .post-card h3 {
+    font-size: 20px;
+  }
+  .projects-compact .projects-grid {
+    grid-template-columns: 1fr;
+  }
+  .projects-compact .project-card {
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 0 14px;
+  }
+  .projects-compact .project-top {
+    grid-row: 1/3;
+  }
+  .project-top svg {
+    width: 25px;
+  }
+  .running-gallery {
+    grid-template-columns: 1fr;
+  }
+  .record-highlight > span {
+    font-size: 12px;
+  }
+  .record-highlight strong {
+    font-size: 30px;
+  }
+}
+@media (max-width: 390px) {
+  .home-category-heading {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 360px) {
+  .welcome-hero {
+    height: 570px;
+    min-height: 570px;
+  }
+}
