@@ -2,9 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import Icon from "../components/Icon.astro";
 import FramedImage from "../components/FramedImage.astro";
-import site from "../data/site.json";
 import { usableImage } from "../lib/posts";
-import { siteIdentity } from "../lib/site.mjs";
+import { site, siteIdentity } from "../lib/site.mjs";
 const identity = siteIdentity();
 const portrait = usableImage(site.portrait);
 const contactUrl = /^https:\/\//i.test(site.contactUrl ?? "")

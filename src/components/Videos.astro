@@ -1,7 +1,7 @@
 ---
 import VideoCard from "./VideoCard.astro";
 import { loadVideos, youtubeChannelUrl } from "../lib/videos.mjs";
-import site from "../data/site.json";
+import { site } from "../lib/site.mjs";
 import Icon from "./Icon.astro";
 const videos = loadVideos().slice(0, 4);
 const channel = youtubeChannelUrl(site.youtubeChannel);

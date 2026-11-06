@@ -1,7 +1,7 @@
 ---
 import Icon from "./Icon.astro";
 import FramedImage from "./FramedImage.astro";
-import site from "../data/site.json";
+import { site } from "../lib/site.mjs";
 import { usableImage } from "../lib/posts";
 const image = usableImage(site.recordsImage);
 const records = [

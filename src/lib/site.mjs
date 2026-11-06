@@ -1,5 +1,8 @@
-import site from "../data/site.json" with { type: "json" };
+import rawSite from "../data/site.json" with { type: "json" };
 import { normalizeImage } from "./content-utils.mjs";
+import { normalizeSiteSettings } from "./site-settings.mjs";
+
+export const site = normalizeSiteSettings(rawSite);
 
 const label = (value, fallback) => typeof value === "string" && value.trim() ? value.trim() : fallback;
 export function siteIdentity(settings = site) {
