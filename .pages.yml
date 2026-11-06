@@ -1,4 +1,8 @@
-media: public/images
+media:
+  - name: images
+    label: Снимки
+    input: public/images
+    output: /images
 
 content:
   - name: posts
@@ -10,6 +14,25 @@ content:
         label: Заглавие
         type: string
         required: true
+
+      - name: cover
+        label: Основна снимка
+        type: image
+        options:
+          media: images
+
+      - name: gallery
+        label: Галерия
+        type: image
+        options:
+          media: images
+          multiple:
+            max: 10
+
       - name: body
         label: Съдържание
         type: rich-text
+        options:
+          media: images
+          format: markdown
+          switcher: true
