@@ -14,6 +14,9 @@
   "aboutImage": "/images/dido-mountain-hero.webp",
   "aboutIntro": "Кой съм аз, какви са интересите ми и защо създадох този сайт.",
   "records": {
+    "oneKm": "5:13",
+    "fiveKm": "28:14",
+    "tenKm": "59:32",
     "halfMarathon": "2:07:14"
   },
   "recordsFrame": {
