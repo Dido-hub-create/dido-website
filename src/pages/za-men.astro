@@ -1,0 +1,106 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "../components/Icon.astro";
+import site from "../data/site.json";
+import { usableImage } from "../lib/posts";
+const portrait = usableImage(site.portrait);
+const contactUrl = /^https:\/\//i.test(site.contactUrl ?? "")
+  ? site.contactUrl
+  : undefined;
+const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(site.email ?? "")
+  ? site.email
+  : undefined;
+---
+
+<Layout
+  title="За мен"
+  description="Човекът зад DIDO. Лично пространство за бягане, технологии и полезни идеи."
+>
+  <div class="container about-page">
+    <div class="breadcrumbs">
+      <a href="/">Начало</a><span>/</span><span>За мен</span>
+    </div><section class="page-intro">
+      <div>
+        <p class="eyebrow">ЧОВЕКЪТ ЗАД DIDO</p><h1>За мен<span>.</span></h1><p>
+          Един сайт. Няколко интереса. Много посоки за откриване.
+        </p>
+      </div>
+    </section>
+    <section class="about-layout">
+      {
+        portrait ? (
+          <img
+            class="about-portrait"
+            src={portrait}
+            alt="Личен портрет на Дидо"
+            width="600"
+            height="800"
+          />
+        ) : (
+          <div class="portrait-placeholder">
+            <>
+              <Icon name="user" size={68} />
+              <span>МЯСТО ЗА ЛИЧНА СНИМКА</span>
+              <p>Портретът предстои.</p>
+            </>
+          </div>
+        )
+      }<div class="about-copy">
+        <p class="eyebrow">ЗДРАВЕЙ, АЗ СЪМ ДИДО</p><h2>
+          Споделям пътя.<br /><span>Не само финала.</span>
+        </h2><p>{site.aboutIntro}</p>{
+          site.biography ? (
+            <div class="biography">{site.biography}</div>
+          ) : (
+            <>
+              <>
+                <p>
+                  DIDO събира на едно място лични преживявания, бягане,
+                  технологични впечатления и идеи за полезни приложения.
+                </p>
+                <p>
+                  Това пространство расте с всяка нова публикация. Тук ще добавя
+                  повече за себе си, за нещата, които ме вдъхновяват, и за
+                  следващите си проекти.
+                </p>
+              </>
+            </>
+          )
+        }<div class="about-contact">
+          <span class="eyebrow">КОНТАКТИ</span>{
+            email || contactUrl ? (
+              <div class="contact-links">
+                {email && (
+                  <a class="text-link" href={`mailto:${email}`}>
+                    {email}
+                  </a>
+                )}
+                {contactUrl && (
+                  <a class="text-link" href={contactUrl}>
+                    Свържи се с мен <Icon name="diagonal" size={18} />
+                  </a>
+                )}
+              </div>
+            ) : (
+              <p>Данни за връзка ще бъдат добавени по-късно.</p>
+            )
+          }
+        </div>
+      </div>
+    </section>
+    <section class="section about-directions">
+      <a href="/byagane/"
+        ><Icon name="run" size={30} /><h3>Бягане</h3><p>
+          Тренировки, състезания и лични крачки напред.
+        </p><Icon name="arrow" size={21} /></a
+      ><a href="/tehnologii/"
+        ><Icon name="code" size={30} /><h3>Технологии</h3><p>
+          Любопитството се превръща в практически идеи.
+        </p><Icon name="arrow" size={21} /></a
+      ><a href="/polezno/"
+        ><Icon name="book" size={30} /><h3>Полезно</h3><p>
+          Знания и открития, които си струва да споделя.
+        </p><Icon name="arrow" size={21} /></a>
+    </section>
+  </div>
+</Layout>

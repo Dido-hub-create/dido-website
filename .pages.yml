@@ -29,6 +29,37 @@ content:
           multiple:
             max: 10
 
+      - name: category
+        label: Раздел
+        type: select
+        options:
+          values: [Бягане, Технологии, Полезно, Финанси]
+
+      - name: topic
+        label: Тема (по желание)
+        type: select
+        options:
+          values: [Състезания, Тренировки, Лични рекорди, Полезно за бегачи, Екипировка, Моите приложения, Изкуствен интелект, Технологични впечатления, Практически ръководства, Статии, Инструкции, Образователни материали, Ресурси, Bitcoin, Финансови публикации]
+
+      - name: description
+        label: Кратко описание (по желание)
+        type: text
+
+      - name: date
+        label: Дата (по желание)
+        type: date
+
+      - name: status
+        label: Статус
+        type: select
+        default: published
+        options:
+          values:
+            - label: Публикувано
+              value: published
+            - label: Чернова
+              value: draft
+
       - name: body
         label: Съдържание
         type: rich-text
@@ -36,3 +67,50 @@ content:
           media: images
           format: markdown
           switcher: true
+
+  - name: site
+    label: Настройки на сайта
+    type: file
+    path: src/data/site.json
+    fields:
+      - name: homeIntro
+        label: Представяне на началната страница
+        type: text
+      - name: heroImage
+        label: Голяма снимка на началната страница
+        type: image
+        options:
+          media: images
+      - name: aboutIntro
+        label: Кратко представяне за мен
+        type: text
+      - name: biography
+        label: Биография (по желание)
+        type: text
+      - name: portrait
+        label: Личен портрет (по желание)
+        type: image
+        options:
+          media: images
+      - name: email
+        label: Имейл за връзка (по желание)
+        type: string
+      - name: contactUrl
+        label: Връзка за контакт — пълен HTTPS адрес (по желание)
+        type: string
+      - name: records
+        label: Лични рекорди
+        type: object
+        fields:
+          - name: oneKm
+            label: 1 км — време (празно, ако предстои)
+            type: string
+          - name: fiveKm
+            label: 5 км — време (празно, ако предстои)
+            type: string
+          - name: tenKm
+            label: 10 км — време (празно, ако предстои)
+            type: string
+          - name: halfMarathon
+            label: Полумаратон — време
+            type: string

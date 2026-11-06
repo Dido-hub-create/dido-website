@@ -1,0 +1,165 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "../components/Icon.astro";
+import Records from "../components/Records.astro";
+import Projects from "../components/Projects.astro";
+import PostCard from "../components/PostCard.astro";
+import { allPosts, usableImage } from "../lib/posts";
+import site from "../data/site.json";
+const posts = await allPosts();
+const heroImage = usableImage(site.heroImage);
+---
+
+<Layout>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">
+          <span class="small-line"></span>ДОБРЕ ДОШЛИ В МОЯ СВЯТ
+        </p><h1>
+          В движение.<br />С любопитство.<br /><span>Без точка.</span>
+        </h1><p class="hero-intro">{site.homeIntro}</p><div
+          class="hero-actions"
+        >
+          <a class="button" href="#posledni-publikacii"
+            >Разгледай публикациите <Icon name="arrow" size={20} /></a
+          ><a class="quiet-link" href="/za-men/"
+            >Кой стои зад DIDO? <Icon name="diagonal" size={17} /></a>
+        </div><div class="hero-interests">
+          <span>БЯГАНЕ</span><span>ТЕХНОЛОГИИ</span><span>НОВИ ИДЕИ</span>
+        </div>
+      </div>
+      <div class="hero-visual">
+        {
+          heroImage ? (
+            <img
+              src={heroImage}
+              alt="Снимка от състезание, споделена в личния дневник на DIDO"
+              width="1200"
+              height="1600"
+              fetchpriority="high"
+            />
+          ) : (
+            <div class="hero-image-placeholder">
+              <>
+                <Icon name="run" size={90} />
+                <span>Всяка крачка е история.</span>
+              </>
+            </div>
+          )
+        }<div class="hero-photo-bottom">
+          <span>ИСТОРИИТЕ ЗАПОЧВАТ<br /><strong>с първата крачка.</strong></span
+          ><a href="/byagane/" aria-label="Към раздел Бягане"
+            ><Icon name="diagonal" size={25} /></a>
+        </div><span class="photo-corner">ЛИЧЕН ДНЕВНИК / 01</span>
+      </div>
+    </section>
+    <Records />
+    <section
+      class="section"
+      id="posledni-publikacii"
+      aria-labelledby="latest-title"
+    >
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">ОТ ЛИЧНИЯ ДНЕВНИК</p><h2 id="latest-title">
+            Последни публикации<span>.</span>
+          </h2>
+        </div><a class="text-link" href="/polezno/"
+          >Още за четене <Icon name="arrow" size={18} /></a>
+      </div>
+      {
+        posts.length ? (
+          <div class="latest-layout">
+            <>
+              <div class="latest-posts">
+                {posts.slice(0, 3).map((post) => (
+                  <PostCard post={post} />
+                ))}
+              </div>
+              <aside class="explore-topics">
+                <>
+                  <p class="eyebrow">НАМЕРИ СВОЯТА ТЕМА</p>
+                  <a href="/byagane/">
+                    <>
+                      <Icon name="run" size={27} />
+                      <span>
+                        <>
+                          <strong>Бягане</strong>
+                          <small>От тренировката до финала</small>
+                        </>
+                      </span>
+                      <Icon name="diagonal" size={19} />
+                    </>
+                  </a>
+                  <a href="/tehnologii/">
+                    <>
+                      <Icon name="code" size={27} />
+                      <span>
+                        <>
+                          <strong>Технологии</strong>
+                          <small>Идеи, инструменти, приложения</small>
+                        </>
+                      </span>
+                      <Icon name="diagonal" size={19} />
+                    </>
+                  </a>
+                  <a href="/polezno/">
+                    <>
+                      <Icon name="book" size={27} />
+                      <span>
+                        <>
+                          <strong>Полезно</strong>
+                          <small>Открития за всеки ден</small>
+                        </>
+                      </span>
+                      <Icon name="diagonal" size={19} />
+                    </>
+                  </a>
+                  <div class="aside-note">
+                    <>
+                      <span>01 / НОВО НАЧАЛО</span>
+                      <p>
+                        Едно място за всичко,
+                        <br />
+                        което ме движи напред.
+                      </p>
+                    </>
+                  </div>
+                </>
+              </aside>
+            </>
+          </div>
+        ) : (
+          <div class="empty-state">
+            <>
+              <h3>Дневникът започва оттук.</h3>
+              <p>Първите публикации предстоят.</p>
+            </>
+          </div>
+        )
+      }
+    </section>
+    <Projects />
+    <section class="section bottom-features">
+      <article class="about-preview">
+        <span class="eyebrow">ЧОВЕКЪТ ЗАД САЙТА</span><h2>
+          Здравей, аз съм Дидо<span>.</span>
+        </h2><p>{site.aboutIntro}</p><a class="text-link" href="/za-men/"
+          >Няколко думи за мен <Icon name="arrow" size={19} /></a>
+      </article>
+      <a class="finance-preview" href="/finansi/"
+        ><div class="finance-top">
+          <span class="eyebrow">ОЩЕ ЕДНА ПЕРСПЕКТИВА</span><Icon
+            name="diagonal"
+            size={23}
+          />
+        </div><span class="bitcoin-symbol" aria-hidden="true">₿</span><h2>
+          Финанси & Bitcoin
+        </h2><p>Нови теми. По-широк хоризонт.</p><span class="text-link"
+          >Към раздела <Icon name="arrow" size={19} /></span
+        ></a
+      >
+    </section>
+  </div>
+</Layout>

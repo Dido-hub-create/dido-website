@@ -1,0 +1,37 @@
+---
+import Icon from "./Icon.astro";
+import site from "../data/site.json";
+const records = [
+  { label: "1 КМ", time: site.records?.oneKm?.trim(), half: false },
+  { label: "5 КМ", time: site.records?.fiveKm?.trim(), half: false },
+  { label: "10 КМ", time: site.records?.tenKm?.trim(), half: false },
+  {
+    label: "ПОЛУМАРАТОН",
+    time: site.records?.halfMarathon?.trim(),
+    half: true,
+  },
+];
+---
+
+<section class="records" aria-labelledby="records-title" id="lichni-rekordi">
+  <div class="records-title">
+    <Icon name="trophy" size={23} /><h2 id="records-title">
+      Лични<br />рекорди
+    </h2><span>Всяка крачка е напред.</span>
+  </div>
+  {
+    records.map((record) => (
+      <div class:list={["record", { "record-highlight": record.half }]}>
+        <>
+          <span>{record.label}</span>
+          <strong>{record.time || "—"}</strong>
+          <small>
+            {record.time
+              ? `${record.half ? "21,1 км · " : ""}Личен рекорд`
+              : "Предстои"}
+          </small>
+        </>
+      </div>
+    ))
+  }
+</section>

@@ -1,0 +1,43 @@
+---
+import { projects } from "../lib/content-utils.mjs";
+import Icon from "./Icon.astro";
+---
+
+<section
+  class="section projects-section"
+  id="moite-prilozheniya"
+  aria-labelledby="projects-title"
+>
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">СЪЗДАДЕНО С ЛЮБОПИТСТВО</p><h2 id="projects-title">
+        Моите приложения<span>.</span>
+      </h2>
+    </div><span class="section-note">Малки идеи. Практични решения.</span>
+  </div>
+  <div class="projects-grid">
+    {
+      projects.map((project, index) => (
+        <article class="project-card">
+          <>
+            <div class="project-top">
+              <>
+                <Icon name={project.icon} size={29} />
+                <span class="project-number">0{index + 1}</span>
+              </>
+            </div>
+            <span class="status">
+              <span />
+              Планирано
+            </span>
+            <h3>{project.title}</h3>
+            <p>{project.text}</p>
+          </>
+        </article>
+      ))
+    }
+  </div>
+  <p class="projects-note">
+    Идеи в развитие — ще споделя повече, когато са готови.
+  </p>
+</section>

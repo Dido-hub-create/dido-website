@@ -1,0 +1,41 @@
+---
+import type { Post } from "../lib/posts";
+import { formatDate } from "../lib/posts";
+import Icon from "./Icon.astro";
+interface Props {
+  post: Post;
+}
+const { post } = Astro.props;
+---
+
+<article class="post-card">
+  <a class="post-image" href={post.href} tabindex="-1" aria-hidden="true"
+    >{
+      post.cover ? (
+        <img src={post.cover} alt="" loading="lazy" width="600" height="450" />
+      ) : (
+        <div class="post-placeholder">
+          <span>
+            DIDO<span>.</span>
+          </span>
+        </div>
+      )
+    }<span class="image-category">{post.category.label}</span></a
+  >
+  <div class="post-card-body">
+    <div class="post-meta">
+      <span>ЛИЧЕН ДНЕВНИК</span>{
+        post.data.date && (
+          <time datetime={post.data.date.toISOString()}>
+            {formatDate(post.data.date)}
+          </time>
+        )
+      }
+    </div><h3><a href={post.href}>{post.data.title}</a></h3><p>
+      {post.summary}
+    </p><a class="text-link" href={post.href}
+      >Прочети публикацията <Icon name="arrow" size={19} /><span class="sr-only"
+        >: {post.data.title}</span
+      ></a>
+  </div>
+</article>
