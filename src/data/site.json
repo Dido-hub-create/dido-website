@@ -1,7 +1,6 @@
 {
   "siteName": "DIDO",
   "siteSubtitle": "Личен сайт",
-  "logoImage": "",
   "navigation": {
     "home": "Начало",
     "running": "Бягане",
@@ -10,29 +9,12 @@
     "about": "За мен",
     "finance": "Финанси"
   },
-  "homeIntro": "Това е моят личен сайт — място, в което споделям опит, идеи и теми, които ме вълнуват: бягане, технологии, полезни неща и лични теми.",
-  "heroImage": "/images/dido-mountain-hero.webp",
-  "aboutIntro": "Кой съм аз, какви са интересите ми и защо създадох този сайт.",
-  "biography": "",
-  "portrait": "",
-  "email": "",
-  "contactUrl": "",
-  "records": {
-    "oneKm": "",
-    "fiveKm": "",
-    "tenKm": "",
-    "halfMarathon": "2:07:14"
-  },
   "recordsImage": "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg",
   "financeImage": "/images/dido-bitcoin.svg",
   "aboutImage": "/images/dido-mountain-hero.webp",
-  "heroFrame": {
-    "fit": "cover",
-    "x": 50,
-    "y": 62,
-    "mobileFit": "cover",
-    "mobileX": 83,
-    "mobileY": 50
+  "aboutIntro": "Кой съм аз, какви са интересите ми и защо създадох този сайт.",
+  "records": {
+    "halfMarathon": "2:07:14"
   },
   "recordsFrame": {
     "fit": "contain",
@@ -54,9 +36,7 @@
     "x": 50,
     "y": 35
   },
-  "youtubeChannel": "",
-  "publicSiteUrl": "",
-  "socialImage": "",
+  "youtubeChannel": "https://www.youtube.com/@Dido_RunForFun",
   "home": {
     "title": "Добре дошли",
     "intro": "Това е моят личен сайт — място, в което споделям опит, идеи и теми, които ме вълнуват: бягане, технологии, полезни неща и лични теми.",
@@ -69,13 +49,8 @@
       "mobileX": 83,
       "mobileY": 50
     },
-    "race": "",
-    "raceCaption": "",
-    "featuredPost": "",
-    "selectedPosts": [],
     "runningDescription": "Тук ще споделям състезания, тренировки и полезно за бегачи.",
     "technologyDescription": "Приложения, изкуствен интелект и технологични открития — скоро тук.",
-    "financeDescription": "Лични размисли, наблюдения и интерес към Bitcoin — тема, която следя и проучвам.",
-    "aboutDescription": ""
+    "financeDescription": "Лични размисли, наблюдения и интерес към Bitcoin — тема, която следя и проучвам."
   }
 }
