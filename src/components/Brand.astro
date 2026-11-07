@@ -1,35 +1,82 @@
 ---
-import { siteIdentity } from "../lib/site.mjs";
-import { usableImage } from "../lib/posts";
+import { site, siteIdentity } from "../lib/site.mjs";
+import { brandPresentation } from "../lib/branding.mjs";
 interface Props {
   footer?: boolean;
 }
 const { footer = false } = Astro.props;
 const identity = siteIdentity();
-const logo = usableImage(identity.logo);
+const brand = brandPresentation(site);
 ---
 
 <a
-  class="brand magazine-brand"
+  class:list={["brand", "magazine-brand", { "is-image": !!brand.src, "brand-footer": footer }]}
   href="/"
-  aria-label={`${identity.name} — ${identity.navigation[0][1]}`}
->{logo ? (
-  <img class="brand-logo" src={logo} alt={identity.name} />
-) : (
-  <>{identity.name === "DIDO" ? "Dido" : identity.name}<svg viewBox="0 0 110 13" aria-hidden="true">
+  aria-label={`${brand.alt} — ${identity.navigation[0][1]}`}
+  style={`--logo-desktop:${brand.desktopWidth}px;--logo-mobile:${brand.mobileWidth}px`}
+>
+  {brand.src && <img class="brand-logo" data-brand-logo src={brand.src} alt={brand.alt} width="2030" height="620" />}
+  <span class="brand-wordmark" data-brand-fallback hidden={!!brand.src}>
+    {identity.name === "DIDO" ? "Dido" : identity.name}<svg viewBox="0 0 110 13" aria-hidden="true">
     <path d="M3 10Q49-4 106 8 50 3 3 12Z" fill="currentColor"></path>
-  </svg></>
-)}</a>
+    </svg>
+  </span>
+</a>
 <span class:list={["brand-caption", { "footer-caption": footer }]}
   >{identity.subtitle}</span
 >
 
 <style>
+  .brand.magazine-brand {
+    display: flex;
+    align-items: center;
+    height: 49px;
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
+  .brand.is-image { width: var(--logo-desktop); }
+  .brand.brand-footer { height: 42px; }
+  .brand.brand-footer.is-image { width: min(var(--logo-desktop), 112px); }
   .brand-logo {
     display: block;
-    width: auto;
-    max-width: 140px;
-    height: 1.3em;
+    width: 100%;
+    max-width: none;
+    height: 100%;
     object-fit: contain;
+    object-position: left center;
+  }
+  .brand-wordmark { display: block; position: relative; padding-bottom: 10px; color: var(--text); }
+  .brand-wordmark > svg {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 11px;
+    color: var(--accent);
+  }
+  @media (min-width: 961px) and (max-width: 1200px) {
+    .brand.is-image { width: min(var(--logo-desktop), 128px); }
+  }
+  @media (max-width: 960px) {
+    .brand.is-image { width: var(--logo-mobile); }
+    .brand.brand-footer.is-image { width: min(var(--logo-mobile), 112px); }
+  }
+  @media (max-width: 640px) {
+    .brand.magazine-brand { height: 44px; }
+    .brand.brand-footer { height: 42px; }
   }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLImageElement>("[data-brand-logo]").forEach((image) => {
+    function fallback() {
+      const link = image.closest(".brand");
+      const wordmark = link?.querySelector<HTMLElement>("[data-brand-fallback]");
+      if (wordmark) wordmark.hidden = false;
+      link?.classList.remove("is-image");
+      image.remove();
+    }
+    image.addEventListener("error", fallback, { once: true });
+    if (image.complete && image.naturalWidth === 0) fallback();
+  });
+</script>
