@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 import { rmSync } from "node:fs";
 import { resolve } from "node:path";
-import { assertNoPublicGpx, assertGeneratedGpx, writeGpxHeaders } from "./src/lib/running.mjs";
+import { assertNoPublicGpx, assertGeneratedGpx, assertGeneratedAnalysis, writeGpxHeaders } from "./src/lib/running.mjs";
 import { clearSocialImages } from "./src/lib/social.mjs";
 export default defineConfig({
   // Test projects share node_modules, but must never share content data stores.
@@ -19,6 +19,7 @@ export default defineConfig({
         },
         "astro:build:done": () => {
           assertGeneratedGpx();
+          assertGeneratedAnalysis();
           writeGpxHeaders();
         },
       },

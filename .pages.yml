@@ -415,6 +415,30 @@ content:
         label: Височинните данни са от проверен надежден източник
         type: boolean
         default: false
+      - name: lapCount
+        label: Брой обиколки за анализа и стратегията
+        type: number
+        default: 1
+        options:
+          min: 1
+          max: 10
+          step: 1
+        description: "Цяло число 1–10. GPX описва една обиколка. Общата дистанция е измерената дистанция × обиколките, без GPS преход между тях. За официалната обиколка на Плевен избери 2; не за вече записан пълен полумаратон."
+      - name: allowElevationAnalysis
+        label: Разрешавам публичен височинен анализ
+        type: boolean
+        default: false
+        description: "Публикува обработените координати И височини само при публикуван, одобрен маршрут с разрешена карта и проверени височини. Не включвай за личен запис."
+      - name: includeInComparison
+        label: Включване в сравнението
+        type: boolean
+        default: true
+        description: "Използва само вече разрешени публични карти; без надежден разрешен профил показва само дистанцията и предупреждение."
+      - name: includeInCalculator
+        label: Включване в калкулатора за темпо
+        type: boolean
+        default: true
+        description: "Без надежден разрешен профил е налично само равномерно темпо."
       - name: cover
         label: Основна снимка
         type: image

@@ -1,0 +1,19 @@
+---
+interface Props { slotName?: string; }
+const { slotName = "primary" } = Astro.props;
+---
+<section class="profile-card" data-profile={slotName} aria-label="Височинен анализ">
+  <h2 data-profile-title>Височинен профил</h2>
+  <p data-profile-notice role="status">За интерактивния анализ е необходим JavaScript.</p>
+  <dl class="analysis-stats" data-profile-stats></dl>
+  <div data-profile-details hidden>
+    <svg data-profile-chart viewBox="0 0 800 250" role="img" aria-label="Височина в метри спрямо изминати километри"></svg>
+    <label>Позиция по трасето <input data-profile-position type="range" min="0" max="1" step="10" value="0" aria-label="Позиция по трасето в метри" /></label>
+    <p data-profile-readout class="profile-readout" aria-live="polite"></p>
+    <h3>Значими изкачвания и спускания</h3>
+    <p data-hills-summary></p>
+    <div class="analysis-table" tabindex="0" role="region" aria-label="Таблица с наклони — превърти хоризонтално">
+      <table><thead><tr><th>Участък</th><th>От км</th><th>До км</th><th>Дължина</th><th>Денивелация</th><th>Среден наклон</th><th>Макс. локален</th></tr></thead><tbody data-profile-hills></tbody></table>
+    </div>
+  </div>
+</section>

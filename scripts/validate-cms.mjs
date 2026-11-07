@@ -88,6 +88,11 @@ export function validateCms(source) {
   const gpx = config.media.find((entry) => entry.name === "gpx");
   const route = config.content.find((entry) => entry.name === "routes");
   const field = route?.fields.find((entry) => entry.name === "gpx");
+  for (const [name, type, value] of [["lapCount", "number", 1], ["allowElevationAnalysis", "boolean", false], ["elevationTrusted", "boolean", false], ["includeInComparison", "boolean", true], ["includeInCalculator", "boolean", true]]) {
+    const setting = route?.fields.find((entry) => entry.name === name);
+    if (setting?.type !== type || setting.default !== value || setting.required)
+      throw new Error("Липсва безопасна незадължителна настройка за GPX анализ: " + name);
+  }
   if (
     gpx?.input !== "src/data/gpx" ||
     gpx?.output !== "/gpx-source" ||
