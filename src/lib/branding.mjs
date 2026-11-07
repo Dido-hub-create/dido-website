@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { normalizeSiteSettings } from "./site-settings.mjs";
 import { normalizeImage } from "./content-utils.mjs";
 
-export const DEFAULT_LOGO = "/branding/logo-dido-runner.svg";
+export const DEFAULT_LOGO = "/branding/logo-dido-runner-b.svg";
 
 /** Resolve the bundled mark or the existing CMS override without changing data. */
 export function brandPresentation(settings, root = process.cwd()) {

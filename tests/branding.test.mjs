@@ -79,7 +79,7 @@ test("CMS offers the five simple branding controls without requiring them in JSO
   assert.equal(fields.find((field) => field.name === "headerLogoWidthMobile").options.max, 128);
 });
 
-test("runner alternatives preserve the exact Dido outlines and canvas without selecting a default", () => {
+test("runner alternatives preserve the exact Dido outlines and canvas with approved B as the default", () => {
   const original = readFileSync("public/branding/logo-dido-runner.svg", "utf8");
   const whitePaths = (svg) => svg.match(/<g fill="#f5f7fa">[\s\S]*?<\/g>/)?.[0];
   assert.ok(whitePaths(original));
@@ -91,5 +91,6 @@ test("runner alternatives preserve the exact Dido outlines and canvas without se
     assert.ok(svg.includes(`data-runner-scale="${scale}"`));
     assert.doesNotMatch(svg, /<(?:script|image|foreignObject)\b|\bon(?:load|error)=|\bhref=/);
   }
+  assert.equal(DEFAULT_LOGO, "/branding/logo-dido-runner-b.svg");
   assert.equal(brandPresentation({}).src, DEFAULT_LOGO);
 });

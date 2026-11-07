@@ -1,55 +1,27 @@
-# Dido с бегач — варианти за одобрение
+# Dido — одобрен вариант Б
 
-**Няма избран окончателен вариант. Текущото активно лого е запазено.**
+**Вариант Б е одобрен от собственика и вече е основното графично лого в хедъра и футъра на feat/dido-v0-6-logo. PR #3 не е сливан; production main не е променян.**
 
-Добавени са два SVG варианта със същите векторни контури на надписа и същия `viewBox` 2030 × 620. Хедърът използва същите 128 px desktop / 108 px mobile ширини.
+![Одобреният вариант Б върху тъмния фон](branding-preview/logo.png)
 
-| | Вариант А — балансиран | Вариант Б — по-изразителен |
-| --- | --- | --- |
-| Бегач | +38%, равномерно увеличение | Около +75% височина, по-плътни контури |
-| Линия | Плавна връзка към фигурата | По-силно изразена, с повече движение |
-| Телефон, 390 px | [Реален PNG](../public/branding/previews/header-a-390.png) | [Реален PNG](../public/branding/previews/header-b-390.png) |
-| Desktop, 1440 px | [Реален PNG](../public/branding/previews/header-a-1440.png) | [Реален PNG](../public/branding/previews/header-b-1440.png) |
-| SVG | [Вариант А](../public/branding/logo-dido-runner-a.svg) | [Вариант Б](../public/branding/logo-dido-runner-b.svg) |
+[Векторен SVG — вариант Б](../public/branding/logo-dido-runner-b.svg) · [CMS настройки и fallback](DIDO-v0.6-logo.md)
 
-### А — телефон, реален хедър 390 × 73 px
+## Desktop — реален хедър, 1440 px
 
-![Вариант А в мобилния хедър](../public/branding/previews/header-a-390.png)
+![Активният вариант Б при 1440 px](branding-preview/header-desktop.png)
 
-### Б — телефон, реален хедър 390 × 73 px
+## Телефон — реален хедър, 320 и 390 px
 
-![Вариант Б в мобилния хедър](../public/branding/previews/header-b-390.png)
+![Активният вариант Б при 320 px](branding-preview/header-320.png)
 
-Пълното сравнение, с native SVG изглед и screenshots за 320/390/768/1440 px, е на **`/branding/variants.html`** в новия branch preview. Screenshots са от действителния изграден сайт; чрез локален browser response override е сменен само SVG файлът. CSS, размерът на логото и менюто не са променяни. Проверена е пълна идентичност на позициите и размерите на хедъра за текущото лого, А и Б; няма overflow или page errors.
+![Активният вариант Б при 390 px](branding-preview/header-390.png)
 
-След избора от собственика SVG може да се качи през съществуващото поле **Собствено лого** в Pages CMS. Не е добавен автоматичен избор или промяна в `site.json`, favicon или производствения `main`.
+Снимките са от реално заредената страница след избора, без подмяна на SVG от браузърния тест. И хедърът, и футърът зареждат logo-dido-runner-b.svg. Потвърдени са същите височини на хедъра 73/73/77/79 px при 320/390/768/1440 px и същите ширини на логото 108/108/108/128 px. Няма хоризонтален overflow или JavaScript page errors; менюто, кликът към началната и runtime fallback са проверени.
 
----
+При празно **Собствено лого** Pages CMS използва вариант Б. Собствено изображение продължава да има предимство; изключване на графичното лого или липсващ/незареден файл връща текста. Настройките, site.json, размерите и CSS са запазени.
 
-## Предходният вариант — запазен като текущ
+## Favicon — непроменен
 
-Това е визуален преглед на новия branch, с реални Chromium screenshots. Не е production deployment; публикуваният сайт не е променян.
+![Favicon при 16/32/64 px на светъл и тъмен фон](branding-preview/favicon.png)
 
-## Новият знак
-
-![Новото Dido лого върху тъмния фон](branding-preview/logo.png)
-
-[Векторен SVG файл](../public/branding/logo-dido-runner.svg) · [Настройки и fallback](DIDO-v0.6-logo.md)
-
-## Desktop — 1440 px
-
-![Хедър при 1440 px](branding-preview/header-desktop.png)
-
-## Телефон — 320 и 390 px
-
-![Хедър при 320 px](branding-preview/header-320.png)
-
-![Хедър при 390 px](branding-preview/header-390.png)
-
-## Favicon — светъл и тъмен фон, 16/32/64 px
-
-![Favicon на светла и тъмна тема](branding-preview/favicon.png)
-
-Проверен е и таблетен изглед 768 px. Хедърът запазва височината си; няма overflow или промяна на размера на менюто. Изключено/незаредено изображение връща досегашното текстово Dido с линия.
-
-За интерактивен преглед GitHub Actions запазва пълния build в artifact **dido-static-preview**. Ако Cloudflare предложи автоматичен branch preview към PR, използвай само този адрес — production `main` не се публикува от тази задача.
+Предходните SVG предложения и сравнението А/Б са запазени само за справка на **/branding/variants.html**. Вариант А не е активен. Пълният build се запазва от GitHub Actions като artifact **dido-static-preview**, а съществуващата Cloudflare интеграция обновява само branch preview. Merge и production публикуване остават за отделно окончателно одобрение.
