@@ -161,6 +161,10 @@ test(
       });
       writeRoute("MarathonKaylaka21km.gpx", { publishMap: true, allowDownload: true });
       writeRoute("retired", { publishMap: true, allowDownload: true });
+      mkdirSync(join(fixture,"src/data/route-geometry"),{recursive:true});
+      writeFileSync(join(fixture,"src/data/route-geometry/processed.json"),JSON.stringify({segments:[points]}));
+      writeRoute("geometry-only",{gpx:"",geometry:"/route-geometry/processed.json",publishMap:true,allowDownload:false,allowElevationAnalysis:true,elevationTrusted:true});
+      writeRoute("geometry-unapproved",{gpx:"",geometry:"/route-geometry/processed.json",publishMap:true,allowElevationAnalysis:true,elevationTrusted:true,publicApproved:false});
       writeFileSync(join(fixture, "src/data/gpx/no-height.gpx"), source.replace(/<ele>[^<]+<\/ele>/g, ""));
       writeFileSync(join(fixture, "src/data/gpx/gap.gpx"), source.replace('lon="0.009999"', 'lon="0.099999"').replace(/lon="([^"]+)"/g, (_, lon) => `lon="${Number(lon) + 1}"`));
       writeRoute("no-height", { publishMap: true, allowElevationAnalysis: true, elevationTrusted: true, gpx: "/gpx-source/no-height.gpx" });
@@ -230,6 +234,12 @@ test(
         path = (id, name) => join(output, "byagane/marshruti", id, name),
         read = (id, name) => readFileSync(path(id, name), "utf8");
       assert.ok(existsSync(path("allowed", "index.html")));
+      assert.ok(existsSync(path("geometry-only","map.json")));assert.ok(existsSync(path("geometry-only","analysis.json")));
+      assert.ok(!existsSync(path("geometry-only","trace.gpx")));
+      assert.ok(!existsSync(join(output,"byagane/marshruti/geometry-unapproved")));
+      assert.ok(!existsSync(join(output,"route-geometry/processed.json")));
+      assert.ok(!read("geometry-only","index.html").includes('href="trace.gpx"'));
+      assert.doesNotMatch(readFileSync(join(output,"_headers"),"utf8"),/geometry-only/);
       const map = JSON.parse(read("allowed", "map.json")),
         download = read("allowed", "trace.gpx");
       assert.deepEqual(publicMapData(parseGpx(download)), map);
@@ -335,6 +345,7 @@ test(
       assert.ok(loaded.distanceM > 0);
       assert.equal(loaded.ascentM, 20);
       writeRoute("allowed", { publishMap: false, allowDownload: false });
+      writeRoute("geometry-only",{gpx:"",geometry:"/route-geometry/processed.json",publishMap:false,allowDownload:false,allowElevationAnalysis:true,elevationTrusted:true});
       renameSync(join(fixture, "src/content/routes/retired.json"), join(fixture, "src/content/routes/retired.gpx.json"));
       build();
       assert.ok(!existsSync(path("retired", "index.html")));
@@ -342,6 +353,7 @@ test(
       assert.ok(!existsSync(path("allowed", "trace.gpx")));
       assert.ok(!existsSync(path("allowed", "map.json")));
       assert.ok(!existsSync(path("allowed", "analysis.json")));
+      assert.ok(!existsSync(path("geometry-only","map.json")));assert.ok(!existsSync(path("geometry-only","analysis.json")));
       assert.ok(!read("allowed", "index.html").includes("trace.gpx"));
       assert.doesNotMatch(readFileSync(join(output, "_headers"), "utf8"), /\/allowed\//);
       // A bad public upload must fail the build and remove any previously built output.

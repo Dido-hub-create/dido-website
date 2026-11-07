@@ -1,0 +1,18 @@
+{
+  "title": "Плевенски полумаратон — май 2026",
+  "description": "Обработен личен състезателен запис от 17 май 2026 г. Пълният полумаратон включва двете изминати обиколки; геометрията се използва само веднъж. Това не е официален GPX на организатора. GPS дистанцията и денивелацията са ориентировъчни.",
+  "location": "Плевен",
+  "surface": "road",
+  "geometry": "/route-geometry/pleven-half-2026.geometry.json",
+  "status": "published",
+  "publicApproved": true,
+  "publishMap": true,
+  "allowDownload": false,
+  "allowElevationAnalysis": true,
+  "elevationTrusted": true,
+  "includeInComparison": true,
+  "includeInCalculator": true,
+  "lapCount": 1,
+  "trimStartM": 0,
+  "trimEndM": 0
+}

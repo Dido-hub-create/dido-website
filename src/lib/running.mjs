@@ -15,6 +15,7 @@ import {
   serializeGpx,
 } from "./gpx.mjs";
 import { readEntries, validEntryId } from "./entry-files.mjs";
+import { parseRouteGeometry } from "./route-geometry.mjs";
 import { gpxFilename } from "./download-name.mjs";
 import { elevationQuality, validLapCount } from "./route-analysis.mjs";
 
@@ -79,6 +80,17 @@ export function resolveGpxSource(root, value) {
     throw new Error("Изходният GPX файл липсва или не може да се използва.");
   return file;
 }
+export function resolveGeometrySource(root, value) {
+  let path;
+  try { path = decodeURIComponent(text(value)); } catch { throw new Error("Невалиден път към обработена геометрия."); }
+  if (!path.startsWith("/route-geometry/") || path.includes("\\") || path.includes("\0")) throw new Error("Невалиден път към обработена геометрия.");
+  const filename = path.slice("/route-geometry/".length);
+  if (!filename || filename.split("/").some((part) => !part || part === "." || part === "..") || extname(filename).toLowerCase() !== ".json") throw new Error("Невалиден път към обработена геометрия.");
+  const directory = resolve(root, "src/data/route-geometry"), file = resolve(directory, filename);
+  if (relative(directory, file).startsWith("..") || !existsSync(file) || lstatSync(file).isSymbolicLink() || realpathSync(file) !== file || lstatSync(file).size > 5 * 1024 * 1024)
+    throw new Error("Обработената геометрия липсва или не може да се използва.");
+  return file;
+}
 export function assertNoPublicGpx(root = process.cwd()) {
   function walk(directory) {
     if (!existsSync(directory)) return;
@@ -112,16 +124,19 @@ export function loadRoutes(root = process.cwd()) {
       let segments = [],
         error;
       try {
-        const file = resolveGpxSource(root, data.gpx);
+        if (text(data.gpx) && text(data.geometry)) throw new Error("Изберете само един източник: GPX или обработена геометрия.");
+        const source = text(data.geometry)
+          ? parseRouteGeometry(readFileSync(resolveGeometrySource(root, data.geometry), "utf8"))
+          : parseGpx(readFileSync(resolveGpxSource(root, data.gpx), "utf8"));
         segments = trimGpx(
-          parseGpx(readFileSync(file, "utf8")),
+          source,
           data.trimStartM ?? 0,
           data.trimEndM ?? 0,
         );
       } catch (failure) {
         const message = failure instanceof Error ? failure.message : "";
         error =
-          /^(Празен или прекалено голям|Невалиден или неподдържан|Липсва GPX документ|Твърде много GPS точки|Невалидни GPS координати|GPX файлът няма използваемо|Невалидно разстояние за премахване|Премахването на началото|Невалиден път към GPX|Изходният GPX трябва|Изходният GPX файл липсва)/.test(
+          /^(Празен или прекалено голям|Невалиден или неподдържан|Липсва GPX документ|Твърде много GPS точки|Невалидни GPS координати|GPX файлът няма използваемо|Невалидно разстояние за премахване|Премахването на началото|Невалиден път към GPX|Изходният GPX трябва|Изходният GPX файл липсва|Невалиден път към обработена геометрия|Невалидна обработена геометрия|Обработената геометрия липсва|Изберете само един източник)/.test(
             message,
           )
             ? message
