@@ -24,8 +24,23 @@ test('cabinet online and standalone document: CRUD, reload, topics, confirmed JS
  for(const width of [320,390,768,1440]){
   await show.setViewportSize({width,height:960});await show.goto(process.env.DIDO_BROWSER_URL+'/tehnologii/');
   assert.equal(await show.locator('.cabinet-action').count(),2);assert.equal(await show.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-  await show.locator('.cabinet').screenshot({path:`work/cabinet/presentation-${width}.png`});
+  assert.equal(await show.locator('.app-gallery').count(),1);assert.equal(await show.locator('.app-gallery .app-card').count(),5);
+  assert.deepEqual(await show.locator('.app-gallery h3').allTextContents(),['Дигитални дъски','Финансов калкулатор','Личен органайзер',JSON.parse(readFileSync('src/data/cabinet.json','utf8')).title,'Фитнес тракери']);
+  assert.deepEqual(await show.locator('.app-gallery .app-status').allTextContents(),['В разработка','Планирано','Планирано','Достъпно','Планирано']);
+  assert.equal(await show.locator('.app-gallery a').count(),2);
+  assert.ok((await show.locator('.cabinet .app-copy').textContent()).includes(JSON.parse(readFileSync('src/data/cabinet.json','utf8')).description));
+  await show.locator('.app-gallery img').evaluateAll(images=>Promise.all(images.map(img=>img.decode())));
+  assert.ok(await show.locator('.app-gallery .app-art').evaluateAll(items=>items.every(el=>el.clientHeight<=170)));
+  await show.locator('.app-gallery').screenshot({path:`work/cabinet/gallery-${width}.png`});
  }
+ await show.locator('.cabinet-action.online').hover();
+ assert.equal(await show.locator('.online .boot').evaluate(el=>getComputedStyle(el).animationName),'none');
+ await show.emulateMedia({reducedMotion:'no-preference'});
+ await show.locator('.cabinet-action.online').hover();
+ assert.notEqual(await show.locator('.online .boot').evaluate(el=>getComputedStyle(el).animationName),'none');
+ await show.locator('.cabinet-action.download').hover();
+ assert.notEqual(await show.locator('.download .arrow').evaluate(el=>getComputedStyle(el).animationName),'none');
+ assert.ok(await show.locator('.cabinet-action').evaluateAll(links=>links.every(el=>el.getBoundingClientRect().height>=44)));
  const getting=show.waitForEvent('download');await show.locator('.cabinet-action.download').click();const downloaded=await getting;
  assert.equal(readFileSync(await downloaded.path(),'utf8'),readFileSync('public/downloads/digitalen-kabinet.html','utf8'));
  await show.locator('.cabinet-action.online').focus();await show.keyboard.press('Enter');await show.waitForURL('**/tehnologii/digitalen-kabinet/');

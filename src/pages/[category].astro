@@ -3,7 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import Icon from "../components/Icon.astro";
 import Records from "../components/Records.astro";
 import RunningDashboard from "../components/RunningDashboard.astro";
-import Cabinet from "../components/Cabinet.astro";
 import Projects from "../components/Projects.astro";
 import PostCard from "../components/PostCard.astro";
 import { categories } from "../lib/content-utils.mjs";
@@ -44,12 +43,12 @@ const posts = (await allPosts()).filter(
         </>
       )
     }
-    {category.slug === "tehnologii" && <><Cabinet /><Projects /></>}
+    {category.slug === "tehnologii" && <Projects />}
     <section class="section" aria-labelledby="category-posts-title">
       <div class="section-heading">
         <div>
           <p class="eyebrow">ЛИЧНИЯТ ДНЕВНИК</p><h2 id="category-posts-title">
-            Публикации<span>.</span>
+            {category.slug === "tehnologii" ? "Публикации и експерименти" : "Публикации"}<span>.</span>
           </h2>
         </div><span class="section-note"
           >{posts.length}
