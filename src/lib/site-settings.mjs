@@ -8,6 +8,9 @@ const text = (value, fallback = "") => typeof value === "string" ? value : fallb
 /** @param {unknown} value */
 const frame = (value) => value !== null && typeof value === "object" && !Array.isArray(value)
   ? normalizeFrame(value) : undefined;
+/** @param {unknown} value @param {number} fallback @param {number} min @param {number} max */
+const logoWidth = (value, fallback, min, max) => typeof value === "number" && Number.isFinite(value)
+  ? Math.max(min, Math.min(max, Math.round(value))) : fallback;
 
 /**
  * Pages CMS omits empty optional fields, including nested ones. Keep a stable
@@ -19,9 +22,14 @@ export function normalizeSiteSettings(value) {
   const input = object(value), records = object(input.records);
   const navigation = object(input.navigation), home = object(input.home);
   return {
-    siteName: text(input.siteName).trim() || "DIDO",
+    siteName: text(input.siteTitle).trim() || text(input.siteName).trim() || "DIDO",
+    siteTitle: text(input.siteTitle),
     siteSubtitle: text(input.siteSubtitle).trim() || "Личен сайт",
     logoImage: text(input.logoImage),
+    headerLogoAlt: text(input.headerLogoAlt),
+    useImageLogo: typeof input.useImageLogo === "boolean" ? input.useImageLogo : true,
+    headerLogoWidthDesktop: logoWidth(input.headerLogoWidthDesktop, 128, 96, 160),
+    headerLogoWidthMobile: logoWidth(input.headerLogoWidthMobile, 108, 88, 128),
     navigation: {
       home: text(navigation.home, "Начало"),
       running: text(navigation.running, "Бягане"),

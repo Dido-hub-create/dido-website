@@ -126,8 +126,34 @@ content:
         label: Подзаглавие
         type: string
         default: Личен сайт
+      - name: siteTitle
+        label: Заглавие на сайта (по желание)
+        type: string
+        description: Празно = използва „Име на сайта“. Попълненото заглавие има предимство.
+      - name: headerLogoAlt
+        label: Алтернативен текст на логото (по желание)
+        type: string
+        description: Празно = името/заглавието на сайта. Използва се от екранни четци.
+      - name: useImageLogo
+        label: Използвай графичното лого
+        type: boolean
+        default: true
+      - name: headerLogoWidthDesktop
+        label: Ширина на логото — компютър (px)
+        type: number
+        default: 128
+        options:
+          min: 96
+          max: 160
+      - name: headerLogoWidthMobile
+        label: Ширина на логото — телефон/таблет (px)
+        type: number
+        default: 108
+        options:
+          min: 88
+          max: 128
       - name: logoImage
-        label: Лого като изображение (празно = текстово лого)
+        label: Собствено лого (празно = вграденото Dido с бегач)
         type: image
         options:
           media: images

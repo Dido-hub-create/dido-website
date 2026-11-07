@@ -7,7 +7,7 @@ export const site = normalizeSiteSettings(rawSite);
 const label = (value, fallback) => typeof value === "string" && value.trim() ? value.trim() : fallback;
 export function siteIdentity(settings = site) {
   return {
-    name: label(settings.siteName, "DIDO"),
+    name: label(settings.siteTitle, label(settings.siteName, "DIDO")),
     subtitle: label(settings.siteSubtitle, "Личен сайт"),
     logo: normalizeImage(typeof settings.logoImage === "string" ? settings.logoImage : ""),
     navigation: [

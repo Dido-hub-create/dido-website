@@ -58,7 +58,9 @@ const socialUrl = social ? absolutePublicUrl(social.path, origin) : undefined;
       <meta name="twitter:image" content={socialUrl} />
       <meta name="twitter:image:alt" content={pageTitle} />
     </>}
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.svg?v=runner-1" type="image/svg+xml" sizes="any" />
+    <link rel="icon" href="/branding/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/branding/apple-touch-icon.png" sizes="180x180" />
     <title>{pageTitle}</title>
   </head>
   <body>
