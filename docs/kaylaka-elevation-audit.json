@@ -1,0 +1,55 @@
+{
+  "sha256": "c91dd2e46c4829c5ce8be9211227c607ae1754d0b9caee19c8ffca62fceefee3",
+  "pointCount": 6336,
+  "segmentCount": 1,
+  "distanceM": 21122.30522285294,
+  "heightCount": 6336,
+  "complete": true,
+  "quality": "ready",
+  "minHeightM": 127.8,
+  "maxHeightM": 174.4,
+  "uniqueHeights": 224,
+  "zeroLengthEdges": 3,
+  "zeroLengthHeightChanges": 0,
+  "medianSpacingM": 3.2609940831875908,
+  "maxSpacingM": 5.205524436014468,
+  "maxHeightJumpM": 0.5999999999999943,
+  "profiles": [
+    {
+      "windowM": 25,
+      "minM": 127.93993895501234,
+      "maxM": 174.40000000001862,
+      "ascentM": 171.5184410615856,
+      "descentM": 171.5184410615517,
+      "maxLocalGrade": 0.08924646290950591,
+      "hills": 0
+    },
+    {
+      "windowM": 50,
+      "minM": 128.13101303950066,
+      "maxM": 174.366209106911,
+      "ascentM": 150.54162079413913,
+      "descentM": 150.54162079412166,
+      "maxLocalGrade": 0.07895633905660589,
+      "hills": 0
+    },
+    {
+      "windowM": 100,
+      "minM": 128.4480283657182,
+      "maxM": 174.15192565533448,
+      "ascentM": 129.46817743733342,
+      "descentM": 129.4681774373353,
+      "maxLocalGrade": 0.06403316883323669,
+      "hills": 0
+    },
+    {
+      "windowM": 200,
+      "minM": 128.54559544606136,
+      "maxM": 173.66821352892555,
+      "ascentM": 108.61250649179624,
+      "descentM": 108.61250649180013,
+      "maxLocalGrade": 0.04156619580101619,
+      "hills": 0
+    }
+  ]
+}

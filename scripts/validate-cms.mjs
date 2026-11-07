@@ -88,6 +88,11 @@ export function validateCms(source) {
   const gpx = config.media.find((entry) => entry.name === "gpx");
   const route = config.content.find((entry) => entry.name === "routes");
   const field = route?.fields.find((entry) => entry.name === "gpx");
+  for (const [name, type, value] of [["lapCount", "number", 1], ["allowElevationAnalysis", "boolean", false], ["elevationTrusted", "boolean", false], ["includeInComparison", "boolean", true], ["includeInCalculator", "boolean", true]]) {
+    const setting = route?.fields.find((entry) => entry.name === name);
+    if (setting?.type !== type || setting.default !== value || setting.required)
+      throw new Error("Липсва безопасна незадължителна настройка за GPX анализ: " + name);
+  }
   if (
     gpx?.input !== "src/data/gpx" ||
     gpx?.output !== "/gpx-source" ||
@@ -99,6 +104,11 @@ export function validateCms(source) {
     throw new Error(
       "GPX качването трябва да използва file поле и отделна непублична за сайта папка.",
     );
+  const geometryMedia = config.media.find((entry) => entry.name === "routeGeometry");
+  const geometryField = route.fields.find((entry) => entry.name === "geometry");
+  if (geometryMedia?.input !== "src/data/route-geometry" || geometryMedia.output !== "/route-geometry" || !geometryMedia.extensions?.includes("json") ||
+      geometryField?.type !== "file" || geometryField.options?.media !== "routeGeometry" || !geometryField.options.extensions?.includes("json") || geometryField.required || field.required)
+    throw new Error("Обработената геометрия трябва да е незадължителен алтернативен източник извън public/; GPX не е задължителен при JSON.");
   return config;
 }
 if (

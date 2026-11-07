@@ -10,6 +10,7 @@
   "allowDownload": true,
   "trimStartM": 0,
   "trimEndM": 0,
-  "elevationTrusted": false,
+  "elevationTrusted": true,
+  "allowElevationAnalysis": true,
   "race": "src/content/races/kaylakamarathon2026.json"
 }

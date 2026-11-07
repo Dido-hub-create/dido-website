@@ -1,0 +1,20 @@
+---
+import ElevationProfile from "./ElevationProfile.astro";
+import AnalysisMethod from "./AnalysisMethod.astro";
+import { analysisSummary } from "../lib/running.mjs";
+import "../styles/analysis.css";
+const { route } = Astro.props;
+const summary = analysisSummary(route);
+---
+<section class="route-analysis" data-route-analysis data-single-route>
+  <h2>Анализ на трасето</h2>
+  <script type="application/json" data-analysis-catalog set:html={JSON.stringify([summary]).replace(/</g, "\\u003c")} />
+  <label class="analysis-window">Изглаждане на височините<select data-smoothing><option value="25">25 м — повече детайл / шум</option><option value="50">50 м</option><option value="100" selected>100 м</option><option value="200">200 м</option></select></label>
+  <p data-analysis-status role="status"></p>
+  <ElevationProfile /><AnalysisMethod />
+  <div class="running-links">
+    {route.mapHref && route.includeInCalculator && <a class="button" href={`/byagane/analiz/?route=${encodeURIComponent(route.id)}#strategy`}>Изчисли стратегия</a>}
+    {route.mapHref && route.includeInComparison && <a class="button" href={`/byagane/analiz/?route=${encodeURIComponent(route.id)}#comparison`}>Сравни с друго трасе</a>}
+  </div>
+</section>
+<script>import "../scripts/route-analysis";</script>

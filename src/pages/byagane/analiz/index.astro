@@ -1,0 +1,36 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import RouteMap from "../../../components/RouteMap.astro";
+import ElevationProfile from "../../../components/ElevationProfile.astro";
+import AnalysisMethod from "../../../components/AnalysisMethod.astro";
+import PacePlanner from "../../../components/PacePlanner.astro";
+import { loadRoutes, analysisSummary } from "../../../lib/running.mjs";
+import "../../../styles/analysis.css";
+const routes = loadRoutes().filter((r) => r.mapHref && (r.includeInComparison || r.includeInCalculator)).map(analysisSummary);
+---
+<Layout title="Анализ на трасета" description="Височинни профили, сравнение и ориентировъчна стратегия за бягане.">
+  <article class="container running-page analysis-page" data-route-analysis>
+    <div class="breadcrumbs"><a href="/byagane/">Бягане</a><span>/</span>Анализ на трасета</div>
+    <header class="page-intro"><div><p class="eyebrow">Планирай следващото бягане</p><h1>Анализ на трасета<span>.</span></h1><p>Сравни профили на една километрова скала и планирай темпото според измерената дистанция.</p></div></header>
+    <script type="application/json" data-analysis-catalog set:html={JSON.stringify(routes).replace(/</g, "\\u003c")} />
+    <div class="analysis-controls" id="comparison">
+      <label>Основно трасе<select data-route-select="primary"><option value="">Избери маршрут</option>{routes.map((r) => <option value={r.id}>{r.title}</option>)}</select></label>
+      <label>Сравни с друго трасе<select data-route-select="secondary"><option value="">Без второ трасе</option>{routes.filter((r) => r.comparison).map((r) => <option value={r.id}>{r.title}</option>)}</select></label>
+      <label>Трето трасе (по желание)<select data-route-select="tertiary"><option value="">Без трето трасе</option>{routes.filter((r) => r.comparison).map((r) => <option value={r.id}>{r.title}</option>)}</select></label>
+      <label>Изглаждане на височините (по дистанция)<select data-smoothing><option value="25">25 м — повече детайл / шум</option><option value="50">50 м</option><option value="100" selected>100 м</option><option value="200">200 м</option></select></label>
+    </div>
+    <label class="analysis-window">Наслагване (по желание)<select data-overlay-mode><option value="off">Изключено — отделни графики</option><option value="relative">Спрямо старта (Δh) — препоръчано</option></select></label>
+    <p class="content-notice">Сравняват се само разрешени публикувани маршрути. Ако има само един, можеш да го анализираш и да планираш равномерно темпо. Второ и трето реално трасе се добавят през Pages CMS.</p>
+    <p data-analysis-status role="status"></p>
+    {!routes.length && <p class="empty-state">Няма разрешени публични маршрути за тези инструменти.</p>}
+    <section class="profile-card" data-overlay hidden aria-label="Наслагване на височинни профили"><h2>Наслагване на трасетата</h2><p data-overlay-notice></p><ul class="profile-legend" data-overlay-legend></ul><svg data-overlay-chart role="img" aria-label="Наслагване на профили по километри"></svg><p data-overlay-unavailable role="status"></p></section>
+    <div class="analysis-grid">
+      <div data-analysis-slot="primary"><ElevationProfile /><details class="analysis-map"><summary>Карта на основното трасе</summary><RouteMap url={routes[0]?.mapHref ?? ""} title="Основно трасе" /></details></div>
+      <div data-analysis-slot="secondary" hidden><ElevationProfile slotName="secondary" /><details class="analysis-map"><summary>Карта на второто трасе</summary><RouteMap url="" title="Второ трасе" /></details></div>
+      <div data-analysis-slot="tertiary" hidden><ElevationProfile slotName="tertiary" /><details class="analysis-map"><summary>Карта на третото трасе</summary><RouteMap url="" title="Трето трасе" /></details></div>
+    </div>
+    <AnalysisMethod /><PacePlanner />
+    <noscript><p class="content-notice">За графиките, сравнението и калкулатора е необходим JavaScript. <a href="/byagane/marshruti/">Всички маршрути →</a></p></noscript>
+  </article>
+</Layout>
+<script>import "../../../scripts/route-analysis";</script>

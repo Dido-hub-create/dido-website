@@ -10,6 +10,13 @@ media:
     extensions:
       - gpx
     rename: safe
+  - name: routeGeometry
+    label: Одобрена обработена геометрия — публична в GitHub
+    input: src/data/route-geometry
+    output: /route-geometry
+    extensions:
+      - json
+    rename: safe
 content:
   - name: posts
     label: Публикации
@@ -375,8 +382,15 @@ content:
           media: gpx
           extensions:
             - gpx
-        required: true
-        description: "Хранилището е публично: каченият оригинал се вижда в GitHub веднага, дори маршрутът да е чернова. Не качвай лични координати без предварително почистване или промяна на репото към Private."
+        description: "Избери само GPX ИЛИ обработена геометрия. Хранилището е публично: каченият оригинал се вижда в GitHub веднага, дори маршрутът да е чернова. Не качвай лични координати без предварително почистване или промяна на репото към Private."
+      - name: geometry
+        label: Одобрена обработена геометрия (JSON), вместо GPX
+        type: file
+        options:
+          media: routeGeometry
+          extensions:
+            - json
+        description: "Избери само един източник. JSON съдържа само segments с lat/lon/ele, без имена, времеви отметки или телеметрия. Оригинален GPX не е нужен. Файлът се вижда в публичното GitHub репо веднага, дори записът да е чернова."
       - name: status
         label: Публикуване
         type: select
@@ -415,6 +429,30 @@ content:
         label: Височинните данни са от проверен надежден източник
         type: boolean
         default: false
+      - name: lapCount
+        label: Брой повторения на целия GPX за анализа и стратегията
+        type: number
+        default: 1
+        options:
+          min: 1
+          max: 10
+          step: 1
+        description: "Цяло число 1–10. Избери 1 за пълен състезателен запис, дори вече да съдържа две обиколки. Избери 2 само за GPX на една обиколка, която трябва да се повтори. Общата дистанция е измереният GPX × повторенията, без GPS преход между тях. Не е автоматичен брой физически обиколки."
+      - name: allowElevationAnalysis
+        label: Разрешавам публичен височинен анализ
+        type: boolean
+        default: false
+        description: "Публикува обработените координати И височини само при публикуван, одобрен маршрут с разрешена карта и проверени височини. За личен запис включвай само след изрично разрешение на собственика за публични координати и височини."
+      - name: includeInComparison
+        label: Включване в сравнението
+        type: boolean
+        default: true
+        description: "Използва само вече разрешени публични карти; без надежден разрешен профил показва само дистанцията и предупреждение."
+      - name: includeInCalculator
+        label: Включване в калкулатора за темпо
+        type: boolean
+        default: true
+        description: "Без надежден разрешен профил е налично само равномерно темпо."
       - name: cover
         label: Основна снимка
         type: image

@@ -22,6 +22,9 @@ import {
   resolveGpxSource,
   loadRoutes,
   referenceId,
+  analysisPayload,
+  analysisSummary,
+  assertGeneratedAnalysis,
 } from "../src/lib/running.mjs";
 
 const points = Array.from({ length: 9 }, (_, index) => ({
@@ -125,6 +128,8 @@ test(
         publishMap: true,
         allowDownload: true,
         elevationTrusted: true,
+        allowElevationAnalysis: true,
+        lapCount: 2,
       });
       writeRoute("map-only", { publishMap: true, allowDownload: false });
       writeRoute("download-only", { publishMap: false, allowDownload: true });
@@ -156,6 +161,17 @@ test(
       });
       writeRoute("MarathonKaylaka21km.gpx", { publishMap: true, allowDownload: true });
       writeRoute("retired", { publishMap: true, allowDownload: true });
+      mkdirSync(join(fixture,"src/data/route-geometry"),{recursive:true});
+      writeFileSync(join(fixture,"src/data/route-geometry/processed.json"),JSON.stringify({segments:[points]}));
+      writeRoute("geometry-only",{gpx:"",geometry:"/route-geometry/processed.json",publishMap:true,allowDownload:false,allowElevationAnalysis:true,elevationTrusted:true});
+      writeRoute("geometry-unapproved",{gpx:"",geometry:"/route-geometry/processed.json",publishMap:true,allowElevationAnalysis:true,elevationTrusted:true,publicApproved:false});
+      writeFileSync(join(fixture, "src/data/gpx/no-height.gpx"), source.replace(/<ele>[^<]+<\/ele>/g, ""));
+      writeFileSync(join(fixture, "src/data/gpx/gap.gpx"), source.replace('lon="0.009999"', 'lon="0.099999"').replace(/lon="([^"]+)"/g, (_, lon) => `lon="${Number(lon) + 1}"`));
+      writeRoute("no-height", { publishMap: true, allowElevationAnalysis: true, elevationTrusted: true, gpx: "/gpx-source/no-height.gpx" });
+      writeRoute("gap", { publishMap: true, allowElevationAnalysis: true, elevationTrusted: true, trimStartM: 0, trimEndM: 0, gpx: "/gpx-source/gap.gpx" });
+      writeRoute("untrusted", { publishMap: true, allowElevationAnalysis: true });
+      writeRoute("no-map-analysis", { publishMap: false, allowElevationAnalysis: true, elevationTrusted: true });
+      writeRoute("bad-laps", { publishMap: true, allowElevationAnalysis: true, elevationTrusted: true, lapCount: 1.5 });
       writeFileSync(join(fixture, "src/content/routes/bad-json.json"), "{PRIVATE_JSON");
       writeFileSync(join(fixture, "src/content/races/Invalid.gpx.json"), "{PRIVATE_RACE");
       const image = "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg";
@@ -218,9 +234,34 @@ test(
         path = (id, name) => join(output, "byagane/marshruti", id, name),
         read = (id, name) => readFileSync(path(id, name), "utf8");
       assert.ok(existsSync(path("allowed", "index.html")));
+      assert.ok(existsSync(path("geometry-only","map.json")));assert.ok(existsSync(path("geometry-only","analysis.json")));
+      assert.ok(!existsSync(path("geometry-only","trace.gpx")));
+      assert.ok(!existsSync(join(output,"byagane/marshruti/geometry-unapproved")));
+      assert.ok(!existsSync(join(output,"route-geometry/processed.json")));
+      assert.ok(!read("geometry-only","index.html").includes('href="trace.gpx"'));
+      assert.doesNotMatch(readFileSync(join(output,"_headers"),"utf8"),/geometry-only/);
       const map = JSON.parse(read("allowed", "map.json")),
         download = read("allowed", "trace.gpx");
       assert.deepEqual(publicMapData(parseGpx(download)), map);
+      const profile = JSON.parse(read("allowed", "analysis.json"));
+      assert.deepEqual(profile, { segments: parseGpx(download), lapCount: 2 });
+      const policy = new Map(loadRoutes(fixture).map((r) => [r.id, r]));
+      assert.equal(policy.get("allowed").analysisStatus, "ready");
+      assert.equal(policy.get("map-only").analysisStatus, "disabled");
+      assert.equal(policy.get("map-only").lapCount, 1);
+      assert.equal(policy.get("no-height").analysisStatus, "missing");
+      assert.equal(policy.get("gap").analysisStatus, "gaps");
+      assert.equal(policy.get("untrusted").analysisStatus, "untrusted");
+      assert.equal(policy.get("bad-laps").analysisStatus, "unavailable");
+      for (const id of ["map-only", "download-only", "no-map-analysis", "details-only", "invalid", "missing", "trim-all", "no-height", "gap", "untrusted", "bad-laps"]) {
+        assert.ok(!existsSync(path(id, "analysis.json")), id);
+        assert.throws(() => analysisPayload(policy.get(id)));
+        assert.ok(!JSON.stringify(analysisSummary(policy.get(id))).includes('"segments"'));
+      }
+      assertGeneratedAnalysis(fixture);
+      writeFileSync(path("map-only", "analysis.json"), JSON.stringify(profile));
+      assert.throws(() => assertGeneratedAnalysis(fixture));
+      rmSync(path("map-only", "analysis.json"));
       assert.match(download, /<name>Маратон Кайлъка 2026 – 21,1 км<\/name>/);
       assert.match(read("allowed", "index.html"), /download="maraton-kaylaka-2026-21km.gpx"/);
       const headers = readFileSync(join(output, "_headers"), "utf8");
@@ -304,12 +345,15 @@ test(
       assert.ok(loaded.distanceM > 0);
       assert.equal(loaded.ascentM, 20);
       writeRoute("allowed", { publishMap: false, allowDownload: false });
+      writeRoute("geometry-only",{gpx:"",geometry:"/route-geometry/processed.json",publishMap:false,allowDownload:false,allowElevationAnalysis:true,elevationTrusted:true});
       renameSync(join(fixture, "src/content/routes/retired.json"), join(fixture, "src/content/routes/retired.gpx.json"));
       build();
       assert.ok(!existsSync(path("retired", "index.html")));
       assert.ok(!existsSync(path("retired", "trace.gpx")));
       assert.ok(!existsSync(path("allowed", "trace.gpx")));
       assert.ok(!existsSync(path("allowed", "map.json")));
+      assert.ok(!existsSync(path("allowed", "analysis.json")));
+      assert.ok(!existsSync(path("geometry-only","map.json")));assert.ok(!existsSync(path("geometry-only","analysis.json")));
       assert.ok(!read("allowed", "index.html").includes("trace.gpx"));
       assert.doesNotMatch(readFileSync(join(output, "_headers"), "utf8"), /\/allowed\//);
       // A bad public upload must fail the build and remove any previously built output.

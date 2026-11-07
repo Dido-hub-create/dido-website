@@ -1,0 +1,26 @@
+---
+import { TERRAIN } from "../lib/profile-terrain.mjs";
+interface Props { slotName?: string; }
+const { slotName = "primary" } = Astro.props;
+---
+<section class="profile-card" data-profile={slotName} aria-label="Височинен анализ">
+  <h2 data-profile-title>Височинен профил</h2>
+  <p data-profile-notice role="status">За интерактивния анализ е необходим JavaScript.</p>
+  <dl class="analysis-stats" data-profile-stats></dl>
+  <div data-profile-details hidden>
+    <p class="axis-notice" data-axis-notice></p>
+    <ul class="terrain-legend" id={`terrain-legend-${slotName}`} aria-label="Легенда на посоките на наклона">{Object.entries(TERRAIN).map(([kind, style]) => <li><span aria-hidden="true" class={`terrain-swatch terrain-${kind}`} style={`border-color:${style.color}`}></span>{style.label}</li>)}</ul>
+    <p class="profile-hint">Премести мишката, докосни/плъзни по графиката или използвай плъзгача. Цветът и видът на линията показват устойчива посока; „равно“ включва слаб наклон. Белите номера съответстват на водещите изкачвания от таблицата.</p>
+    <svg aria-describedby={`terrain-legend-${slotName} profile-readout-${slotName}`} data-profile-chart viewBox="0 0 800 250" role="img" aria-label="Височина в метри спрямо изминати километри"></svg>
+    <label>Позиция по трасето <input data-profile-position type="range" min="0" max="1" step="10" value="0" aria-label="Позиция по трасето в метри" /></label>
+    <p id={`profile-readout-${slotName}`} data-profile-readout class="profile-readout" aria-live="polite"></p>
+    <h3>Трите водещи изкачвания</h3>
+    <p data-top-climbs-summary></p>
+    <div class="analysis-table" tabindex="0" role="region" aria-label="Водещи изкачвания — превърти хоризонтално"><table><thead><tr><th>№ / GPX повторение</th><th>От км</th><th>До км</th><th>Дължина</th><th>Натрупано изкачване</th><th>Среден наклон</th></tr></thead><tbody data-top-climbs></tbody></table></div>
+    <h3>Стръмни изкачвания и спускания</h3>
+    <p data-hills-summary></p>
+    <div class="analysis-table" tabindex="0" role="region" aria-label="Таблица с наклони — превърти хоризонтално">
+      <table><thead><tr><th>Участък</th><th>От км</th><th>До км</th><th>Дължина</th><th>Денивелация</th><th>Среден наклон</th><th>Макс. локален</th></tr></thead><tbody data-profile-hills></tbody></table>
+    </div>
+  </div>
+</section>

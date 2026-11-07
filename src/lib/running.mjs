@@ -15,7 +15,9 @@ import {
   serializeGpx,
 } from "./gpx.mjs";
 import { readEntries, validEntryId } from "./entry-files.mjs";
+import { parseRouteGeometry } from "./route-geometry.mjs";
 import { gpxFilename } from "./download-name.mjs";
+import { elevationQuality, validLapCount } from "./route-analysis.mjs";
 
 const text = (value) => (typeof value === "string" ? value.trim() : "");
 export const routeTypes = {
@@ -78,6 +80,17 @@ export function resolveGpxSource(root, value) {
     throw new Error("Изходният GPX файл липсва или не може да се използва.");
   return file;
 }
+export function resolveGeometrySource(root, value) {
+  let path;
+  try { path = decodeURIComponent(text(value)); } catch { throw new Error("Невалиден път към обработена геометрия."); }
+  if (!path.startsWith("/route-geometry/") || path.includes("\\") || path.includes("\0")) throw new Error("Невалиден път към обработена геометрия.");
+  const filename = path.slice("/route-geometry/".length);
+  if (!filename || filename.split("/").some((part) => !part || part === "." || part === "..") || extname(filename).toLowerCase() !== ".json") throw new Error("Невалиден път към обработена геометрия.");
+  const directory = resolve(root, "src/data/route-geometry"), file = resolve(directory, filename);
+  if (relative(directory, file).startsWith("..") || !existsSync(file) || lstatSync(file).isSymbolicLink() || realpathSync(file) !== file || lstatSync(file).size > 5 * 1024 * 1024)
+    throw new Error("Обработената геометрия липсва или не може да се използва.");
+  return file;
+}
 export function assertNoPublicGpx(root = process.cwd()) {
   function walk(directory) {
     if (!existsSync(directory)) return;
@@ -111,22 +124,29 @@ export function loadRoutes(root = process.cwd()) {
       let segments = [],
         error;
       try {
-        const file = resolveGpxSource(root, data.gpx);
+        if (text(data.gpx) && text(data.geometry)) throw new Error("Изберете само един източник: GPX или обработена геометрия.");
+        const source = text(data.geometry)
+          ? parseRouteGeometry(readFileSync(resolveGeometrySource(root, data.geometry), "utf8"))
+          : parseGpx(readFileSync(resolveGpxSource(root, data.gpx), "utf8"));
         segments = trimGpx(
-          parseGpx(readFileSync(file, "utf8")),
+          source,
           data.trimStartM ?? 0,
           data.trimEndM ?? 0,
         );
       } catch (failure) {
         const message = failure instanceof Error ? failure.message : "";
         error =
-          /^(Празен или прекалено голям|Невалиден или неподдържан|Липсва GPX документ|Твърде много GPS точки|Невалидни GPS координати|GPX файлът няма използваемо|Невалидно разстояние за премахване|Премахването на началото|Невалиден път към GPX|Изходният GPX трябва|Изходният GPX файл липсва)/.test(
+          /^(Празен или прекалено голям|Невалиден или неподдържан|Липсва GPX документ|Твърде много GPS точки|Невалидни GPS координати|GPX файлът няма използваемо|Невалидно разстояние за премахване|Премахването на началото|Невалиден път към GPX|Изходният GPX трябва|Изходният GPX файл липсва|Невалиден път към обработена геометрия|Невалидна обработена геометрия|Обработената геометрия липсва|Изберете само един източник)/.test(
             message,
           )
             ? message
             : "GPX файлът не може да се обработи.";
       }
       const valid = !error && segments.length > 0;
+      const lapCount = data.lapCount === undefined ? 1 : data.lapCount;
+      const analysisStatus = !valid || data.publishMap !== true || !validLapCount(lapCount) ? "unavailable"
+        : data.allowElevationAnalysis !== true ? "disabled"
+        : data.elevationTrusted !== true ? "untrusted" : elevationQuality(segments);
       const stats = valid
         ? gpxStats(segments, data.elevationTrusted === true)
         : { distanceM: undefined, ascentM: undefined };
@@ -145,6 +165,11 @@ export function loadRoutes(root = process.cwd()) {
         galleryFrame: data.galleryFrame,
         imageFrames: Array.isArray(data.imageFrames) ? data.imageFrames : [],
         href: base,
+        lapCount: validLapCount(lapCount) ? lapCount : 1,
+        analysisStatus,
+        analysisHref: analysisStatus === "ready" ? `${base}analysis.json` : undefined,
+        includeInComparison: validLapCount(lapCount) && (data.includeInComparison === undefined || data.includeInComparison === true),
+        includeInCalculator: validLapCount(lapCount) && (data.includeInCalculator === undefined || data.includeInCalculator === true),
         mapHref:
           valid && data.publishMap === true ? `${base}map.json` : undefined,
         gpxHref:
@@ -199,6 +224,35 @@ export function loadRaces(root = process.cwd()) {
 }
 export function mapPayload(route) {
   return publicMapData(route.segments);
+}
+export function analysisPayload(route) {
+  if (!route.analysisHref || route.analysisStatus !== "ready") throw new Error("Неразрешен височинен анализ.");
+  return { segments: route.segments.map((s) => s.map(({ lat, lon, ele }) => ({ lat, lon, ele }))), lapCount: route.lapCount };
+}
+// Whitelist: never serialize a route object containing source geometry or paths.
+export function analysisSummary(route) {
+  return { id: route.id, title: route.title, href: route.href, mapHref: route.mapHref,
+    profileHref: route.analysisHref, baseDistanceM: route.distanceM,
+    distanceM: route.distanceM === undefined || route.analysisStatus === "unavailable" ? undefined : route.distanceM * route.lapCount,
+    lapCount: route.lapCount, status: route.analysisStatus,
+    comparison: route.includeInComparison, calculator: route.includeInCalculator };
+}
+export function assertGeneratedAnalysis(root = process.cwd()) {
+  const directory = resolve(root, "dist");
+  const allowed = new Map(loadRoutes(root).filter((r) => r.analysisHref).map((r) => [decodeURIComponent(r.analysisHref).slice(1), JSON.stringify(analysisPayload(r))]));
+  function walk(folder) {
+    if (!existsSync(folder)) return;
+    for (const name of readdirSync(folder)) {
+      const file = join(folder, name), stat = lstatSync(file);
+      if (stat.isSymbolicLink()) throw new Error("Символна връзка в статичния build.");
+      if (stat.isDirectory()) walk(file);
+      else if (name === "analysis.json") {
+        const key = relative(directory, file).split(sep).join("/");
+        if (!allowed.has(key) || readFileSync(file, "utf8") !== allowed.get(key)) throw new Error("Неразрешени височинни данни в статичния build.");
+      }
+    }
+  }
+  walk(directory);
 }
 export function downloadPayload(route) {
   return serializeGpx(route.segments, route.title);

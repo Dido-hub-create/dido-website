@@ -30,7 +30,7 @@ const image = usableImage(route.cover);
       route.location && <p>{route.location}</p>
     }<div class="route-card-stats">
       <span>{distanceLabel(route.distanceM)}</span><span
-        >Д+ {ascentLabel(route.ascentM)}</span>
+        title="Положителна денивелация от GPX, без изглаждане">Д+ {ascentLabel(route.ascentM)}</span>
     </div>{
       route.error && (
         <p class="content-notice">GPX файлът се нуждае от корекция.</p>

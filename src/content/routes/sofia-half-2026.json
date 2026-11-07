@@ -1,0 +1,18 @@
+{
+  "title": "Софийски полумаратон — октомври 2026",
+  "description": "Обработен личен състезателен запис от 11 октомври 2026 г., съдържащ целия полумаратон. Това не е официален GPX на организатора. GPS дистанцията и денивелацията са ориентировъчни; при 100 м изглаждане изчисленото изкачване е около 96 м.",
+  "location": "София",
+  "surface": "road",
+  "geometry": "/route-geometry/sofia-half-2026.geometry.json",
+  "status": "published",
+  "publicApproved": true,
+  "publishMap": true,
+  "allowDownload": false,
+  "allowElevationAnalysis": true,
+  "elevationTrusted": true,
+  "includeInComparison": true,
+  "includeInCalculator": true,
+  "lapCount": 1,
+  "trimStartM": 0,
+  "trimEndM": 0
+}
