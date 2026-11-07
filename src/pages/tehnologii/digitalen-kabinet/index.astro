@@ -1,0 +1,6 @@
+---
+import { readFileSync } from 'node:fs';
+// Render the canonical standalone document verbatim, without DIDO's layout or scripts.
+const html = readFileSync('public/downloads/digitalen-kabinet.html', 'utf8');
+---
+<Fragment set:html={html} />
