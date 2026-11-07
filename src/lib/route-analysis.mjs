@@ -1,3 +1,4 @@
+import { detectClimbs } from "./profile-terrain.mjs";
 import { distanceBetween, distanceOf } from "./geo.mjs";
 
 export const WINDOWS = [25, 50, 100, 200];
@@ -97,7 +98,7 @@ export function analyzeRoute(segments, { windowM = 100, lapCount = 1, trusted = 
   if (!(distanceM > 0)) throw new Error("Трасето няма измерима дистанция.");
   const quality = trusted ? elevationQuality(segments) : "untrusted";
   if (quality !== "ready") return { available: false, quality, baseDistanceM, distanceM, lapCount, segments: [], hills: [] };
-  const base = [], baseHills = [];
+  const base = [], baseHills = [], baseClimbs = [];
   let offset = 0, ascentM = 0, descentM = 0;
   const step = Math.max(10, baseDistanceM / 5000);
   for (const segment of segments) {
@@ -109,16 +110,18 @@ export function analyzeRoute(segments, { windowM = 100, lapCount = 1, trusted = 
       const delta = smooth[i].ele - smooth[i - 1].ele;
       ascentM += Math.max(0, delta); descentM += Math.max(0, -delta);
     }
+    baseClimbs.push(...detectClimbs(smooth).map((c) => ({ ...c, segment: base.length, startM: c.startM + offset, endM: c.endM + offset })));
     baseHills.push(...detectHills(smooth).map((h) => ({ ...h, segment: base.length, startM: h.startM + offset, endM: h.endM + offset })));
     base.push(points); offset += smooth.at(-1).x;
   }
-  const repeated = [], hills = [];
+  const repeated = [], hills = [], climbs = [];
   for (let lap = 0; lap < lapCount; lap++) {
     for (const points of base) repeated.push(points.map((p) => ({ ...p, x: p.x + lap * baseDistanceM, lap: lap + 1 })));
+    for (const c of baseClimbs) climbs.push({ ...c, startM: c.startM + lap * baseDistanceM, endM: c.endM + lap * baseDistanceM, lap: lap + 1 });
     for (const h of baseHills) hills.push({ ...h, startM: h.startM + lap * baseDistanceM, endM: h.endM + lap * baseDistanceM, lap: lap + 1 });
   }
   const heights = base.flat().map((p) => p.ele);
-  return { available: true, quality, baseDistanceM, distanceM, lapCount, windowM, segments: repeated, hills,
+  return { available: true, quality, baseDistanceM, distanceM, lapCount, windowM, segments: repeated, hills, climbs,
     startM: base[0][0].ele, minM: Math.min(...heights), maxM: Math.max(...heights), ascentM: ascentM * lapCount, descentM: descentM * lapCount };
 }
 

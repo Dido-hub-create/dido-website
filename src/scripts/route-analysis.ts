@@ -1,4 +1,5 @@
 import { analyzeRoute, profilePoint, planPace, parseTargetTime, formatDuration, formatPace, PROFILE_MESSAGES } from "../lib/route-analysis.mjs";
+import { TERRAIN, terrainRuns, topClimbs } from "../lib/profile-terrain.mjs";
 import { elevationAxis, comparisonAxis, displayElevation } from "../lib/profile-scales.mjs";
 import { chartAxes, svgNode, PROFILE_COLORS, PROFILE_DASHES } from "./profile-chart";
 import { initRouteMap } from "./route-map";
@@ -33,33 +34,65 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
   }
   function draw(card: HTMLElement, profile: Profile, maxDistance: number, slot: string) {
     const svg = card.querySelector<SVGSVGElement>("[data-profile-chart]")!;
+    const drawGeneration = generation;
     svg.replaceChildren();
     if (!profile.available) return;
     const axis = elevationAxis(profile.minM!, profile.maxM!);
     const { x, y, width, left, plotWidth } = chartAxes(svg, axis, maxDistance);
     put(card, "[data-axis-notice]", `Абсолютна височина · вертикално приближение ${axis.min}–${axis.max} м · деление ${axis.step} м. ↕ Отделен вертикален мащаб за всяко трасе; стръмността на нарисуваната линия не е сравнима между панелите.`);
-    for (const points of profile.segments) svg.append(svgNode("polyline", { points: points.map((p) => `${x(p.x).toFixed(2)},${y(p.ele).toFixed(2)}`).join(" "), fill: "none", stroke: "#ff951e", "stroke-width": 2.5, "stroke-linejoin": "round", "vector-effect": "non-scaling-stroke" }));
-    for (const hill of profile.hills) {
-      const pts = profile.segments[hill.segment + (hill.lap - 1) * (profile.segments.length / profile.lapCount)].filter((p) => p.x >= hill.startM && p.x <= hill.endM);
-      // Each hill belongs to one segment; do not connect duplicate boundary positions.
-      if (pts.length) svg.append(svgNode("polyline", { points: pts.map((p) => `${x(p.x)},${y(p.ele)}`).join(" "), fill: "none", stroke: hill.type === "up" ? "#ffc06a" : "#65dcc0", "stroke-width": 4, "vector-effect": "non-scaling-stroke" }));
+    for (const points of profile.segments) for (const run of terrainRuns(points)) {
+      const style = TERRAIN[run.kind as keyof typeof TERRAIN];
+      const curve = svgNode("polyline", { points: run.points.map((p: { x: number; ele: number }) => `${x(p.x).toFixed(2)},${y(p.ele).toFixed(2)}`).join(" "), fill: "none", stroke: style.color, "stroke-width": 3.5, "stroke-linejoin": "round", "stroke-dasharray": style.dash, "vector-effect": "non-scaling-stroke", "data-terrain": run.kind });
+      curve.append(svgNode("title", {}, `${style.label}: ${km(run.points[0].x)}–${km(run.points.at(-1)!.x)} км`));
+      svg.append(curve);
     }
     const line = svgNode("line", { x1: left, x2: left, y1: 35, y2: 205, stroke: "#fff", "stroke-dasharray": "4 4" });
     const dot = svgNode("circle", { cx: left, cy: 205, r: 5, fill: "white" }); svg.append(line, dot);
     const slider = card.querySelector<HTMLInputElement>("[data-profile-position]")!;
     slider.max = String(profile.distanceM); slider.step = "any"; slider.value = "0";
-    function choose(distance: number) {
-      const p = profilePoint(profile, distance); if (!p) return;
+    function choose(distance: number, selectedPoint?: ReturnType<typeof profilePoint>) {
+      const p = selectedPoint ?? profilePoint(profile, distance); if (!p) return;
       line.setAttribute("x1", String(x(p.x))); line.setAttribute("x2", String(x(p.x)));
       dot.setAttribute("cx", String(x(p.x))); dot.setAttribute("cy", String(y(p.ele)));
-      put(card, "[data-profile-readout]", `${km(p.x)} км · ${metres(p.ele)} · наклон ${percent(p.grade)} · обиколка ${p.lap}. Точката е отбелязана и на картата, след като я отвориш.`);
+      svg.dataset.selectedDistance = String(p.x);
+      const direction = p.grade === undefined ? "Начало на сегмент" : Math.abs(p.grade) < .0035 ? "→ Слаб наклон" : p.grade > 0 ? "↑ Нагоре" : "↓ Надолу";
+      put(card, "[data-profile-readout]", `${direction} · ${km(p.x)} км · ${metres(p.ele)} · локален наклон след изглаждане ${percent(p.grade)} · обиколка ${p.lap}. Точката е отбелязана и на картата, след като я отвориш.`);
       mapFor(slot)?.selectPoint(p);
     }
     slider.oninput = () => choose(Number(slider.value));
-    svg.onpointerdown = (event) => {
-      const box = svg.getBoundingClientRect(); const distance = Math.max(0, Math.min(profile.distanceM, ((event.clientX - box.left) / box.width * width - left) / plotWidth * maxDistance));
+    let touchPointer: number | undefined, pendingX: number | undefined, scheduled = false;
+    function pointFromClient(clientX: number) {
+      const box = svg.getBoundingClientRect();
+      const distance = Math.max(0, Math.min(profile.distanceM, ((clientX - box.left) / box.width * width - left) / plotWidth * maxDistance));
       slider.value = String(distance); choose(distance);
+    }
+    svg.onpointerdown = (event) => {
+      if (event.pointerType !== "mouse") { touchPointer = event.pointerId; svg.setPointerCapture(event.pointerId); }
+      pointFromClient(event.clientX);
     };
+    svg.onpointermove = (event) => {
+      if (event.pointerType !== "mouse" && touchPointer !== event.pointerId) return;
+      pendingX = event.clientX;
+      if (scheduled) return; scheduled = true;
+      requestAnimationFrame(() => { scheduled = false; if (svg.isConnected && drawGeneration === generation && pendingX !== undefined) pointFromClient(pendingX); });
+    };
+    svg.onpointerup = svg.onpointercancel = () => { touchPointer = undefined; };
+    const annotations: { x: number; y: number }[] = [];
+    for (const climb of topClimbs(profile)) {
+      const segment = profile.segments[climb.segment + (climb.lap - 1) * (profile.segments.length / profile.lapCount)];
+      const peak = segment.find((p) => p.x >= climb.endM - 1e-6); if (!peak) continue;
+      const cx = Math.max(left + 12, Math.min(left + plotWidth - 12, x(peak.x)));
+      const positions = [-15, 20, -40, 45, -65, 70].map((offset) => Math.max(18, Math.min(193, y(peak.ele) + offset)));
+      const cy = positions.find((candidate) => annotations.every((p) => Math.abs(p.x - cx) >= 24 || Math.abs(p.y - candidate) >= 24)) ?? positions[0];
+      annotations.push({ x: cx, y: cy });
+      const label = `Изкачване №${climb.rank}, обиколка ${climb.lap}, ${km(climb.startM)}–${km(climb.endM)} км, +${metres(climb.gainM)}, средно ${percent(climb.averageGrade)}`;
+      const marker = svgNode("g", { "data-climb-marker": climb.rank, tabindex: 0, role: "button", "aria-label": label });
+      marker.append(svgNode("title", {}, label), svgNode("line", { x1: cx, x2: x(peak.x), y1: cy + 9, y2: y(peak.ele), stroke: "white" }), svgNode("circle", { cx, cy, r: 10, fill: "#fff", stroke: "#0e1828", "stroke-width": 1.5 }), svgNode("text", { x: cx, y: cy + 4, fill: "#0e1828", "text-anchor": "middle", "font-size": 12, "font-weight": "bold" }, String(climb.rank)));
+      const activate = () => { slider.value = String(climb.endM); choose(climb.endM, peak); };
+      marker.addEventListener("click", activate);
+      marker.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activate(); } });
+      svg.append(marker);
+    }
     choose(0);
   }
   function render(card: HTMLElement, route: Summary, profile: Profile, maxDistance: number, slot: string) {
@@ -72,13 +105,18 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
         noise = ` 25 м е чувствителен към GPS шум; за шосе препоръчваме 100 м. Изкачване при 25 м: ${metres(profile.ascentM)}; при 100 м: ${metres(baseline.ascentM)}. Разликата не доказва допълнителни реални хълмове.`;
       }
     }
-    put(card, "[data-profile-notice]", profile.available ? `Изглаждане ${smoothing.value} м. Оранжево: профил; светлооранжево: изкачване; зелено: спускане.${noise}` : PROFILE_MESSAGES[route.status === "ready" ? "unavailable" : route.status]);
+    put(card, "[data-profile-notice]", profile.available ? `Изглаждане ${smoothing.value} м. Устойчива посока: ↑ оранжево-червено — нагоре; ↓ зелено — надолу; → сиво — равно/слаб наклон. Линиите са също плътни, прекъснати и точкови.${noise}` : PROFILE_MESSAGES[route.status === "ready" ? "unavailable" : route.status]);
     const stats = card.querySelector("[data-profile-stats]")!; stats.replaceChildren();
     const entries = [["Обща дистанция", `${km(profile.distanceM)} км`], ["Обиколки", `${route.lapCount} × ${km(profile.baseDistanceM)} км`], ["Начална височина", metres(profile.startM)], ["Мин. / макс.", `${metres(profile.minM)} / ${metres(profile.maxM)}`], ["Изкачване", metres(profile.ascentM)], ["Спускане", metres(profile.descentM)]];
     for (const [label, value] of entries) { const div = document.createElement("div"), dt = document.createElement("dt"), dd = document.createElement("dd"); dt.textContent = label; dd.textContent = value; div.append(dt, dd); stats.append(div); }
     card.querySelector<HTMLElement>("[data-profile-details]")!.hidden = !profile.available;
     const body = card.querySelector("[data-profile-hills]")!; body.replaceChildren();
+    const topBody = card.querySelector("[data-top-climbs]")!; topBody.replaceChildren();
     if (!profile.available) return;
+    const climbs = topClimbs(profile);
+    put(card, "[data-top-climbs-summary]", `${climbs.length < 3 ? `Намерени са ${climbs.length} изкачвания над прага; не допълваме до три с измислени участъци.` : "Топ 3 по натрупано изкачване."} Долина–връх: поне 200 м, 10 м изкачване и 0,5% среден наклон; допускаме спад до 5 м за до 300 м. При равенство: среден наклон, дължина, по-ранен километър. Обиколките и сегментите остават отделни.`);
+    for (const c of climbs) row(topBody, [`№${c.rank} · обиколка ${c.lap}`, km(c.startM), km(c.endM), `${Math.round(c.lengthM)} м`, `+${metres(c.gainM)}`, percent(c.averageGrade)]).dataset.climbRank = String(c.rank);
+    if (!climbs.length) row(topBody, ["Няма изкачвания над прага", "—", "—", "—", "—", "—"]);
     const strongest = [...profile.hills].filter((h) => h.type === "up").sort((a, b) => b.gainM - a.gainM)[0];
     put(card, "[data-hills-summary]", strongest ? `Най-голямо изкачване по натрупване: ${km(strongest.startM)}–${km(strongest.endM)} км, +${metres(strongest.gainM)}, средно ${percent(strongest.averageGrade)}. Това не е обща оценка за трудност.` : "Няма изкачвания над избрания праг.");
     for (const h of profile.hills) row(body, [h.type === "up" ? "↑ Изкачване" : "↓ Спускане", km(h.startM), km(h.endM), `${Math.round(h.lengthM)} м`, `${h.type === "up" ? "+" : "−"}${metres(h.gainM)}`, percent(h.averageGrade), percent(h.maxGrade)]).dataset.hill = h.type;
@@ -102,7 +140,7 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
     const { x, y } = chartAxes(svg, axis, maxDistance, relative);
     svg.dataset.mode = relative ? "relative" : "absolute";
     svg.setAttribute("aria-label", relative ? "Относителна промяна във височината спрямо старта в метри, по километри" : "Абсолютна надморска височина в метри, по километри");
-    put(panel, "[data-overlay-notice]", `Спрямо старта: Δh = височина − начална изгладена височина на собственото трасе. Всеки маршрут започва от 0 м; това не е натрупано изкачване и не нормализира амплитудата. Абсолютните височини са в отделните приближени панели, за да не скриват разликите между градовете релефа. Обща вертикална скала ${axis.min}–${axis.max} м, деление ${axis.step} м; еднаква километрова скала. Отделните графики отдолу запазват собствено вертикално приближение.`);
+    put(panel, "[data-overlay-notice]", `Спрямо старта: Δh = височина − начална изгладена височина на собственото трасе. Всеки маршрут започва от 0 м; това не е натрупано изкачване и не нормализира амплитудата. Абсолютните височини са в отделните приближени панели, за да не скриват разликите между градовете релефа. Обща вертикална скала ${axis.min}–${axis.max} м, деление ${axis.step} м; еднаква километрова скала. Отделните графики отдолу запазват собствено вертикално приближение. Тук цветът обозначава маршрута; оцветяването по наклон е в отделните панели.`);
     selected.forEach(({ route }, i) => {
       const profile = profiles[i]; if (!route || !profile?.available) return;
       const li = document.createElement("li"), swatch = document.createElement("span");

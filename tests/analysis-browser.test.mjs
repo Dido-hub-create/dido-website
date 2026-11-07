@@ -8,7 +8,7 @@ const enabled = process.env.DIDO_BROWSER_MODULE && process.env.DIDO_BROWSER_URL;
 test("analysis UI: real permissions, synthetic profiles, comparison, smoothing, map cursor and pace at four widths", { skip: !enabled, timeout: 90000 }, async () => {
   const { chromium } = createRequire(import.meta.url)(process.env.DIDO_BROWSER_MODULE);
   const browser = await chromium.launch({ executablePath: process.env.DIDO_CHROMIUM || "/usr/bin/chromium", headless: true, args: ["--no-sandbox"] });
-  const context = await browser.newContext(), page = await context.newPage();
+  const context = await browser.newContext({ hasTouch: true }), page = await context.newPage();
   const origin = process.env.DIDO_BROWSER_URL, errors = [], external = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.route("**/*", (route) => { const url = new URL(route.request().url()); if (url.origin === origin || url.protocol === "data:") return route.continue(); external.push(url.href); return route.abort(); });
@@ -25,11 +25,54 @@ test("analysis UI: real permissions, synthetic profiles, comparison, smoothing, 
       assert.equal(await page.locator("[data-smoothing] option").evaluateAll((options) => options.map((o) => o.value).join(",")), "25,50,100,200");
       assert.equal(await page.locator('option[value="effort"]').evaluate((el) => el.disabled), false);
       assert.match(await page.locator("[data-pace-rows] tr").last().textContent(), /02:00:00/);
+      const realCard = page.locator('[data-profile="primary"]'), chart = realCard.locator('[data-profile-chart]');
+      assert.equal(await realCard.locator('.terrain-legend li').count(), 3);
+      assert.deepEqual(new Set(await chart.locator('[data-terrain]').evaluateAll((curves) => curves.map((c) => c.dataset.terrain))), new Set(['up','down','flat']));
+      const ranks = await realCard.locator('[data-climb-rank]').count();
+      assert.ok(ranks > 0 && ranks <= 3); assert.equal(await chart.locator('[data-climb-marker]').count(), ranks);
+      await chart.scrollIntoViewIfNeeded();
+      const chartBox = await chart.boundingBox(), chartY = chartBox.y + chartBox.height * .55;
+      await page.mouse.move(chartBox.x + chartBox.width * .25, chartY);
+      await page.waitForFunction(() => Number(document.querySelector('[data-profile-chart]').dataset.selectedDistance) > 0);
+      const hovered = Number(await chart.getAttribute('data-selected-distance'));
+      await page.mouse.move(chartBox.x + chartBox.width * .7, chartY);
+      await page.waitForFunction((previous) => Number(document.querySelector('[data-profile-chart]').dataset.selectedDistance) > previous, hovered);
+      assert.match(await realCard.locator('[data-profile-readout]').textContent(), /локален наклон след изглаждане/);
+      if (width <= 390) {
+        const previous = Number(await chart.getAttribute('data-selected-distance'));
+        await page.touchscreen.tap(chartBox.x + chartBox.width * .4, chartY);
+        await page.waitForFunction((previous) => Number(document.querySelector('[data-profile-chart]').dataset.selectedDistance) < previous, previous);
+        const cdp = await context.newCDPSession(page);
+        await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:0,x:chartBox.x+chartBox.width*.4,y:chartY}]});
+        await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:0,x:chartBox.x+chartBox.width*.65,y:chartY}]});
+        await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+        await page.waitForFunction((previous) => Number(document.querySelector('[data-profile-chart]').dataset.selectedDistance) > previous, Number(await chart.getAttribute('data-x-max'))*.5);
+        await cdp.detach();
+      }
+      const numbered = chart.locator('[data-climb-marker="1"]');
+      await numbered.focus(); assert.equal(await numbered.evaluate((el) => el === document.activeElement), true);
+      await numbered.press('Enter');
+      const expectedPeak = Number((await realCard.locator('[data-climb-rank="1"] td').nth(2).textContent()).replace(',', '.')) * 1000;
+      await page.waitForFunction((expected) => Math.abs(Number(document.querySelector('[data-profile-chart]').dataset.selectedDistance) - expected) < 11, expectedPeak);
+      assert.match(await numbered.getAttribute('aria-label'), /Изкачване №1, обиколка 1/);
       await overflow();
       await page.locator("[data-smoothing]").selectOption("25"); await waitPlan();
       assert.match(await page.locator("[data-profile-notice]").first().textContent(), /GPS шум/);
       await page.locator("[data-smoothing]").selectOption("100"); await waitPlan();
-      if ([390, 1440].includes(width)) await page.locator('[data-profile="primary"]').screenshot({ path: `${screenshotDir}/kaylaka-${width}.png` });
+      await page.evaluate(() => document.activeElement?.blur());
+      await page.waitForFunction(() => document.querySelector(".skip-link").getBoundingClientRect().bottom < 0);
+      if ([390, 1440].includes(width)) {
+        // Capture the default view in a fresh context, separate from keyboard/touch
+        // focus transitions and viewport resizing in the interaction checks above.
+        const snapshotContext = await browser.newContext({ viewport: { width, height: 960 }, hasTouch: width < 768 });
+        try {
+          const snapshot = await snapshotContext.newPage();
+          await snapshot.route("**/*", (route) => new URL(route.request().url()).origin === origin ? route.continue() : route.abort());
+          await snapshot.goto(origin + "/byagane/analiz/");
+          await snapshot.locator('[data-pace-result]').waitFor({state:'visible'});
+          await snapshot.locator('[data-profile="primary"]').screenshot({path:`${screenshotDir}/kaylaka-${width}.png`});
+        } finally { await snapshotContext.close(); }
+      }
       await page.goto(origin + "/byagane/marshruti/kaylaka-21km-2026/");
       await page.locator("[data-profile-notice]").waitFor();
       await page.waitForFunction(() => document.querySelector("[data-profile-notice]").textContent.includes("Изглаждане 100"));
@@ -79,6 +122,8 @@ test("analysis UI: real permissions, synthetic profiles, comparison, smoothing, 
       });
       assert.equal(starts.length, 3); assert.ok(Math.max(...starts) - Math.min(...starts) < .02);
       assert.equal(await page.locator('[data-overlay-mode] option[value="absolute"]').count(), 0, "never flatten different cities onto one absolute vertical scale");
+      await page.evaluate(() => document.activeElement?.blur());
+      await page.waitForFunction(() => document.querySelector(".skip-link").getBoundingClientRect().bottom < 0);
       if ([390,1440].includes(width)) await page.locator('[data-overlay]').screenshot({path:`${screenshotDir}/relative-overlay-${width}.png`});
       const before = await page.locator('[data-profile="primary"] [data-profile-stats]').textContent();
       await page.locator("[data-smoothing]").selectOption("200"); await waitPlan();
@@ -103,7 +148,7 @@ test("analysis UI: real permissions, synthetic profiles, comparison, smoothing, 
       const slider = page.locator('[data-profile="primary"] [data-profile-position]'); await slider.focus(); await page.keyboard.press("End");
       assert.match(await page.locator('[data-profile="primary"] [data-profile-readout]').textContent(), /обиколка 2/);
       await overflow();
-      if ([390, 1440].includes(width)) { await page.evaluate(() => scrollTo(0, 0)); await page.locator(".analysis-grid").screenshot({ path: `${screenshotDir}/synthetic-comparison-${width}.png` }); }
+      if ([390, 1440].includes(width)) { await page.evaluate(() => { document.activeElement?.blur(); scrollTo(0, 0); }); await page.waitForFunction(() => document.querySelector(".skip-link").getBoundingClientRect().bottom < 0); await page.locator(".analysis-grid").screenshot({ path: `${screenshotDir}/synthetic-comparison-${width}.png` }); }
     }
     await page.locator('[data-route-select="primary"]').selectOption("synthetic-1"); await waitPlan();
     assert.equal(await page.locator('[data-route-select="secondary"]').inputValue(), "");
@@ -113,6 +158,10 @@ test("analysis UI: real permissions, synthetic profiles, comparison, smoothing, 
     await page.locator('[data-analysis-slot="primary"] [data-load-map]').click();
     await page.locator('[data-analysis-slot="primary"] .leaflet-container').waitFor({ state: "visible" });
     assert.equal(await page.locator('[data-pace-checkpoints] li').count(), 1);
+    assert.equal(await page.locator('[data-profile-details]:visible').count(), 2, "two-route comparison remains available");
+    await page.locator('[data-profile="primary"] [data-climb-marker="1"]').focus();
+    await page.locator('[data-profile="primary"] [data-climb-marker="1"]').press('Enter');
+    assert.match(await page.locator('[data-profile="primary"] [data-profile-readout]').textContent(), /локален наклон след изглаждане/);
     await page.locator('[data-route-select="primary"]').selectOption("untrusted"); await waitPlan();
     assert.equal(await page.locator('option[value="effort"]').evaluate((el) => el.disabled), true);
     assert.match(await page.locator('[data-profile="primary"] [data-profile-notice]').textContent(), /не е потвърдена/);
