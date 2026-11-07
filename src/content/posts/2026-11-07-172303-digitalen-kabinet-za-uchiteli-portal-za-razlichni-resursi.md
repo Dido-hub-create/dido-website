@@ -1,6 +1,6 @@
 ---
 title: Дигитален кабинет за учители - портал за различни ресурси.
-cover: /images/Дигитален кабинет за учители.png
+cover: /images/apps/04_digitalen_kabinet.png
 category: Технологии
 date: 2026-11-07
 status: published
