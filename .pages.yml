@@ -18,6 +18,51 @@ media:
       - json
     rename: safe
 content:
+  - name: applications
+    label: Още приложения — каталог
+    type: file
+    path: src/data/applications.json
+    fields:
+      - name: apps
+        label: Допълнителни приложения
+        type: object
+        list: true
+        description: "Кабинетът за учителя се управлява в съществуващото представяне на кабинета. Тук добавяйте други реални приложения; файловете трябва вече да съществуват в сайта."
+        fields:
+          - name: id
+            label: Уникален идентификатор (малки латински букви, цифри, тире)
+            type: string
+            required: true
+          - name: title
+            label: Заглавие
+            type: string
+            required: true
+          - name: description
+            label: Описание
+            type: text
+            required: true
+          - name: category
+            label: Категория
+            type: select
+            options:
+              values: [digitalni-daski, finansovi-instrumenti, lichni-organayzeri, digitalni-kabineti, fitnes-trakeri]
+          - name: image
+            label: Изображение
+            type: image
+            options:
+              media: images
+          - name: online
+            label: Реален локален онлайн адрес
+            type: string
+          - name: download
+            label: Съществуващ файл за изтегляне
+            type: string
+          - name: status
+            label: Публикуване
+            type: select
+            default: draft
+            options:
+              values: [draft, published]
   - name: cabinet
     label: Дигитален кабинет — представяне
     type: file

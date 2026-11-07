@@ -105,7 +105,7 @@ const socialUrl = social ? absolutePublicUrl(social.path, origin) : undefined;
       <div class="container magazine-footer">
         <div class="footer-identity"><Brand footer /></div>
         <nav aria-label="Навигация в долния колонтитул">
-          {navigation.map(([href, label]) => <a href={href}>{label}</a>)}
+          {navigation.map(([href, label]) => <a href={href} style={href === "/prilozheniya/" ? "white-space:normal;text-align:center" : undefined}>{label}</a>)}
         </nav>
         <p>Бягане · Технологии · Полезно · Лични теми</p>
       </div>

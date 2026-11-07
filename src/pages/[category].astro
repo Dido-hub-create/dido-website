@@ -3,7 +3,6 @@ import Layout from "../layouts/Layout.astro";
 import Icon from "../components/Icon.astro";
 import Records from "../components/Records.astro";
 import RunningDashboard from "../components/RunningDashboard.astro";
-import Projects from "../components/Projects.astro";
 import PostCard from "../components/PostCard.astro";
 import { categories } from "../lib/content-utils.mjs";
 import { allPosts } from "../lib/posts";
@@ -43,7 +42,7 @@ const posts = (await allPosts()).filter(
         </>
       )
     }
-    {category.slug === "tehnologii" && <Projects />}
+
     <section class="section" aria-labelledby="category-posts-title">
       <div class="section-heading">
         <div>

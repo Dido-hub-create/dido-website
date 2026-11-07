@@ -1,25 +1,19 @@
 ---
-import data from '../data/cabinet.json';
-const image = typeof data.image === 'string' && /^\/images\/[\p{L}\p{N} _./%-]+$/u.test(data.image) && !data.image.includes('..') ? data.image : '/images/apps/04_digitalen_kabinet.png';
+interface Props { app: {title:string;description:string;image?:string;online?:string;download?:string;} }
+const {app}=Astro.props;
 ---
-<article class="app-card cabinet">
- <div class="app-art"><img src={image} alt="Дигитален кабинет – учителски портал" width="1535" height="564" loading="lazy" /></div>
- <div class="app-copy"><span class="app-status is-available">Достъпно</span><h3>{data.title}</h3><p>{data.description}</p>
-  <div class="cabinet-actions">
-    <a class="cabinet-action online" href="/tehnologii/digitalen-kabinet/">
-      <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="6" width="38" height="28" rx="4"/><path d="M24 34v8m-10 0h20"/><path class="boot" d="m18 16 12 8-12 6z"/></svg>
-      <strong>Работи онлайн</strong>
-    </a>
-    <a class="cabinet-action download" href="/downloads/digitalen-kabinet.html" download="digitalen-kabinet.html">
-      <svg viewBox="0 0 48 48" aria-hidden="true"><g class="arrow"><path d="M24 5v25m-9-9 9 9 9-9"/></g><path d="M7 31v11h34V31"/></svg>
-      <strong>Изтегли за компютър <span aria-hidden="true">↓</span></strong>
-    </a>
-  </div>
-<p class="cabinet-note">Локален автозапис · JSON експорт и импорт. Документите не се качват в DIDO.</p></div>
+<article class="application-card cabinet">
+ {app.image && <div class="app-art"><img src={app.image} alt={app.title} width="1535" height="564" loading="lazy" /></div>}
+ <div class="app-copy"><h2>{app.title}</h2><p>{app.description}</p>
+ <div class="cabinet-actions">
+ {app.online && <a class="cabinet-action online" href={app.online}><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="6" width="38" height="28" rx="4"/><path d="M24 34v8m-10 0h20"/><path class="boot" d="m18 16 12 8-12 6z"/></svg><strong>Работи онлайн</strong></a>}
+ {app.download && <a class="cabinet-action download" href={app.download} download><svg viewBox="0 0 48 48" aria-hidden="true"><g class="arrow"><path d="M24 5v25m-9-9 9 9 9-9"/></g><path d="M7 31v11h34V31"/></svg><strong>Изтегли</strong></a>}
+ </div>
+ </div>
 </article>
 <style>
 /* Keep the whole teacher illustration visible within the existing card dimensions. */
-.cabinet .app-art img{object-fit:contain}
+.application-card{max-width:850px;border:1px solid #334b70;border-radius:18px;overflow:hidden;background:#132237;margin:24px 0}.app-art{height:170px;background:#102440}.app-art img{width:100%;height:100%;object-fit:contain}.app-copy{padding:22px}.app-copy h2{font-size:1.4rem}.app-copy p{color:#b7c5d8;line-height:1.7}
 
 .cabinet-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:5px;width:100%}.cabinet-action{display:flex;align-items:center;gap:9px;padding:11px 12px;min-height:46px;border:1px solid #647b9a;border-radius:11px;background:#152b43;color:#f5f8ff;text-decoration:none;transition:transform .22s,box-shadow .22s,border-color .22s}.cabinet-action strong{font-size:.82rem;white-space:nowrap}.cabinet-action svg{width:28px;height:28px;flex-shrink:0;fill:none;stroke:#ff8a16;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}.cabinet-action:hover,.cabinet-action:focus-visible{transform:translateY(-2px);border-color:#ff8a16;box-shadow:0 6px 16px #0004,0 0 14px #ff8a1615}.cabinet-action:active{transform:translateY(0) scale(.99)}.online:hover .boot,.online:focus-visible .boot{animation:boot .65s ease both}.download:hover .arrow,.download:focus-visible .arrow{animation:download .65s ease both}@keyframes boot{from{opacity:.2;transform:scale(.85);transform-origin:center}to{opacity:1;transform:scale(1)}}@keyframes download{50%{transform:translateY(5px)}}.cabinet-note{font-size:.75rem!important;color:#9dafc5!important}@media(prefers-reduced-motion:reduce){.cabinet-action{transition:none}.cabinet-action:hover,.cabinet-action:focus-visible,.cabinet-action:active{transform:none}.cabinet-action svg *{animation:none!important}}
 </style>

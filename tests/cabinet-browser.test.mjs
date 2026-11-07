@@ -22,16 +22,35 @@ test('cabinet online and standalone document: CRUD, reload, topics, confirmed JS
  }
  const presentation=await browser.newContext({acceptDownloads:true,reducedMotion:'reduce'}),show=await presentation.newPage();
  for(const width of [320,390,768,1440]){
-  await show.setViewportSize({width,height:960});await show.goto(process.env.DIDO_BROWSER_URL+'/tehnologii/');
-  assert.equal(await show.locator('.cabinet-action').count(),2);assert.equal(await show.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-  assert.equal(await show.locator('.app-gallery').count(),1);assert.equal(await show.locator('.app-gallery .app-card').count(),5);
-  assert.deepEqual(await show.locator('.app-gallery h3').allTextContents(),['Дигитални дъски','Финансов калкулатор','Личен органайзер',JSON.parse(readFileSync('src/data/cabinet.json','utf8')).title,'Фитнес тракери']);
-  assert.deepEqual(await show.locator('.app-gallery .app-status').allTextContents(),['В разработка','Планирано','Планирано','Достъпно','Планирано']);
-  assert.equal(await show.locator('.app-gallery a').count(),2);
-  assert.ok((await show.locator('.cabinet .app-copy').textContent()).includes(JSON.parse(readFileSync('src/data/cabinet.json','utf8')).description));
+  await show.setViewportSize({width,height:960});
+  await show.goto(process.env.DIDO_BROWSER_URL+'/');
+  assert.equal(await show.locator('.compact-applications').count(),1);assert.equal(await show.locator('.app-gallery').count(),0);
+  await show.locator('.compact-applications h2').click();
+  await show.locator('.compact-applications').screenshot({path:`work/cabinet/home-apps-${width}.png`});
+  assert.equal(await show.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  const nav=show.locator('#main-navigation');
+  if(!await nav.isVisible())await show.locator('[aria-controls="main-navigation"]').click();
+  await nav.locator('a[href="/prilozheniya/"]').click();await show.waitForURL('**/prilozheniya/');
+  assert.equal(await show.locator('.app-card').count(),5);
+  assert.deepEqual(await show.locator('.app-gallery h2').allTextContents(),['Дигитални дъски','Финансови инструменти','Лични органайзери','Дигитални кабинети','Фитнес тракери']);
+  assert.equal(await show.locator('a.app-card').count(),1);assert.equal(await show.locator('article.app-card').count(),4);
+  assert.equal(await show.locator('.app-status').count(),0);assert.equal(await show.locator('.cabinet-action').count(),0);
+  assert.ok(await show.locator('article.app-card').evaluateAll(cards=>cards.every(el=>!el.hasAttribute('href')&&!el.hasAttribute('tabindex')&&getComputedStyle(el).cursor!=='pointer')));
+  await show.locator('article.app-card').first().hover();
+  assert.equal(await show.locator('article.app-card').first().evaluate(el=>getComputedStyle(el).transform),'none');
   await show.locator('.app-gallery img').evaluateAll(images=>Promise.all(images.map(img=>img.decode())));
-  assert.ok(await show.locator('.app-gallery .app-art').evaluateAll(items=>items.every(el=>el.clientHeight<=170)));
+  assert.ok(await show.locator('.app-art').evaluateAll(items=>items.every(el=>el.clientHeight<=170)));
   await show.locator('.app-gallery').screenshot({path:`work/cabinet/gallery-${width}.png`});
+  assert.equal(await show.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await show.locator('a.app-card').focus();await show.keyboard.press('Enter');await show.waitForURL('**/prilozheniya/digitalni-kabineti/');
+  assert.equal(await show.locator('.application-card').count(),1);assert.equal(await show.locator('.cabinet-action').count(),2);
+  await show.locator('.application-card').screenshot({path:`work/cabinet/category-${width}.png`});
+  assert.equal(await show.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  for(const slug of ['digitalni-daski','finansovi-instrumenti','lichni-organayzeri','fitnes-trakeri']){
+   await show.goto(process.env.DIDO_BROWSER_URL+'/prilozheniya/'+slug+'/');assert.equal(await show.locator('.empty-state').count(),1);assert.equal(await show.locator('.cabinet-action').count(),0);
+  }
+  await show.goto(process.env.DIDO_BROWSER_URL+'/tehnologii/');assert.equal(await show.locator('.app-gallery,.cabinet-action').count(),0);assert.ok(await show.locator('.category-posts a').count()>0);
+  await show.goto(process.env.DIDO_BROWSER_URL+'/prilozheniya/digitalni-kabineti/');
  }
  await show.locator('.cabinet-action.online').hover();
  assert.equal(await show.locator('.online .boot').evaluate(el=>getComputedStyle(el).animationName),'none');

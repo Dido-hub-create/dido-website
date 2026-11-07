@@ -48,28 +48,7 @@ export const categories = [
   },
 ];
 
-export const projects = [
-  {
-    title: "Дигитални дъски",
-    icon: "grid",
-    text: "Пространство за идеи, бележки и визуално подреждане на мислите.",
-  },
-  {
-    title: "Финансов калкулатор",
-    icon: "calculator",
-    text: "Практични изчисления за по-ясна представа за личните финанси.",
-  },
-  {
-    title: "Личен органайзер",
-    icon: "calendar",
-    text: "Задачи, планове и малките стъпки към по-подреден ден.",
-  },
-  {
-    title: "Дигитален кабинет",
-    icon: "folder",
-    text: "Едно място за документи, полезни материали и ежедневна работа.",
-  },
-];
+
 
 /** @param {string | undefined | null} value */
 export function categoryFor(value) {
