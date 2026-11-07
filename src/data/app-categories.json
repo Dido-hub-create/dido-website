@@ -1,0 +1,7 @@
+[
+ {"slug":"digitalni-daski","title":"Дигитални дъски","image":"/images/apps/01_digitalni_daski.png","description":"Интерактивни дъски по математика, графики и визуални задачи."},
+ {"slug":"finansovi-instrumenti","title":"Финансови инструменти","image":"/images/apps/02_finansov_kalkulator.png","description":"Калкулатори, бюджет и инструменти за лични финанси."},
+ {"slug":"lichni-organayzeri","title":"Лични органайзери","image":"/images/apps/03_lichen_organizer.png","description":"Задачи, планове и организация на ежедневието."},
+ {"slug":"digitalni-kabineti","title":"Дигитални кабинети","image":"/images/apps/04_digitalen_kabinet.png","description":"Учебни ресурси, документи и полезни връзки за учителя."},
+ {"slug":"fitnes-trakeri","title":"Фитнес тракери","image":"/images/apps/05_fitness_trakeri.png","description":"Приложения за тренировки, активност и форма."}
+]

@@ -13,6 +13,7 @@ export function siteIdentity(settings = site) {
     navigation: [
       ["/", label(settings.navigation?.home, "Начало")],
       ["/byagane/", label(settings.navigation?.running, "Бягане")],
+      ["/prilozheniya/", "Моите приложения"],
       ["/tehnologii/", label(settings.navigation?.technology, "Технологии")],
       ["/polezno/", label(settings.navigation?.useful, "Полезно")],
       ["/za-men/", label(settings.navigation?.about, "За мен")],
