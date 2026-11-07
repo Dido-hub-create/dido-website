@@ -9,7 +9,7 @@ const near = (actual, expected, tolerance = .001) => assert.ok(Math.abs(actual -
 
 test("distance-weighted smoothing is independent of GPS point density", () => {
   const sparse = [point(0, 0), point(400, 40)], dense = line(400, .1, 0, 1);
-  for (const windowM of [50, 100, 200, 500]) {
+  for (const windowM of [25, 50, 100, 200]) {
     const a = smoothSegment(sparse, windowM), b = smoothSegment(dense, windowM);
     for (let i = 0; i < a.length; i++) near(a[i].ele, b[i].ele);
     near(a[20].ele, 20);
@@ -80,4 +80,14 @@ test("target time parsing rejects invalid values without permissive numeric conv
   assert.equal(parseTargetTime("02:00:01"), 7201);
   assert.equal(parseTargetTime("48:00:00"), 172800);
   assert.equal(formatDuration(7201), "02:00:01");
+});
+
+
+test("25 m retains more high-frequency elevation variation than the road default", () => {
+  const noisy = Array.from({ length: 401 }, (_, i) => point(i * 5, 100 + 2 * Math.sin(i * Math.PI / 4)));
+  const fine = analyzeRoute([noisy], { trusted: true, windowM: 25 });
+  const road = analyzeRoute([noisy], { trusted: true, windowM: 100 });
+  assert.ok(fine.ascentM > road.ascentM * 2);
+  assert.equal(fine.hills.length, 0, "short noise must not become a significant hill");
+  assert.equal(road.hills.length, 0);
 });
