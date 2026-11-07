@@ -18,6 +18,22 @@ media:
       - json
     rename: safe
 content:
+  - name: cabinet
+    label: Дигитален кабинет — представяне
+    type: file
+    path: src/data/cabinet.json
+    fields:
+      - name: title
+        label: Заглавие
+        type: string
+      - name: description
+        label: Описание
+        type: text
+      - name: image
+        label: Рекламна снимка (по желание)
+        type: image
+        options:
+          media: images
   - name: posts
     label: Публикации
     type: collection

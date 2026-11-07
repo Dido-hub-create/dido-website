@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кабинет · Учителски портал</title>
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --ink-900:#101c2c;
+  --ink-800:#16273b;
+  --ink-700:#1f3550;
+  --ink-600:#2b4a6e;
+  --ink-400:#5b7796;
+  --ink-300:#8ea3bb;
+  --paper-0:#f7f6f2;
+  --paper-1:#eeece4;
+  --paper-2:#e3e0d5;
+  --line:#d8d4c6;
+  --gold-500:#c98a2b;
+  --gold-600:#b3761f;
+  --gold-100:#f3e2c2;
+  --teal-500:#2f7d7a;
+  --teal-600:#256662;
+  --teal-100:#d9ece9;
+  --rose-500:#b3543f;
+  --rose-100:#f2ded7;
+  --violet-500:#6b4fb3;
+  --violet-600:#5a3f9e;
+  --violet-100:#e7e0f7;
+  --good:#3f8a5a;
+  --bad:#b3402f;
+  --radius-s:6px;
+  --radius-m:10px;
+  --radius-l:16px;
+  --shadow-1:0 1px 2px rgba(16,28,44,.06), 0 1px 1px rgba(16,28,44,.04);
+  --shadow-2:0 6px 20px -6px rgba(16,28,44,.18);
+  --shadow-3:0 18px 46px -14px rgba(16,28,44,.30);
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', Palatino, serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  --bg:var(--paper-0);
+  --surface:#fffdf9;
+  --surface-2:#fbf9f4;
+  --text:var(--ink-900);
+  --text-dim:var(--ink-400);
+  --border:var(--line);
+  --sidebar-bg:var(--ink-900);
+  --sidebar-text:#dfe6ee;
+  --sidebar-text-dim:#8ea0b6;
+  --sidebar-active:#20344d;
+}
+[data-theme="dark"]{
+  --bg:#0d1520;
+  --surface:#131e2c;
+  --surface-2:#0f1826;
+  --text:#e8ecf1;
+  --text-dim:#8fa0b5;
+  --border:#233348;
+  --paper-1:#182437;
+  --paper-2:#1d2c40;
+  --sidebar-bg:#0a1119;
+  --sidebar-active:#182437;
+  --gold-100:#3a2f1a;
+  --teal-100:#123230;
+  --rose-100:#3a201a;
+  --violet-100:#2a2140;
+  --shadow-1:0 1px 2px rgba(0,0,0,.4);
+  --shadow-2:0 6px 20px -6px rgba(0,0,0,.5);
+  --shadow-3:0 18px 46px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--gold-100);}
+a{color:inherit;}
+button{font-family:inherit;}
+input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+#app{display:flex;min-height:100vh;}
+
+/* ---- sidebar ---- */
+#sidebar{
+  width:272px;flex:0 0 272px;background:var(--sidebar-bg);color:var(--sidebar-text);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.brand{
+  display:flex;align-items:center;gap:10px;padding:20px 20px 16px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;background:linear-gradient(155deg,var(--gold-500),var(--rose-500));
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);
+  font-weight:700;color:#1a1208;font-size:16px;flex:0 0 auto;box-shadow:var(--shadow-1);
+}
+.brand-text .t1{font-family:var(--font-display);font-size:16.5px;font-weight:700;letter-spacing:.2px;line-height:1.15;}
+.brand-text .t2{font-size:11px;color:var(--sidebar-text-dim);letter-spacing:.4px;text-transform:uppercase;}
+
+nav.navtree{padding:14px 10px 20px;flex:1;}
+.nav-section{margin-bottom:4px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;
+  color:var(--sidebar-text);padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;
+  transition:background .12s ease; position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,.06);}
+.nav-item.active{background:var(--sidebar-active);color:#fff;}
+.nav-item.active::before{
+  content:"";position:absolute;left:-10px;top:6px;bottom:6px;width:3px;border-radius:3px;
+  background:var(--gold-500);
+}
+.nav-item .ico{width:18px;text-align:center;flex:0 0 auto;font-size:14px;opacity:.9;}
+.nav-item .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav-item .count{font-size:11px;color:var(--sidebar-text-dim);background:rgba(255,255,255,.06);padding:1px 7px;border-radius:20px;}
+.nav-item.active .count{background:rgba(255,255,255,.15);color:#fff;}
+.nav-caret{width:12px;text-align:center;font-size:10px;transition:transform .15s ease;color:var(--sidebar-text-dim);}
+.nav-caret.open{transform:rotate(90deg);}
+.nav-children{overflow:hidden;max-height:0;transition:max-height .18s ease;}
+.nav-children.open{max-height:900px;}
+.nav-children .nav-item{padding-left:30px;font-size:13px;}
+.nav-children .nav-children .nav-item{padding-left:46px;font-size:12.5px;}
+.nav-divider{height:1px;background:rgba(255,255,255,.08);margin:12px 10px;}
+.nav-heading{padding:10px 12px 4px;font-size:10.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--sidebar-text-dim);}
+
+.sidebar-foot{padding:14px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:var(--sidebar-text-dim);}
+
+/* ---- main column ---- */
+#main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+#topbar{
+  position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;padding:12px 24px;backdrop-filter:blur(6px);
+}
+.search-wrap{flex:1;max-width:560px;position:relative;}
+.search-wrap input{
+  width:100%;padding:10px 14px 10px 38px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface-2);color:var(--text);font-size:13.5px;outline:none;transition:border-color .15s, box-shadow .15s;
+}
+.search-wrap input:focus{border-color:var(--gold-500);box-shadow:0 0 0 3px var(--gold-100);}
+.search-wrap .sico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:14px;}
+.search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:4px 6px;display:none;}
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+.icon-btn{
+  width:36px;height:36px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);
+  color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;
+  transition:transform .1s ease, background .15s;
+}
+.icon-btn:hover{background:var(--paper-1);}
+.icon-btn:active{transform:scale(.94);}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;border:1px solid transparent;
+  font-size:13px;font-weight:600;cursor:pointer;transition:filter .12s ease, transform .1s ease;white-space:nowrap;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(155deg,var(--gold-500),var(--gold-600));color:#241a08;box-shadow:var(--shadow-1);}
+.btn-primary:hover{filter:brightness(1.06);}
+.btn-ghost{background:var(--surface-2);border-color:var(--border);color:var(--text);}
+.btn-ghost:hover{background:var(--paper-1);}
+.btn-danger{background:var(--rose-100);color:var(--bad);}
+.btn-danger:hover{filter:brightness(0.97);}
+.btn-sm{padding:6px 11px;font-size:12px;}
+
+#content{padding:26px 30px 60px;max-width:1280px;width:100%;margin:0 auto;}
+
+/* ============================================================
+   TYPOGRAPHY / SHARED
+   ============================================================ */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+.page-head h1{font-family:var(--font-display);font-size:26px;margin:0 0 4px;letter-spacing:.2px;}
+.page-eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold-600);font-weight:700;margin-bottom:6px;}
+.page-sub{color:var(--text-dim);font-size:13.5px;margin:0;}
+.breadcrumbs{font-size:12.5px;color:var(--text-dim);margin-bottom:10px;}
+.breadcrumbs button{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:12.5px;padding:0;text-decoration:none;}
+.breadcrumbs button:hover{color:var(--gold-600);text-decoration:underline;}
+.breadcrumbs .sep{margin:0 6px;opacity:.5;}
+
+.section-title{font-family:var(--font-display);font-size:16.5px;margin:30px 0 12px;display:flex;align-items:center;gap:8px;}
+.section-title .tag{font-size:10.5px;background:var(--paper-1);color:var(--text-dim);padding:2px 8px;border-radius:20px;font-family:var(--font-body);letter-spacing:.3px;}
+
+.empty-state{
+  border:1.5px dashed var(--border);border-radius:var(--radius-l);padding:44px 24px;text-align:center;color:var(--text-dim);
+  background:var(--surface-2);
+}
+.empty-state .ee-ico{font-size:30px;margin-bottom:10px;}
+.empty-state h3{margin:0 0 6px;color:var(--text);font-family:var(--font-display);font-weight:700;font-size:16px;}
+.empty-state p{margin:0 0 14px;font-size:13px;}
+
+/* ---- grid of tiles (dashboard / grades / admin cats) ---- */
+.tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+.tile{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);padding:18px;cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;position:relative;overflow:hidden;
+}
+.tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-2);border-color:var(--gold-500);}
+.tile .tile-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:12px;}
+.tile h4{margin:0 0 3px;font-size:15px;font-family:var(--font-display);}
+.tile .tile-meta{font-size:12px;color:var(--text-dim);}
+.tile .tile-corner{position:absolute;top:14px;right:14px;font-size:11px;color:var(--text-dim);}
+
+/* ---- stat cards ---- */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:6px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:15px 16px;}
+.stat-card .num{font-family:var(--font-display);font-size:26px;line-height:1;}
+.stat-card .lbl{font-size:11.5px;color:var(--text-dim);margin-top:6px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ---- resource cards ---- */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.res-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:14px 14px 12px;
+  display:flex;flex-direction:column;gap:8px;transition:box-shadow .12s ease, border-color .12s ease;position:relative;
+}
+.res-card:hover{box-shadow:var(--shadow-2);border-color:var(--ink-300);}
+.res-card.dragging{opacity:.4;}
+.res-top{display:flex;align-items:flex-start;gap:10px;}
+.res-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:0 0 auto;}
+.res-title{flex:1;min-width:0;}
+.res-title .name{font-weight:700;font-size:14px;line-height:1.3;cursor:pointer;}
+.res-title .name:hover{color:var(--gold-600);}
+.res-title .type{font-size:11px;color:var(--text-dim);}
+.fav-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--border);padding:2px;flex:0 0 auto;}
+.fav-btn.active{color:var(--gold-500);}
+.res-desc{font-size:12.5px;color:var(--text-dim);line-height:1.45;max-height:52px;overflow:hidden;}
+.res-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.chip{font-size:10.5px;padding:2px 8px;border-radius:20px;background:var(--paper-1);color:var(--text-dim);white-space:nowrap;}
+.chip.grade{background:var(--teal-100);color:var(--teal-600);}
+.chip.subject{background:var(--gold-100);color:var(--gold-600);}
+.chip.admin{background:var(--rose-100);color:var(--rose-500);}
+.chip.personal{background:var(--violet-100,#e7e0f7);color:var(--violet-600,#6b4fb3);}
+.res-foot{display:flex;align-items:center;justify-content:space-between;margin-top:2px;padding-top:9px;border-top:1px solid var(--border);}
+.res-foot .link-btn{font-size:12px;font-weight:600;color:var(--teal-600);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.res-foot .link-btn:hover{text-decoration:underline;}
+.res-actions{display:flex;gap:3px;}
+.res-actions button{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:13px;padding:4px 6px;border-radius:6px;}
+.res-actions button:hover{background:var(--paper-1);color:var(--text);}
+
+/* ---- topic cards ---- */
+.topic-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;cursor:pointer;
+  display:flex;flex-direction:column;gap:8px;transition:box-shadow .12s ease, border-color .12s ease;
+}
+.topic-card:hover{box-shadow:var(--shadow-2);border-color:var(--gold-500);}
+.topic-card .th{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.topic-card h4{margin:0;font-family:var(--font-display);font-size:15.5px;}
+.topic-card .tmeta{font-size:12px;color:var(--text-dim);}
+.topic-progress{height:5px;border-radius:4px;background:var(--paper-1);overflow:hidden;}
+.topic-progress i{display:block;height:100%;background:linear-gradient(90deg,var(--teal-500),var(--gold-500));}
+
+/* ---- table / bulk editor ---- */
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-m);background:var(--surface);}
+table.bulk{border-collapse:collapse;width:100%;font-size:12.5px;min-width:1180px;}
+table.bulk th{
+  text-align:left;padding:10px 10px;background:var(--surface-2);border-bottom:1px solid var(--border);
+  font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dim);position:sticky;top:0;cursor:pointer;white-space:nowrap;
+}
+table.bulk th:hover{color:var(--gold-600);}
+table.bulk td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+table.bulk tr:hover td{background:var(--surface-2);}
+table.bulk tr.row-incomplete td:first-child{box-shadow: inset 3px 0 0 var(--gold-500);}
+table.bulk input[type=text], table.bulk textarea, table.bulk select{
+  width:100%;border:1px solid transparent;background:transparent;color:var(--text);padding:6px 6px;border-radius:6px;font-size:12.5px;
+  font-family:inherit;resize:none;
+}
+table.bulk input[type=text]:hover, table.bulk select:hover, table.bulk textarea:hover{border-color:var(--border);}
+table.bulk input[type=text]:focus, table.bulk select:focus, table.bulk textarea:focus{
+  border-color:var(--gold-500);background:var(--surface);outline:none;box-shadow:0 0 0 2px var(--gold-100);
+}
+table.bulk .cell-fav{text-align:center;cursor:pointer;}
+table.bulk .rowactions{display:flex;gap:2px;white-space:nowrap;}
+table.bulk .rowactions button{background:none;border:none;cursor:pointer;color:var(--text-dim);padding:5px;border-radius:5px;}
+table.bulk .rowactions button:hover{background:var(--paper-1);color:var(--bad);}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+.table-toolbar .info{font-size:12px;color:var(--text-dim);}
+
+/* ---- modal ---- */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(10,16,25,.55);display:flex;align-items:center;justify-content:center;
+  z-index:100;padding:20px;backdrop-filter:blur(2px);
+}
+.modal{
+  background:var(--surface);border-radius:var(--radius-l);width:100%;max-width:620px;max-height:90vh;overflow-y:auto;
+  box-shadow:var(--shadow-3);border:1px solid var(--border);
+}
+.modal.small{max-width:420px;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+.modal-head h3{margin:0;font-family:var(--font-display);font-size:18px;}
+.modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-dim);}
+.modal-body{padding:20px 22px;}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:16px 22px;border-top:1px solid var(--border);}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
+.field input[type=text], .field input[type=url], .field textarea, .field select{
+  width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font-size:13.5px;outline:none;
+}
+.field input:focus, .field textarea:focus, .field select:focus{border-color:var(--gold-500);box-shadow:0 0 0 3px var(--gold-100);}
+.field textarea{resize:vertical;min-height:64px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field-hint{font-size:11px;color:var(--text-dim);margin-top:4px;}
+.chip-input{display:flex;flex-wrap:wrap;gap:6px;border:1px solid var(--border);border-radius:8px;padding:7px 8px;background:var(--surface-2);}
+.chip-input input{border:none;background:none;flex:1;min-width:90px;outline:none;font-size:13px;color:var(--text);}
+.chip-editable{display:flex;align-items:center;gap:5px;background:var(--paper-1);padding:2px 4px 2px 9px;border-radius:20px;font-size:12px;}
+.chip-editable button{background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:12px;padding:2px 5px;}
+.checkline{display:flex;align-items:center;gap:8px;font-size:13px;}
+
+/* toast */
+#toast-host{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:var(--ink-900);color:#fff;padding:11px 16px;border-radius:9px;font-size:13px;box-shadow:var(--shadow-3);
+  display:flex;align-items:center;gap:8px;animation:toastin .18s ease;
+}
+[data-theme="dark"] .toast{background:var(--surface-2);border:1px solid var(--border);}
+@keyframes toastin{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.kbd{font-family:var(--font-mono);font-size:11px;background:var(--paper-1);padding:1px 6px;border-radius:5px;border:1px solid var(--border);}
+
+/* misc */
+.flex-between{display:flex;align-items:center;justify-content:space-between;}
+.muted{color:var(--text-dim);}
+.hidden{display:none !important;}
+.fade-in{animation:fadein .16s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+@media(max-width:880px){
+  #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:60;transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-3);}
+  #sidebar.open{transform:translateX(0);}
+  #content{padding:18px 14px 60px;}
+  #topbar{padding:10px 14px;}
+  .search-wrap{max-width:none;}
+  table.bulk{min-width:1000px;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar"></aside>
+  <div id="main">
+    <header id="topbar"></header>
+    <main id="content"></main>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div id="toast-host"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONSTANTS
+   ============================================================ */
+const GRADES = ["5","6","7"];
+const SUBJECTS = ["Математика","ИТ"];
+const ADMIN_CATEGORIES = ["Заповеди","Протоколи","Планове","Атестация","Квалификация","НВО","Родителски срещи","Проекти","Други"];
+const PERSONAL_CATEGORIES = ["Финанси","Здраве","Дом","Семейство","Автомобил","Пътувания","Лична квалификация","Документи за самоличност","Друго"];
+const PERSONAL_ICON = {"Финанси":"💰","Здраве":"🩺","Дом":"🏠","Семейство":"👪","Автомобил":"🚗","Пътувания":"✈️","Лична квалификация":"🎓","Документи за самоличност":"🪪","Друго":"📁"};
+const RESOURCE_TYPES = ["PDF","Word","Excel","PowerPoint","OneDrive файл","GeoGebra","Kahoot","Wordwall","YouTube","Website","Сканиран документ","Изображение","Друг ресурс"];
+const TYPE_ICON = {
+  "PDF":"📕","Word":"📘","Excel":"📗","PowerPoint":"📙","OneDrive файл":"☁️","GeoGebra":"📐",
+  "Kahoot":"🎯","Wordwall":"🧩","YouTube":"▶️","Website":"🌐","Сканиран документ":"🖨️","Изображение":"🖼️","Друг ресурс":"📎"
+};
+const SUBJECT_ICON = {"Математика":"∑","ИТ":"💻"};
+const LS_KEYS = { resources:"teacherHub.resources", topics:"teacherHub.topics", settings:"teacherHub.settings" };
+function schoolYearOptions(){
+  const now = new Date();
+  const startBase = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear()-1;
+  const arr = [];
+  for(let i=-3;i<=3;i++){ const s = startBase+i; arr.push(s+"/"+(s+1)); }
+  return arr;
+}
+const SCHOOL_YEARS = schoolYearOptions();
+const RESOURCE_COLS = [
+  ["name","Име"],["resourceType","Тип"],["section","Раздел"],["grade","Клас"],["subject","Предмет"],
+  ["schoolYear","Уч. година"],["adminCategory","Адм. категория"],["personalCategory","Лична категория"],
+  ["topicId","Тема"],["tags","Тагове"],["link","Линк"],["favorite","★"],["archived","Архив"],["updatedAt","Обновен"]
+];
+
+/* ============================================================
+   UTIL
+   ============================================================ */
+function uid(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "id-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9);
+}
+function safeResourceUrl(value){
+  try { const u = new URL(value); return ["http:","https:"].includes(u.protocol) && !u.username && !u.password ? u.href : null; } catch { return null; }
+}
+function validateImport(data){
+  if(!data || !Array.isArray(data.resources) || !Array.isArray(data.topics) || data.resources.length>10000 || data.topics.length>10000) throw Error("format");
+  for(const list of [data.resources,data.topics]){
+    const ids=new Set();
+    for(const item of list){
+      if(!item || typeof item!=="object" || Array.isArray(item) || typeof item.id!=="string" || !/^[a-zA-Z0-9_-]{1,150}$/.test(item.id) || ids.has(item.id) || typeof item.name!=="string") throw Error("record");
+      ids.add(item.id);
+      if(item.grade && !GRADES.includes(item.grade)) throw Error("grade");
+      if(item.resourceType && !RESOURCE_TYPES.includes(item.resourceType)) throw Error("type");
+      if(item.section && !["learning","admin","personal"].includes(item.section)) throw Error("section");
+      for(const key of ["name","description","link","subject","adminCategory","personalCategory","schoolYear","createdAt","updatedAt","lastOpenedAt"]) if(item[key]!=null && typeof item[key]!=="string") throw Error("text");
+      for(const [key,value] of Object.entries(item)){
+        if(["__proto__","constructor","prototype"].includes(key)) throw Error("key");
+        if(key==="tags"){ if(!Array.isArray(value)||value.length>200||value.some(t=>typeof t!=="string"||t.length>1000)) throw Error("tags"); }
+        else if(value!==null && !["string","number","boolean"].includes(typeof value)) throw Error("value");
+        if(typeof value==="string" && value.length>100000) throw Error("length");
+      }
+      if(item.link && !safeResourceUrl(item.link)) throw Error("url");
+      if(item.topicId && !/^[a-zA-Z0-9_-]{1,150}$/.test(item.topicId)) throw Error("topic");
+    }
+  }
+  return data;
+}
+function nowISO(){ return new Date().toISOString(); }
+function escapeHtml(str){
+  if(str===undefined||str===null) return "";
+  return String(str).replace(/[&<>"']/g,function(c){
+    return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c];
+  });
+}
+function formatDate(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return "—";
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs/60000);
+  if(diffMin < 1) return "току-що";
+  if(diffMin < 60) return diffMin+" мин.";
+  const diffH = Math.floor(diffMin/60);
+  if(diffH < 24) return diffH+" ч.";
+  const diffD = Math.floor(diffH/24);
+  if(diffD < 7) return diffD+" д.";
+  return d.toLocaleDateString("bg-BG",{day:"2-digit",month:"2-digit",year:"numeric"});
+}
+function debounce(fn, ms){
+  let t; return function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args), ms); };
+}
+function toast(msg, icon){
+  const host = document.getElementById("toast-host");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = `<span>${icon||"✓"}</span><span>${escapeHtml(msg)}</span>`;
+  host.appendChild(el);
+  setTimeout(()=>{ el.style.transition="opacity .25s ease"; el.style.opacity="0"; setTimeout(()=>el.remove(),260); }, 2200);
+}
+function typeIcon(t){ return Object.hasOwn(TYPE_ICON,t) ? TYPE_ICON[t] : "📎"; }
+
+/* ============================================================
+   STATE / STORE
+   ============================================================ */
+const Store = {
+  resources: [],
+  topics: [],
+  settings: { theme:"light", sidebarOpenGroups:{}, hiddenResourceCols:[], savedViews:[] },
+
+  load(){
+    try{
+      const r = localStorage.getItem(LS_KEYS.resources);
+      const t = localStorage.getItem(LS_KEYS.topics);
+      const s = localStorage.getItem(LS_KEYS.settings);
+      this.resources = r ? JSON.parse(r) : seedResources();
+      this.topics = t ? JSON.parse(t) : seedTopics();
+      this.settings = s ? Object.assign({theme:"light",sidebarOpenGroups:{},hiddenResourceCols:[],savedViews:[]}, JSON.parse(s)) : this.settings;
+      // Missing keys stay empty until an explicit user change; never overwrite existing browser data on startup.
+    }catch(e){
+      this.loadFailed = true;
+      toast("Съхранените данни не могат да се прочетат. Не са променени; възстановете чрез Импорт.", "⚠️");
+      this.resources = seedResources();
+      this.topics = seedTopics();
+    }
+  },
+  save(){
+    if(this.loadFailed){ toast("Записът е спрян за защита на съществуващите данни. Използвайте Импорт.", "⚠️"); return; }
+    try{
+      localStorage.setItem(LS_KEYS.resources, JSON.stringify(this.resources));
+      localStorage.setItem(LS_KEYS.topics, JSON.stringify(this.topics));
+      localStorage.setItem(LS_KEYS.settings, JSON.stringify(this.settings));
+    }catch(e){
+      console.error("Грешка при запис", e);
+      toast("Грешка при автозапис — паметта може да е пълна", "⚠️");
+    }
+  },
+
+  addResource(data){
+    const res = Object.assign({
+      id: uid(), name:"", description:"", resourceType:"Друг ресурс", link:"",
+      tags:[], favorite:false, archived:false, section:"learning",
+      grade:null, subject:null, topicId:null, adminCategory:null, personalCategory:null, schoolYear:null,
+      createdAt: nowISO(), updatedAt: nowISO(), lastOpenedAt:null, order:Date.now()
+    }, data);
+    this.resources.unshift(res);
+    this.save();
+    return res;
+  },
+  updateResource(id, patch){
+    const r = this.resources.find(x=>x.id===id);
+    if(!r) return;
+    Object.assign(r, patch, {updatedAt: nowISO()});
+    this.save();
+    return r;
+  },
+  deleteResource(id){
+    this.resources = this.resources.filter(x=>x.id!==id);
+    this.save();
+  },
+  bulkSetArchived(ids, val){
+    const set = new Set(ids);
+    this.resources.forEach(r=>{ if(set.has(r.id)){ r.archived = val; r.updatedAt = nowISO(); } });
+    this.save();
+  },
+  bulkDelete(ids){
+    const set = new Set(ids);
+    this.resources = this.resources.filter(x=>!set.has(x.id));
+    this.save();
+  },
+  bulkAddTag(ids, tag){
+    tag = (tag||"").trim();
+    if(!tag) return;
+    const set = new Set(ids);
+    this.resources.forEach(r=>{
+      if(set.has(r.id)){
+        if(!r.tags) r.tags = [];
+        if(!r.tags.includes(tag)) r.tags.push(tag);
+        r.updatedAt = nowISO();
+      }
+    });
+    this.save();
+  },
+  duplicateResource(id){
+    const r = this.resources.find(x=>x.id===id);
+    if(!r) return;
+    const copy = Object.assign({}, r, {id: uid(), name: r.name + " (копие)", createdAt: nowISO(), updatedAt: nowISO(), lastOpenedAt:null, favorite:false, order:Date.now()});
+    this.resources.unshift(copy);
+    this.save();
+    return copy;
+  },
+  touchResource(id){
+    const r = this.resources.find(x=>x.id===id);
+    if(!r) return;
+    r.lastOpenedAt = nowISO();
+    this.save();
+  },
+
+  addTopic(data){
+    const t = Object.assign({
+      id: uid(), grade:null, subject:null, name:"", description:"", favorite:false,
+      createdAt: nowISO(), lastOpenedAt:null
+    }, data);
+    this.topics.unshift(t);
+    this.save();
+    return t;
+  },
+  updateTopic(id, patch){
+    const t = this.topics.find(x=>x.id===id);
+    if(!t) return;
+    Object.assign(t, patch);
+    this.save();
+    return t;
+  },
+  deleteTopic(id){
+    this.topics = this.topics.filter(x=>x.id!==id);
+    this.resources.forEach(r=>{ if(r.topicId===id) r.topicId = null; });
+    this.save();
+  },
+  touchTopic(id){
+    const t = this.topics.find(x=>x.id===id);
+    if(!t) return;
+    t.lastOpenedAt = nowISO();
+    this.save();
+  },
+
+  resourcesFor({grade, subject, topicId, adminCategory, personalCategory, includeArchived}={}){
+    return this.resources.filter(r=>{
+      if(!includeArchived && r.archived) return false;
+      if(grade!==undefined && r.grade!==grade) return false;
+      if(subject!==undefined && r.subject!==subject) return false;
+      if(topicId!==undefined && r.topicId!==topicId) return false;
+      if(adminCategory!==undefined && r.adminCategory!==adminCategory) return false;
+      if(personalCategory!==undefined && r.personalCategory!==personalCategory) return false;
+      return true;
+    });
+  },
+  counts(){
+    const c = { total: this.resources.filter(r=>!r.archived).length, archived: this.resources.filter(r=>r.archived).length, topics: this.topics.length,
+      byGradeSubject:{}, byAdmin:{}, byPersonal:{} };
+    GRADES.forEach(g=>{ c.byGradeSubject[g]={}; SUBJECTS.forEach(s=>{ c.byGradeSubject[g][s]=0; }); });
+    ADMIN_CATEGORIES.forEach(a=>c.byAdmin[a]=0);
+    PERSONAL_CATEGORIES.forEach(p=>c.byPersonal[p]=0);
+    this.resources.forEach(r=>{
+      if(r.archived) return;
+      if(r.section==="learning" && r.grade && r.subject && c.byGradeSubject[r.grade]) c.byGradeSubject[r.grade][r.subject]++;
+      if(r.section==="admin" && r.adminCategory!==undefined) c.byAdmin[r.adminCategory] = (c.byAdmin[r.adminCategory]||0)+1;
+      if(r.section==="personal" && r.personalCategory!==undefined) c.byPersonal[r.personalCategory] = (c.byPersonal[r.personalCategory]||0)+1;
+    });
+    return c;
+  }
+};
+
+function seedResources(){ return []; }
+function seedTopics(){ return []; }
+
+/* ============================================================
+   ROUTER / VIEW STATE
+   ============================================================ */
+const View = {
+  route: {name:"dashboard", params:{}},
+  searchQuery: "",
+  tableFilter: "",
+  sortCol: "updatedAt",
+  sortDir: "desc",
+  tableTab: "resources",
+  topicSortCol: "name",
+  topicSortDir: "asc",
+  fieldFilters: {section:"", grade:"", subject:"", resourceType:"", tag:"", schoolYear:"", adminCategory:"", personalCategory:""},
+  incompleteOnly: false,
+  go(name, params){
+    if(this.route.name==="table" && name!=="table"){ selectedResourceIds.clear(); }
+    this.route = {name, params: params||{}};
+    this.searchQuery = "";
+    render();
+    document.getElementById("content").scrollTop = 0;
+    window.scrollTo(0,0);
+  }
+};
+let selectedResourceIds = new Set();
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+function toggleGroup(key){
+  Store.settings.sidebarOpenGroups[key] = !Store.settings.sidebarOpenGroups[key];
+  Store.save();
+  renderSidebar();
+}
+function isGroupOpen(key){ return !!Store.settings.sidebarOpenGroups[key]; }
+
+function renderSidebar(){
+  const counts = Store.counts();
+  const r = View.route;
+  const activeIs = (name, params)=>{
+    if(r.name!==name) return false;
+    if(!params) return true;
+    return Object.keys(params).every(k=>r.params[k]===params[k]);
+  };
+
+  let learningChildren = "";
+  GRADES.forEach(g=>{
+    const gKey = "grade-"+g;
+    const gOpen = isGroupOpen(gKey);
+    let subjChildren = "";
+    SUBJECTS.forEach(s=>{
+      const cnt = counts.byGradeSubject[g][s]||0;
+      subjChildren += `
+        <button class="nav-item ${activeIs('subject',{grade:g,subject:s})?'active':''}" data-nav="subject" data-grade="${g}" data-subject="${s}">
+          <span class="ico">${SUBJECT_ICON[s]||"📚"}</span><span class="lbl">${s}</span><span class="count">${cnt}</span>
+        </button>`;
+    });
+    const gTotal = (counts.byGradeSubject[g]["Математика"]||0)+(counts.byGradeSubject[g]["ИТ"]||0);
+    learningChildren += `
+      <div class="nav-section">
+        <button class="nav-item" data-toggle="${gKey}">
+          <span class="ico">🎓</span><span class="lbl">${g}. клас</span><span class="count">${gTotal}</span>
+          <span class="nav-caret ${gOpen?'open':''}">▶</span>
+        </button>
+        <div class="nav-children ${gOpen?'open':''}">${subjChildren}</div>
+      </div>`;
+  });
+
+  let adminChildren = "";
+  ADMIN_CATEGORIES.forEach(a=>{
+    adminChildren += `
+      <button class="nav-item ${activeIs('admin',{cat:a})?'active':''}" data-nav="admin" data-cat="${escapeHtml(a)}">
+        <span class="ico">🗂️</span><span class="lbl">${a}</span><span class="count">${counts.byAdmin[a]||0}</span>
+      </button>`;
+  });
+
+  let personalChildren = "";
+  PERSONAL_CATEGORIES.forEach(p=>{
+    personalChildren += `
+      <button class="nav-item ${activeIs('personal',{cat:p})?'active':''}" data-nav="personal" data-cat="${escapeHtml(p)}">
+        <span class="ico">${PERSONAL_ICON[p]||"📁"}</span><span class="lbl">${p}</span><span class="count">${counts.byPersonal[p]||0}</span>
+      </button>`;
+  });
+
+  const learnOpen = isGroupOpen("learning-root");
+  const adminOpen = isGroupOpen("admin-root");
+  const personalOpen = isGroupOpen("personal-root");
+
+  document.getElementById("sidebar").innerHTML = `
+    <div class="brand">
+      <div class="brand-mark">К</div>
+      <div class="brand-text"><div class="t1">Кабинет</div><div class="t2">Учителски портал</div></div>
+    </div>
+    <nav class="navtree">
+      <button class="nav-item ${activeIs('dashboard')?'active':''}" data-nav="dashboard">
+        <span class="ico">🏠</span><span class="lbl">Табло</span>
+      </button>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <button class="nav-item" data-toggle="learning-root">
+          <span class="ico">📚</span><span class="lbl">Учебни ресурси</span><span class="count">${counts.total - Object.values(counts.byAdmin).reduce((a,b)=>a+b,0) - Object.values(counts.byPersonal).reduce((a,b)=>a+b,0)}</span>
+          <span class="nav-caret ${learnOpen?'open':''}">▶</span>
+        </button>
+        <div class="nav-children ${learnOpen?'open':''}">${learningChildren}</div>
+      </div>
+
+      <div class="nav-section">
+        <button class="nav-item" data-toggle="admin-root">
+          <span class="ico">🏛️</span><span class="lbl">Администрация</span><span class="count">${Object.values(counts.byAdmin).reduce((a,b)=>a+b,0)}</span>
+          <span class="nav-caret ${adminOpen?'open':''}">▶</span>
+        </button>
+        <div class="nav-children ${adminOpen?'open':''}">${adminChildren}</div>
+      </div>
+
+      <div class="nav-section">
+        <button class="nav-item" data-toggle="personal-root">
+          <span class="ico">🗂️</span><span class="lbl">Лично</span><span class="count">${Object.values(counts.byPersonal).reduce((a,b)=>a+b,0)}</span>
+          <span class="nav-caret ${personalOpen?'open':''}">▶</span>
+        </button>
+        <div class="nav-children ${personalOpen?'open':''}">${personalChildren}</div>
+      </div>
+
+      <div class="nav-divider"></div>
+      <button class="nav-item ${activeIs('topics')?'active':''}" data-nav="topics">
+        <span class="ico">🧵</span><span class="lbl">Теми</span><span class="count">${counts.topics}</span>
+      </button>
+      <button class="nav-item ${activeIs('table')?'active':''}" data-nav="table">
+        <span class="ico">📊</span><span class="lbl">Всички данни</span><span class="count">${counts.total}</span>
+      </button>
+      <button class="nav-item ${activeIs('favorites')?'active':''}" data-nav="favorites">
+        <span class="ico">⭐</span><span class="lbl">Любими</span>
+      </button>
+      <button class="nav-item ${activeIs('archive')?'active':''}" data-nav="archive">
+        <span class="ico">📦</span><span class="lbl">Архив</span><span class="count">${counts.archived}</span>
+      </button>
+
+      <div class="nav-divider"></div>
+      <button class="nav-item ${activeIs('settings')?'active':''}" data-nav="settings">
+        <span class="ico">⚙️</span><span class="lbl">Настройки</span>
+      </button>
+    </nav>
+    <div class="sidebar-foot">Данните се пазят локално в браузъра ви. Файловете остават в OneDrive.</div>
+  `;
+
+  document.getElementById("sidebar").querySelectorAll("[data-toggle]").forEach(el=>{
+    el.addEventListener("click", ()=>toggleGroup(el.getAttribute("data-toggle")));
+  });
+  document.getElementById("sidebar").querySelectorAll("[data-nav]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const nav = el.getAttribute("data-nav");
+      if(nav==="dashboard") View.go("dashboard");
+      else if(nav==="subject") View.go("subject", {grade: el.getAttribute("data-grade"), subject: el.getAttribute("data-subject")});
+      else if(nav==="admin") View.go("admin", {cat: el.getAttribute("data-cat")});
+      else if(nav==="personal") View.go("personal", {cat: el.getAttribute("data-cat")});
+      else if(nav==="topics") View.go("topics");
+      else if(nav==="table") View.go("table");
+      else if(nav==="favorites") View.go("favorites");
+      else if(nav==="archive") View.go("archive");
+      else if(nav==="settings") View.go("settings");
+      closeSidebarMobile();
+    });
+  });
+}
+function closeSidebarMobile(){ document.getElementById("sidebar").classList.remove("open"); }
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+function renderTopbar(){
+  const theme = Store.settings.theme;
+  document.getElementById("topbar").innerHTML = `
+    <button class="icon-btn" id="btnMenu" style="display:none">☰</button>
+    <div class="search-wrap">
+      <span class="sico">🔍</span>
+      <input id="globalSearch" type="text" placeholder="Търсене по име, клас, предмет, тема, тагове…" value="${escapeHtml(View.searchQuery)}">
+      <button class="search-clear" id="searchClear">✕</button>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" id="btnTheme" title="Смяна на тема">${theme==="dark"?"☀️":"🌙"}</button>
+      <button class="btn btn-ghost" id="btnAddTopic">+ Тема</button>
+      <button class="btn btn-primary" id="btnAddResource">+ Ресурс</button>
+    </div>
+  `;
+  const input = document.getElementById("globalSearch");
+  const clearBtn = document.getElementById("searchClear");
+  clearBtn.style.display = View.searchQuery ? "block" : "none";
+  input.addEventListener("input", debounce(e=>{
+    View.searchQuery = e.target.value;
+    document.getElementById("searchClear").style.display = View.searchQuery ? "block":"none";
+    renderContent();
+  }, 160));
+  clearBtn.addEventListener("click", ()=>{ View.searchQuery=""; input.value=""; clearBtn.style.display="none"; input.focus(); renderContent(); });
+  document.getElementById("btnTheme").addEventListener("click", toggleTheme);
+  document.getElementById("btnAddResource").addEventListener("click", ()=>openResourceModal());
+  document.getElementById("btnAddTopic").addEventListener("click", ()=>openTopicModal());
+
+  if(window.innerWidth <= 880){
+    document.getElementById("btnMenu").style.display = "flex";
+    document.getElementById("btnMenu").addEventListener("click", ()=>{
+      document.getElementById("sidebar").classList.toggle("open");
+    });
+  }
+}
+function toggleTheme(){
+  Store.settings.theme = Store.settings.theme==="dark" ? "light" : "dark";
+  Store.save();
+  applyTheme();
+  renderTopbar();
+}
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", Store.settings.theme==="dark" ? "dark" : "light");
+}
+
+/* ============================================================
+   RESOURCE CARD RENDERING
+   ============================================================ */
+function tagsChipsHtml(r){
+  let out = "";
+  if(r.section==="learning"){
+    if(r.grade) out += `<span class="chip grade">${escapeHtml(r.grade)}. клас</span>`;
+    if(r.subject) out += `<span class="chip subject">${escapeHtml(r.subject)}</span>`;
+  } else if(r.section==="admin" && r.adminCategory){
+    out += `<span class="chip admin">${escapeHtml(r.adminCategory)}</span>`;
+  } else if(r.section==="personal" && r.personalCategory){
+    out += `<span class="chip personal">${PERSONAL_ICON[r.personalCategory]||"📁"} ${escapeHtml(r.personalCategory)}</span>`;
+  }
+  (r.tags||[]).forEach(t=> out += `<span class="chip">#${escapeHtml(t)}</span>`);
+  return out;
+}
+function resourceCardHtml(r, opts={}){
+  return `
+  <div class="res-card fade-in" draggable="true" data-res-id="${escapeHtml(r.id)}">
+    <div class="res-top">
+      <div class="res-ico" style="background:var(--paper-1)">${typeIcon(r.resourceType)}</div>
+      <div class="res-title">
+        <div class="name" data-open-res="${escapeHtml(r.id)}">${escapeHtml(r.name)||"(без име)"}</div>
+        <div class="type">${escapeHtml(r.resourceType)}</div>
+      </div>
+      <button class="fav-btn ${r.favorite?'active':''}" data-fav-res="${escapeHtml(r.id)}" title="Любимо">★</button>
+    </div>
+    ${r.description ? `<div class="res-desc">${escapeHtml(r.description)}</div>` : ""}
+    <div class="res-tags">${tagsChipsHtml(r)}</div>
+    <div class="res-foot">
+      <button class="link-btn" data-open-res="${escapeHtml(r.id)}">🔗 Отвори</button>
+      <div class="res-actions">
+        <button data-edit-res="${escapeHtml(r.id)}" title="Редактирай">✎</button>
+        <button data-dup-res="${escapeHtml(r.id)}" title="Дублирай">⧉</button>
+        <button data-arc-res="${escapeHtml(r.id)}" title="${r.archived?'Възстанови':'Архивирай'}">${r.archived?'♻️':'🗄️'}</button>
+        <button data-del-res="${escapeHtml(r.id)}" title="Изтрий">🗑️</button>
+      </div>
+    </div>
+  </div>`;
+}
+function bindResourceCardEvents(container){
+  container.querySelectorAll("[data-open-res]").forEach(el=>{
+    el.addEventListener("click", ()=>openResourceLink(el.getAttribute("data-open-res")));
+  });
+  container.querySelectorAll("[data-fav-res]").forEach(el=>{
+    el.addEventListener("click", (e)=>{ e.stopPropagation(); const id=el.getAttribute("data-fav-res"); const r=Store.resources.find(x=>x.id===id); Store.updateResource(id,{favorite: !r.favorite}); renderContent(); renderSidebar(); });
+  });
+  container.querySelectorAll("[data-edit-res]").forEach(el=>{
+    el.addEventListener("click", ()=>openResourceModal(el.getAttribute("data-edit-res")));
+  });
+  container.querySelectorAll("[data-dup-res]").forEach(el=>{
+    el.addEventListener("click", ()=>{ Store.duplicateResource(el.getAttribute("data-dup-res")); toast("Ресурсът е дублиран","⧉"); renderContent(); renderSidebar(); });
+  });
+  container.querySelectorAll("[data-arc-res]").forEach(el=>{
+    el.addEventListener("click", ()=>{ const id=el.getAttribute("data-arc-res"); const r=Store.resources.find(x=>x.id===id); Store.updateResource(id,{archived: !r.archived}); toast(r.archived?"Възстановено":"Преместено в архив","🗄️"); renderContent(); renderSidebar(); });
+  });
+  container.querySelectorAll("[data-del-res]").forEach(el=>{
+    el.addEventListener("click", ()=>confirmModal("Изтриване на ресурс","Действието е необратимо. Сигурни ли сте?",()=>{ Store.deleteResource(el.getAttribute("data-del-res")); toast("Ресурсът е изтрит","🗑️"); renderContent(); renderSidebar(); }));
+  });
+  // drag reorder
+  let dragId = null;
+  container.querySelectorAll("[data-res-id]").forEach(card=>{
+    card.addEventListener("dragstart", ()=>{ dragId = card.getAttribute("data-res-id"); card.classList.add("dragging"); });
+    card.addEventListener("dragend", ()=>{ card.classList.remove("dragging"); });
+    card.addEventListener("dragover", (e)=>{ e.preventDefault(); });
+    card.addEventListener("drop", (e)=>{
+      e.preventDefault();
+      const targetId = card.getAttribute("data-res-id");
+      if(!dragId || dragId===targetId) return;
+      const a = Store.resources.find(x=>x.id===dragId);
+      const b = Store.resources.find(x=>x.id===targetId);
+      if(a && b){ const tmp=a.order; a.order=b.order; b.order=tmp; Store.save(); renderContent(); }
+    });
+  });
+}
+function openResourceLink(id){
+  const r = Store.resources.find(x=>x.id===id);
+  if(!r) return;
+  Store.touchResource(id);
+  if(r.link){ const url=safeResourceUrl(r.link); if(!url){ toast("Разрешени са само валидни HTTP/HTTPS връзки", "⚠️"); return; } window.open(url, "_blank", "noopener,noreferrer"); }
+  else { toast("Няма зададен линк за този ресурс","ℹ️"); }
+  renderContent();
+}
+
+/* ============================================================
+   PAGE: DASHBOARD
+   ============================================================ */
+function pageDashboard(){
+  const counts = Store.counts();
+  const active = Store.resources.filter(r=>!r.archived);
+  const recent = [...active].filter(r=>r.lastOpenedAt).sort((a,b)=> new Date(b.lastOpenedAt)-new Date(a.lastOpenedAt)).slice(0,6);
+  const favRes = active.filter(r=>r.favorite).slice(0,6);
+  const favTopics = Store.topics.filter(t=>t.favorite).slice(0,4);
+  const recentTopics = [...Store.topics].filter(t=>t.lastOpenedAt).sort((a,b)=> new Date(b.lastOpenedAt)-new Date(a.lastOpenedAt)).slice(0,4);
+
+  return `
+    <div class="page-head">
+      <div>
+        <div class="page-eyebrow">Добре дошли</div>
+        <h1>Табло</h1>
+        <p class="page-sub">Бърз преглед на вашия дигитален кабинет</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" data-qa="export">⬇ Експорт</button>
+        <button class="btn btn-ghost" data-qa="import">⬆ Импорт</button>
+        <button class="btn btn-primary" data-qa="add">+ Нов ресурс</button>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="num">${counts.total}</div><div class="lbl">Активни ресурси</div></div>
+      <div class="stat-card"><div class="num">${counts.topics}</div><div class="lbl">Теми</div></div>
+      <div class="stat-card"><div class="num">${active.filter(r=>r.favorite).length}</div><div class="lbl">Любими</div></div>
+      <div class="stat-card"><div class="num">${counts.archived}</div><div class="lbl">В архива</div></div>
+      <div class="stat-card"><div class="num">${Object.values(counts.byAdmin).reduce((a,b)=>a+b,0)}</div><div class="lbl">Администрация</div></div>
+      <div class="stat-card"><div class="num">${Object.values(counts.byPersonal).reduce((a,b)=>a+b,0)}</div><div class="lbl">Лично</div></div>
+    </div>
+
+    <div class="section-title">🕓 Последно отваряни ресурси</div>
+    ${recent.length ? `<div class="res-grid">${recent.map(r=>resourceCardHtml(r)).join("")}</div>` :
+      `<div class="empty-state"><div class="ee-ico">🕓</div><h3>Още няма история</h3><p>Отворените ресурси ще се появят тук.</p></div>`}
+
+    <div class="section-title">⭐ Любими ресурси <span class="tag">${favRes.length}</span></div>
+    ${favRes.length ? `<div class="res-grid">${favRes.map(r=>resourceCardHtml(r)).join("")}</div>` :
+      `<div class="empty-state"><div class="ee-ico">⭐</div><h3>Няма любими ресурси</h3><p>Отбележете важните ресурси със звездичка за бърз достъп.</p></div>`}
+
+    ${(favTopics.length || recentTopics.length) ? `
+    <div class="section-title">🧵 Теми на фокус</div>
+    <div class="tile-grid">
+      ${[...new Map([...favTopics, ...recentTopics].map(t=>[t.id,t])).values()].slice(0,6).map(t=>topicTileHtml(t)).join("")}
+    </div>` : ""}
+  `;
+}
+function bindDashboardEvents(){
+  const q = document.querySelector('[data-qa="add"]'); if(q) q.addEventListener("click", ()=>openResourceModal());
+  const ex = document.querySelector('[data-qa="export"]'); if(ex) ex.addEventListener("click", exportData);
+  const im = document.querySelector('[data-qa="import"]'); if(im) im.addEventListener("click", triggerImport);
+}
+
+/* ============================================================
+   PAGE: LEARNING SUBJECT (grade + subject)
+   ============================================================ */
+function topicProgressPct(topicId){
+  const items = Store.resources.filter(r=>r.topicId===topicId && !r.archived);
+  if(!items.length) return 0;
+  return Math.min(100, items.length*14);
+}
+function topicTileHtml(t){
+  const items = Store.resources.filter(r=>r.topicId===t.id && !r.archived);
+  return `
+  <div class="topic-card" data-open-topic="${escapeHtml(t.id)}">
+    <div class="th">
+      <h4>${escapeHtml(t.name)}</h4>
+      <button class="fav-btn ${t.favorite?'active':''}" data-fav-topic="${escapeHtml(t.id)}">★</button>
+    </div>
+    <div class="tmeta">${t.grade?escapeHtml(t.grade)+'. клас · ':''}${t.subject?escapeHtml(t.subject):''} ${t.grade||t.subject?'·':''} ${items.length} ${items.length===1?'ресурс':'ресурса'}</div>
+    <div class="topic-progress"><i style="width:${topicProgressPct(t.id)}%"></i></div>
+  </div>`;
+}
+function bindTopicTileEvents(container){
+  container.querySelectorAll("[data-open-topic]").forEach(el=>{
+    el.addEventListener("click", ()=>{ Store.touchTopic(el.getAttribute("data-open-topic")); View.go("topic",{id: el.getAttribute("data-open-topic")}); });
+  });
+  container.querySelectorAll("[data-fav-topic]").forEach(el=>{
+    el.addEventListener("click",(e)=>{ e.stopPropagation(); const id=el.getAttribute("data-fav-topic"); const t=Store.topics.find(x=>x.id===id); Store.updateTopic(id,{favorite: !t.favorite}); renderContent(); });
+  });
+}
+
+function pageSubject(grade, subject){
+  const topics = Store.topics.filter(t=>t.grade===grade && t.subject===subject);
+  const orphan = Store.resourcesFor({grade, subject, topicId:null}).sort((a,b)=>b.order-a.order);
+  return `
+    <div class="breadcrumbs">
+      <button data-crumb="dashboard">Табло</button><span class="sep">›</span>
+      <button data-crumb="dashboard">Учебни ресурси</button><span class="sep">›</span>
+      <span>${grade}. клас · ${escapeHtml(subject)}</span>
+    </div>
+    <div class="page-head">
+      <div>
+        <div class="page-eyebrow">${grade}. клас</div>
+        <h1>${SUBJECT_ICON[subject]||""} ${escapeHtml(subject)}</h1>
+        <p class="page-sub">${topics.length} теми · ${orphan.length + topics.reduce((s,t)=>s+Store.resources.filter(r=>r.topicId===t.id&&!r.archived).length,0)} ресурса</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" data-qa="addtopic">+ Тема</button>
+        <button class="btn btn-primary" data-qa="addres">+ Ресурс</button>
+      </div>
+    </div>
+
+    <div class="section-title">🧵 Теми</div>
+    ${topics.length ? `<div class="tile-grid">${topics.map(t=>topicTileHtml(t)).join("")}</div>` :
+      `<div class="empty-state"><div class="ee-ico">🧵</div><h3>Няма теми още</h3><p>Групирайте ресурси в тема, за да изградите пълен образователен комплект.</p><button class="btn btn-primary" data-qa="addtopic2">+ Създай тема</button></div>`}
+
+    <div class="section-title">📎 Ресурси без тема <span class="tag">${orphan.length}</span></div>
+    ${orphan.length ? `<div class="res-grid" id="orphanGrid">${orphan.map(r=>resourceCardHtml(r)).join("")}</div>` :
+      `<div class="empty-state"><div class="ee-ico">📎</div><h3>Няма самостоятелни ресурси</h3><p>Всички ресурси тук са организирани в теми.</p></div>`}
+  `;
+}
+
+/* ============================================================
+   PAGE: TOPIC DETAIL
+   ============================================================ */
+function pageTopic(id){
+  const t = Store.topics.find(x=>x.id===id);
+  if(!t) return `<div class="empty-state"><h3>Темата не е намерена</h3></div>`;
+  const items = Store.resources.filter(r=>r.topicId===id && !r.archived).sort((a,b)=>b.order-a.order);
+  const grouped = {};
+  items.forEach(r=>{ (grouped[r.resourceType] = grouped[r.resourceType]||[]).push(r); });
+  return `
+    <div class="breadcrumbs">
+      <button data-crumb="dashboard">Табло</button><span class="sep">›</span>
+      ${t.grade&&t.subject?`<button data-crumb="subject" data-grade="${escapeHtml(t.grade)}" data-subject="${escapeHtml(t.subject)}">${escapeHtml(t.grade)}. клас · ${escapeHtml(t.subject)}</button><span class="sep">›</span>`:`<button data-crumb="topics">Теми</button><span class="sep">›</span>`}
+      <span>${escapeHtml(t.name)}</span>
+    </div>
+    <div class="page-head">
+      <div>
+        <div class="page-eyebrow">Образователен комплект</div>
+        <h1>🧵 ${escapeHtml(t.name)}</h1>
+        <p class="page-sub">${escapeHtml(t.description||"")||"&nbsp;"}</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="fav-btn ${t.favorite?'active':''}" style="font-size:22px" data-fav-topic="${escapeHtml(t.id)}">★</button>
+        <button class="btn btn-ghost" data-qa="edittopic">✎ Редактирай темата</button>
+        <button class="btn btn-primary" data-qa="addres">+ Ресурс в темата</button>
+      </div>
+    </div>
+    ${items.length ? Object.keys(grouped).map(type=>`
+      <div class="section-title">${typeIcon(type)} ${type} <span class="tag">${grouped[type].length}</span></div>
+      <div class="res-grid">${grouped[type].map(r=>resourceCardHtml(r)).join("")}</div>
+    `).join("") : `<div class="empty-state"><div class="ee-ico">🧵</div><h3>Темата е празна</h3><p>Добавете презентации, тестове, работни листове или интерактивни ресурси.</p></div>`}
+    <div style="margin-top:30px;text-align:right;">
+      <button class="btn btn-danger btn-sm" data-qa="deltopic">🗑️ Изтрий темата</button>
+    </div>
+  `;
+}
+
+/* ============================================================
+   PAGE: TOPICS (all)
+   ============================================================ */
+function pageTopics(){
+  const q = View.tableFilter.toLowerCase();
+  let list = [...Store.topics];
+  if(q) list = list.filter(t=> (t.name+t.description+(t.grade||"")+(t.subject||"")).toLowerCase().includes(q));
+  const groups = {};
+  list.forEach(t=>{ const key = t.grade? `${escapeHtml(t.grade)}. клас · ${t.subject||"Без предмет"}` : "Без клас/предмет"; (groups[key]=groups[key]||[]).push(t); });
+  return `
+    <div class="page-head">
+      <div><div class="page-eyebrow">База знания</div><h1>🧵 Теми</h1><p class="page-sub">${Store.topics.length} образователни комплекта</p></div>
+      <button class="btn btn-primary" data-qa="addtopic">+ Нова тема</button>
+    </div>
+    ${list.length ? Object.keys(groups).map(k=>`
+      <div class="section-title">${k}</div>
+      <div class="tile-grid">${groups[k].map(t=>topicTileHtml(t)).join("")}</div>
+    `).join("") : `<div class="empty-state"><div class="ee-ico">🧵</div><h3>Няма намерени теми</h3></div>`}
+  `;
+}
+
+/* ============================================================
+   PAGE: ADMIN CATEGORY
+   ============================================================ */
+function pageAdmin(cat){
+  const items = Store.resourcesFor({adminCategory:cat}).sort((a,b)=>b.order-a.order);
+  return `
+    <div class="breadcrumbs"><button data-crumb="dashboard">Табло</button><span class="sep">›</span><button data-crumb="dashboard">Администрация</button><span class="sep">›</span><span>${escapeHtml(cat)}</span></div>
+    <div class="page-head">
+      <div><div class="page-eyebrow">Администрация</div><h1>🗂️ ${escapeHtml(cat)}</h1><p class="page-sub">${items.length} документа</p></div>
+      <button class="btn btn-primary" data-qa="addres">+ Документ</button>
+    </div>
+    ${items.length ? `<div class="res-grid">${items.map(r=>resourceCardHtml(r)).join("")}</div>` :
+      `<div class="empty-state"><div class="ee-ico">🗂️</div><h3>Няма документи в тази категория</h3><p>Добавете заповеди, протоколи или други административни документи.</p></div>`}
+  `;
+}
+
+/* ============================================================
+   PAGE: PERSONAL CATEGORY
+   ============================================================ */
+function pagePersonal(cat){
+  const items = Store.resourcesFor({personalCategory:cat}).sort((a,b)=>b.order-a.order);
+  return `
+    <div class="breadcrumbs"><button data-crumb="dashboard">Табло</button><span class="sep">›</span><button data-crumb="dashboard">Лично</button><span class="sep">›</span><span>${escapeHtml(cat)}</span></div>
+    <div class="page-head">
+      <div><div class="page-eyebrow">Лично</div><h1>${PERSONAL_ICON[cat]||"📁"} ${escapeHtml(cat)}</h1><p class="page-sub">${items.length} документа</p></div>
+      <button class="btn btn-primary" data-qa="addres">+ Документ</button>
+    </div>
+    ${items.length ? `<div class="res-grid">${items.map(r=>resourceCardHtml(r)).join("")}</div>` :
+      `<div class="empty-state"><div class="ee-ico">${PERSONAL_ICON[cat]||"📁"}</div><h3>Няма документи в тази категория</h3><p>Добавете лични документи, свързани с „${escapeHtml(cat)}“.</p></div>`}
+  `;
+}
+
+/* ============================================================
+   PAGE: FAVORITES
+   ============================================================ */
+function pageFavorites(){
+  const favRes = Store.resources.filter(r=>r.favorite && !r.archived);
+  const favTopics = Store.topics.filter(t=>t.favorite);
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Бърз достъп</div><h1>⭐ Любими</h1><p class="page-sub">${favRes.length} ресурса · ${favTopics.length} теми</p></div></div>
+    <div class="section-title">Ресурси</div>
+    ${favRes.length ? `<div class="res-grid">${favRes.map(r=>resourceCardHtml(r)).join("")}</div>` : `<div class="empty-state"><div class="ee-ico">⭐</div><h3>Няма любими ресурси</h3></div>`}
+    <div class="section-title">Теми</div>
+    ${favTopics.length ? `<div class="tile-grid">${favTopics.map(t=>topicTileHtml(t)).join("")}</div>` : `<div class="empty-state"><div class="ee-ico">🧵</div><h3>Няма любими теми</h3></div>`}
+  `;
+}
+
+/* ============================================================
+   PAGE: ARCHIVE
+   ============================================================ */
+function pageArchive(){
+  const items = Store.resources.filter(r=>r.archived).sort((a,b)=> new Date(b.updatedAt)-new Date(a.updatedAt));
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Съхранение</div><h1>📦 Архив</h1><p class="page-sub">${items.length} архивирани ресурса</p></div></div>
+    ${items.length ? `<div class="res-grid">${items.map(r=>resourceCardHtml(r)).join("")}</div>` : `<div class="empty-state"><div class="ee-ico">📦</div><h3>Архивът е празен</h3><p>Архивираните ресурси остават тук, докато не бъдат възстановени или изтрити.</p></div>`}
+  `;
+}
+
+/* ============================================================
+   PAGE: SEARCH RESULTS
+   ============================================================ */
+function pageSearch(query){
+  const q = query.toLowerCase();
+  const matchRes = Store.resources.filter(r=>!r.archived && [r.name,r.description,r.grade,r.subject,r.adminCategory,r.personalCategory,r.schoolYear,(r.tags||[]).join(" ")].join(" ").toLowerCase().includes(q));
+  const matchTopics = Store.topics.filter(t=>[t.name,t.description,t.grade,t.subject].join(" ").toLowerCase().includes(q));
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Резултати от търсене</div><h1>🔍 „${escapeHtml(query)}“</h1><p class="page-sub">${matchRes.length} ресурса · ${matchTopics.length} теми</p></div></div>
+    ${matchTopics.length ? `<div class="section-title">Теми</div><div class="tile-grid">${matchTopics.map(t=>topicTileHtml(t)).join("")}</div>` : ""}
+    <div class="section-title">Ресурси</div>
+    ${matchRes.length ? `<div class="res-grid">${matchRes.map(r=>resourceCardHtml(r)).join("")}</div>` : `<div class="empty-state"><div class="ee-ico">🔍</div><h3>Няма съвпадения</h3><p>Опитайте с друга ключова дума.</p></div>`}
+  `;
+}
+
+/* ============================================================
+   PAGE: TABLE (bulk editor) — resources + topics
+   ============================================================ */
+function pageTable(){
+  const tab = View.tableTab;
+  return `
+    <div class="page-head">
+      <div><div class="page-eyebrow">Масов редактор</div><h1>📊 Всички данни</h1><p class="page-sub">Редактирайте директно в таблицата — като в Excel</p></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" data-qa="export">⬇ Експорт</button>
+        <button class="btn btn-primary" data-qa="${tab==='topics'?'addtopicrow':'addrow'}">+ ${tab==='topics'?'Тема':'Ред'}</button>
+      </div>
+    </div>
+    <div class="table-toolbar" style="margin-bottom:6px;">
+      <div style="display:flex;gap:6px;">
+        <button class="btn ${tab==='resources'?'btn-primary':'btn-ghost'} btn-sm" data-tabswitch="resources">📎 Ресурси <span class="tag" style="margin-left:5px;">${Store.resources.length}</span></button>
+        <button class="btn ${tab==='topics'?'btn-primary':'btn-ghost'} btn-sm" data-tabswitch="topics">🧵 Теми <span class="tag" style="margin-left:5px;">${Store.topics.length}</span></button>
+      </div>
+    </div>
+    ${tab==='topics' ? pageTableTopics() : pageTableResources()}
+  `;
+}
+
+function isIncompleteResource(r){
+  return !(r.tags && r.tags.length) || !(r.description && r.description.trim()) || (r.section==="learning" && !r.topicId);
+}
+function pageTableResources(){
+  let items = [...Store.resources];
+  const q = View.tableFilter.toLowerCase();
+  if(q) items = items.filter(r=> [r.name,r.description,r.grade,r.subject,r.adminCategory,r.personalCategory,r.schoolYear,(r.tags||[]).join(" ")].join(" ").toLowerCase().includes(q));
+
+  const ff = View.fieldFilters;
+  if(ff.section) items = items.filter(r=>r.section===ff.section);
+  if(ff.grade) items = items.filter(r=>r.grade===ff.grade);
+  if(ff.subject) items = items.filter(r=>r.subject===ff.subject);
+  if(ff.resourceType) items = items.filter(r=>r.resourceType===ff.resourceType);
+  if(ff.tag) items = items.filter(r=>(r.tags||[]).includes(ff.tag));
+  if(ff.schoolYear) items = items.filter(r=>r.schoolYear===ff.schoolYear);
+  if(ff.adminCategory) items = items.filter(r=>r.adminCategory===ff.adminCategory);
+  if(ff.personalCategory) items = items.filter(r=>r.personalCategory===ff.personalCategory);
+  if(View.incompleteOnly) items = items.filter(isIncompleteResource);
+
+  items.sort((a,b)=>{
+    let av=a[View.sortCol], bv=b[View.sortCol];
+    if(View.sortCol==="tags"){ av=(a.tags||[]).join(","); bv=(b.tags||[]).join(","); }
+    av = av===null||av===undefined?"":av; bv = bv===null||bv===undefined?"":bv;
+    if(typeof av==="boolean"){ av=av?1:0; bv=bv?1:0; }
+    if(av<bv) return View.sortDir==="asc"?-1:1;
+    if(av>bv) return View.sortDir==="asc"?1:-1;
+    return 0;
+  });
+
+  const hidden = new Set(Store.settings.hiddenResourceCols||[]);
+  const visibleCols = RESOURCE_COLS.filter(([key])=>!hidden.has(key));
+  const allTags = Array.from(new Set(Store.resources.flatMap(r=>r.tags||[]))).sort();
+  const visibleIds = items.map(r=>r.id);
+  const allSelectedHere = visibleIds.length>0 && visibleIds.every(id=>selectedResourceIds.has(id));
+
+  const savedViews = Store.settings.savedViews||[];
+
+  return `
+    <div class="table-toolbar" style="flex-wrap:wrap;gap:8px 14px;">
+      <input type="text" id="tableFilter" placeholder="Филтрирай таблицата…" value="${escapeHtml(View.tableFilter)}" style="max-width:260px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);">
+      <select data-ff="section" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Раздел: всички</option>
+        <option value="learning" ${ff.section==='learning'?'selected':''}>Учебен</option>
+        <option value="admin" ${ff.section==='admin'?'selected':''}>Администрация</option>
+        <option value="personal" ${ff.section==='personal'?'selected':''}>Лично</option>
+      </select>
+      <select data-ff="grade" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Клас: всички</option>
+        ${GRADES.map(g=>`<option value="${g}" ${ff.grade===g?'selected':''}>${g}. клас</option>`).join("")}
+      </select>
+      <select data-ff="subject" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Предмет: всички</option>
+        ${SUBJECTS.map(s=>`<option value="${s}" ${ff.subject===s?'selected':''}>${s}</option>`).join("")}
+      </select>
+      <select data-ff="resourceType" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Тип: всички</option>
+        ${RESOURCE_TYPES.map(t=>`<option value="${t}" ${ff.resourceType===t?'selected':''}>${t}</option>`).join("")}
+      </select>
+      <select data-ff="tag" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Таг: всички</option>
+        ${allTags.map(t=>`<option value="${escapeHtml(t)}" ${ff.tag===t?'selected':''}>#${escapeHtml(t)}</option>`).join("")}
+      </select>
+      <select data-ff="schoolYear" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Уч. година: всички</option>
+        ${SCHOOL_YEARS.map(y=>`<option value="${y}" ${ff.schoolYear===y?'selected':''}>${y}</option>`).join("")}
+      </select>
+      <select data-ff="adminCategory" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Адм. категория: всички</option>
+        ${ADMIN_CATEGORIES.map(a=>`<option value="${escapeHtml(a)}" ${ff.adminCategory===a?'selected':''}>${a}</option>`).join("")}
+      </select>
+      <select data-ff="personalCategory" style="padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-size:12.5px;">
+        <option value="">Лична категория: всички</option>
+        ${PERSONAL_CATEGORIES.map(p=>`<option value="${escapeHtml(p)}" ${ff.personalCategory===p?'selected':''}>${p}</option>`).join("")}
+      </select>
+      <button class="btn btn-sm ${View.incompleteOnly?'btn-primary':'btn-ghost'}" id="btnIncomplete">⚠ Непълни записи</button>
+      <button class="btn btn-ghost btn-sm" id="btnClearFilters">✕ Изчисти филтрите</button>
+      <button class="btn btn-ghost btn-sm" id="btnColumns">⚙ Колони</button>
+      <button class="btn btn-ghost btn-sm" id="btnSaveView">💾 Запази изгледа</button>
+    </div>
+
+    ${savedViews.length ? `
+    <div class="table-toolbar" style="padding-top:0;border-top:none;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span class="muted" style="font-size:11.5px;">Запазени изгледи:</span>
+        ${savedViews.map(v=>`
+          <span class="chip-editable" style="font-size:12px;" data-loadview="${escapeHtml(v.id)}">🔖 ${escapeHtml(v.name)}<button data-delview="${escapeHtml(v.id)}">✕</button></span>
+        `).join("")}
+      </div>
+    </div>` : ""}
+
+    <div id="colPopover" class="hidden" style="position:relative;">
+      <div style="position:absolute;right:0;top:4px;z-index:10;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-2);padding:12px 14px;min-width:220px;">
+        <div style="font-size:11.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Видими колони</div>
+        ${RESOURCE_COLS.map(([key,label])=>`
+          <label class="checkline" style="margin-bottom:6px;"><input type="checkbox" data-colcheck="${key}" ${hidden.has(key)?'':'checked'}> ${label}</label>
+        `).join("")}
+      </div>
+    </div>
+
+    ${selectedResourceIds.size>0 ? `
+    <div class="table-toolbar" style="background:var(--gold-100);border-color:var(--gold-500);">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <strong style="font-size:13px;">${selectedResourceIds.size} избрани</strong>
+        <input type="text" id="bulkTagInput" placeholder="таг за добавяне…" style="padding:6px 10px;border-radius:7px;border:1px solid var(--border);font-size:12.5px;width:150px;">
+        <button class="btn btn-ghost btn-sm" id="btnBulkTag">+ Добави таг</button>
+        <button class="btn btn-ghost btn-sm" id="btnBulkArchive">🗄 Архивирай</button>
+        <button class="btn btn-ghost btn-sm" id="btnBulkRestore">♻ Възстанови</button>
+        <button class="btn btn-danger btn-sm" id="btnBulkDelete">🗑 Изтрий</button>
+        <button class="btn btn-ghost btn-sm" id="btnClearSelection">Отказ от избора</button>
+      </div>
+    </div>` : ""}
+
+    <div class="table-toolbar">
+      <div class="info">${items.length} от ${Store.resources.length} реда · щракнете заглавие за сортиране</div>
+    </div>
+    <div class="table-wrap">
+      <table class="bulk">
+        <thead><tr>
+          <th style="width:30px;"><input type="checkbox" id="selectAllRows" ${allSelectedHere?'checked':''}></th>
+          ${visibleCols.map(([key,label])=>`<th data-sort="${key}">${label} ${View.sortCol===key?(View.sortDir==='asc'?'▲':'▼'):''}</th>`).join("")}
+          <th>Действия</th>
+        </tr></thead>
+        <tbody>
+          ${items.map(r=>tableRowHtml(r, visibleCols)).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+function resourceCellHtml(r, key){
+  const topicOptions = ()=>Store.topics.map(t=>`<option value="${escapeHtml(t.id)}" ${r.topicId===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join("");
+  switch(key){
+    case "name": return `<td><input type="text" data-f="name" value="${escapeHtml(r.name)}"></td>`;
+    case "resourceType": return `<td><select data-f="resourceType">${RESOURCE_TYPES.map(t=>`<option value="${t}" ${r.resourceType===t?'selected':''}>${t}</option>`).join("")}</select></td>`;
+    case "section": return `<td><select data-f="section"><option value="learning" ${r.section==='learning'?'selected':''}>Учебен</option><option value="admin" ${r.section==='admin'?'selected':''}>Админ</option><option value="personal" ${r.section==='personal'?'selected':''}>Лично</option></select></td>`;
+    case "grade": return `<td><select data-f="grade"><option value="">—</option>${GRADES.map(g=>`<option value="${g}" ${r.grade===g?'selected':''}>${g}. клас</option>`).join("")}</select></td>`;
+    case "subject": return `<td><select data-f="subject"><option value="">—</option>${SUBJECTS.map(s=>`<option value="${s}" ${r.subject===s?'selected':''}>${s}</option>`).join("")}</select></td>`;
+    case "schoolYear": return `<td><select data-f="schoolYear"><option value="">—</option>${SCHOOL_YEARS.map(y=>`<option value="${y}" ${r.schoolYear===y?'selected':''}>${y}</option>`).join("")}</select></td>`;
+    case "adminCategory": return `<td><select data-f="adminCategory"><option value="">—</option>${ADMIN_CATEGORIES.map(a=>`<option value="${escapeHtml(a)}" ${r.adminCategory===a?'selected':''}>${a}</option>`).join("")}</select></td>`;
+    case "personalCategory": return `<td><select data-f="personalCategory"><option value="">—</option>${PERSONAL_CATEGORIES.map(p=>`<option value="${escapeHtml(p)}" ${r.personalCategory===p?'selected':''}>${p}</option>`).join("")}</select></td>`;
+    case "topicId": return `<td><select data-f="topicId"><option value="">—</option>${topicOptions()}</select></td>`;
+    case "tags": return `<td><input type="text" data-f="tags" value="${escapeHtml((r.tags||[]).join(', '))}" placeholder="тагове, разделени със запетая"></td>`;
+    case "link": return `<td><input type="text" data-f="link" value="${escapeHtml(r.link)}" placeholder="https://…"></td>`;
+    case "favorite": return `<td class="cell-fav" data-favtoggle>${r.favorite?'★':'☆'}</td>`;
+    case "archived": return `<td class="cell-fav" data-archtoggle>${r.archived?'✅':'—'}</td>`;
+    case "updatedAt": return `<td class="muted" style="white-space:nowrap;font-size:11.5px;">${formatDate(r.updatedAt)}</td>`;
+    default: return `<td></td>`;
+  }
+}
+function tableRowHtml(r, visibleCols){
+  return `
+  <tr data-row-id="${escapeHtml(r.id)}" class="${isIncompleteResource(r)?'row-incomplete':''}">
+    <td><input type="checkbox" data-rowcheck="${escapeHtml(r.id)}" ${selectedResourceIds.has(r.id)?'checked':''}></td>
+    ${visibleCols.map(([key])=>resourceCellHtml(r,key)).join("")}
+    <td class="rowactions">
+      <button data-rowdup title="Дублирай">⧉</button>
+      <button data-rowdel title="Изтрий">🗑️</button>
+    </td>
+  </tr>`;
+}
+
+function pageTableTopics(){
+  let items = [...Store.topics];
+  const q = View.tableFilter.toLowerCase();
+  if(q) items = items.filter(t=> [t.name,t.description,t.grade,t.subject].join(" ").toLowerCase().includes(q));
+  items.sort((a,b)=>{
+    let av=a[View.topicSortCol], bv=b[View.topicSortCol];
+    av = av===null||av===undefined?"":av; bv = bv===null||bv===undefined?"":bv;
+    if(typeof av==="boolean"){ av=av?1:0; bv=bv?1:0; }
+    if(av<bv) return View.topicSortDir==="asc"?-1:1;
+    if(av>bv) return View.topicSortDir==="asc"?1:-1;
+    return 0;
+  });
+  const cols = [
+    ["name","Име"],["grade","Клас"],["subject","Предмет"],["description","Описание"],["favorite","★"],["lastOpenedAt","Отваряна"]
+  ];
+  return `
+    <div class="table-toolbar">
+      <input type="text" id="tableFilter" placeholder="Филтрирай темите…" value="${escapeHtml(View.tableFilter)}" style="max-width:320px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);">
+      <div class="info">${items.length} от ${Store.topics.length} теми · щракнете заглавие за сортиране</div>
+    </div>
+    <div class="table-wrap">
+      <table class="bulk">
+        <thead><tr>${cols.map(([key,label])=>`<th data-tsort="${key}">${label} ${View.topicSortCol===key?(View.topicSortDir==='asc'?'▲':'▼'):''}</th>`).join("")}<th>Ресурси</th><th>Действия</th></tr></thead>
+        <tbody>
+          ${items.map(t=>topicRowHtml(t)).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+function topicRowHtml(t){
+  const cnt = Store.resources.filter(r=>r.topicId===t.id && !r.archived).length;
+  return `
+  <tr data-trow-id="${escapeHtml(t.id)}">
+    <td><input type="text" data-tf="name" value="${escapeHtml(t.name)}"></td>
+    <td><select data-tf="grade"><option value="">—</option>${GRADES.map(g=>`<option value="${g}" ${t.grade===g?'selected':''}>${g}. клас</option>`).join("")}</select></td>
+    <td><select data-tf="subject"><option value="">—</option>${SUBJECTS.map(s=>`<option value="${s}" ${t.subject===s?'selected':''}>${s}</option>`).join("")}</select></td>
+    <td><input type="text" data-tf="description" value="${escapeHtml(t.description||"")}" placeholder="кратко описание"></td>
+    <td class="cell-fav" data-tfavtoggle>${t.favorite?'★':'☆'}</td>
+    <td class="muted" style="white-space:nowrap;font-size:11.5px;">${formatDate(t.lastOpenedAt)}</td>
+    <td class="muted" style="text-align:center;">${cnt}</td>
+    <td class="rowactions">
+      <button data-topenrow title="Отвори темата">↗</button>
+      <button data-trowdel title="Изтрий">🗑️</button>
+    </td>
+  </tr>`;
+}
+
+function bindTableEvents(){
+  document.querySelectorAll('[data-tabswitch]').forEach(b=>{
+    b.addEventListener("click", ()=>{ View.tableTab = b.getAttribute("data-tabswitch"); View.tableFilter=""; selectedResourceIds.clear(); renderContent(); });
+  });
+  document.querySelectorAll('[data-qa="export"]').forEach(b=>b.addEventListener("click", exportData));
+
+  if(View.tableTab==="topics"){ bindTopicsTableEvents(); return; }
+
+  document.querySelectorAll("th[data-sort]").forEach(th=>{
+    th.addEventListener("click", ()=>{
+      const col = th.getAttribute("data-sort");
+      if(View.sortCol===col) View.sortDir = View.sortDir==="asc"?"desc":"asc";
+      else { View.sortCol = col; View.sortDir = "asc"; }
+      renderContent();
+    });
+  });
+  const filterInput = document.getElementById("tableFilter");
+  if(filterInput){
+    filterInput.addEventListener("input", debounce(e=>{ View.tableFilter = e.target.value; renderContent(); }, 180));
+  }
+  document.querySelectorAll('[data-qa="addrow"]').forEach(b=>b.addEventListener("click", ()=>{
+    Store.addResource({name:"Нов ресурс"});
+    toast("Добавен е нов ред","✚");
+    renderContent(); renderSidebar();
+  }));
+
+  // field filters
+  document.querySelectorAll('[data-ff]').forEach(sel=>{
+    sel.addEventListener("change", ()=>{
+      View.fieldFilters[sel.getAttribute("data-ff")] = sel.value;
+      renderContent();
+    });
+  });
+  const btnIncomplete = document.getElementById("btnIncomplete");
+  if(btnIncomplete) btnIncomplete.addEventListener("click", ()=>{ View.incompleteOnly = !View.incompleteOnly; renderContent(); });
+  const btnClearFilters = document.getElementById("btnClearFilters");
+  if(btnClearFilters) btnClearFilters.addEventListener("click", ()=>{
+    View.fieldFilters = {section:"", grade:"", subject:"", resourceType:"", tag:"", schoolYear:"", adminCategory:"", personalCategory:""};
+    View.incompleteOnly = false; View.tableFilter=""; renderContent();
+  });
+
+  // column visibility popover
+  const btnColumns = document.getElementById("btnColumns");
+  const colPopover = document.getElementById("colPopover");
+  if(btnColumns && colPopover){
+    btnColumns.addEventListener("click", (e)=>{ e.stopPropagation(); colPopover.classList.toggle("hidden"); });
+    colPopover.addEventListener("click", (e)=>e.stopPropagation());
+    document.addEventListener("click", ()=>colPopover.classList.add("hidden"), {once:true});
+  }
+  document.querySelectorAll('[data-colcheck]').forEach(cb=>{
+    cb.addEventListener("change", ()=>{
+      const key = cb.getAttribute("data-colcheck");
+      const hidden = new Set(Store.settings.hiddenResourceCols||[]);
+      if(cb.checked) hidden.delete(key); else hidden.add(key);
+      Store.settings.hiddenResourceCols = Array.from(hidden);
+      Store.save();
+      renderContent();
+    });
+  });
+
+  // saved views
+  const btnSaveView = document.getElementById("btnSaveView");
+  if(btnSaveView) btnSaveView.addEventListener("click", ()=>openSaveViewModal());
+  document.querySelectorAll('[data-loadview]').forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      if(e.target.closest("[data-delview]")) return;
+      const v = (Store.settings.savedViews||[]).find(x=>x.id===el.getAttribute("data-loadview"));
+      if(v){ View.fieldFilters = Object.assign({section:"",grade:"",subject:"",resourceType:"",tag:"",schoolYear:"",adminCategory:"",personalCategory:""}, v.filters); View.tableFilter = v.tableFilter||""; View.incompleteOnly = !!v.incompleteOnly; renderContent(); toast("Изгледът е зареден","🔖"); }
+    });
+  });
+  document.querySelectorAll('[data-delview]').forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      const id = btn.getAttribute("data-delview");
+      Store.settings.savedViews = (Store.settings.savedViews||[]).filter(v=>v.id!==id);
+      Store.save(); renderContent(); toast("Изгледът е изтрит","🗑️");
+    });
+  });
+
+  // row selection
+  const selectAll = document.getElementById("selectAllRows");
+  const rowChecks = document.querySelectorAll('[data-rowcheck]');
+  if(selectAll){
+    selectAll.addEventListener("change", ()=>{
+      rowChecks.forEach(cb=>{
+        const id = cb.getAttribute("data-rowcheck");
+        if(selectAll.checked) selectedResourceIds.add(id); else selectedResourceIds.delete(id);
+      });
+      renderContent();
+    });
+  }
+  rowChecks.forEach(cb=>{
+    cb.addEventListener("change", ()=>{
+      const id = cb.getAttribute("data-rowcheck");
+      if(cb.checked) selectedResourceIds.add(id); else selectedResourceIds.delete(id);
+      renderContent();
+    });
+  });
+
+  // bulk action bar
+  const btnClearSelection = document.getElementById("btnClearSelection");
+  if(btnClearSelection) btnClearSelection.addEventListener("click", ()=>{ selectedResourceIds.clear(); renderContent(); });
+  const btnBulkTag = document.getElementById("btnBulkTag");
+  if(btnBulkTag) btnBulkTag.addEventListener("click", ()=>{
+    const input = document.getElementById("bulkTagInput");
+    const tag = input ? input.value.trim() : "";
+    if(!tag){ toast("Въведете таг преди да добавите","⚠️"); return; }
+    Store.bulkAddTag(Array.from(selectedResourceIds), tag);
+    toast(`Тагът #${tag} е добавен на ${selectedResourceIds.size} ресурса`,"✅");
+    renderContent();
+  });
+  const btnBulkArchive = document.getElementById("btnBulkArchive");
+  if(btnBulkArchive) btnBulkArchive.addEventListener("click", ()=>{
+    Store.bulkSetArchived(Array.from(selectedResourceIds), true);
+    toast("Избраните са архивирани","🗄️");
+    selectedResourceIds.clear();
+    renderContent(); renderSidebar();
+  });
+  const btnBulkRestore = document.getElementById("btnBulkRestore");
+  if(btnBulkRestore) btnBulkRestore.addEventListener("click", ()=>{
+    Store.bulkSetArchived(Array.from(selectedResourceIds), false);
+    toast("Избраните са възстановени","♻️");
+    selectedResourceIds.clear();
+    renderContent(); renderSidebar();
+  });
+  const btnBulkDelete = document.getElementById("btnBulkDelete");
+  if(btnBulkDelete) btnBulkDelete.addEventListener("click", ()=>{
+    const count = selectedResourceIds.size;
+    confirmModal("Изтриване на избраните", `Ще изтриете ${count} ресурса безвъзвратно. Продължавате ли?`, ()=>{
+      Store.bulkDelete(Array.from(selectedResourceIds));
+      selectedResourceIds.clear();
+      toast("Избраните са изтрити","🗑️");
+      renderContent(); renderSidebar();
+    });
+  });
+
+  document.querySelectorAll("tr[data-row-id]").forEach(tr=>{
+    const id = tr.getAttribute("data-row-id");
+    tr.querySelectorAll("[data-f]").forEach(field=>{
+      const key = field.getAttribute("data-f");
+      const evt = (field.tagName==="SELECT") ? "change" : "input";
+      field.addEventListener(evt, debounce(()=>{
+        let val = field.value;
+        if(key==="tags") val = val.split(",").map(s=>s.trim()).filter(Boolean);
+        if(key==="grade" && val==="") val = null;
+        if(key==="subject" && val==="") val = null;
+        if(key==="adminCategory" && val==="") val = null;
+        if(key==="personalCategory" && val==="") val = null;
+        if(key==="schoolYear" && val==="") val = null;
+        if(key==="topicId" && val==="") val = null;
+        Store.updateResource(id, {[key]: val});
+        renderSidebar();
+      }, 220));
+    });
+    const fav = tr.querySelector("[data-favtoggle]");
+    fav.addEventListener("click", ()=>{ const r=Store.resources.find(x=>x.id===id); Store.updateResource(id,{favorite: !r.favorite}); renderContent(); });
+    const arc = tr.querySelector("[data-archtoggle]");
+    arc.addEventListener("click", ()=>{ const r=Store.resources.find(x=>x.id===id); Store.updateResource(id,{archived: !r.archived}); renderContent(); renderSidebar(); });
+    tr.querySelector("[data-rowdup]").addEventListener("click", ()=>{ Store.duplicateResource(id); toast("Редът е дублиран","⧉"); renderContent(); renderSidebar(); });
+    tr.querySelector("[data-rowdel]").addEventListener("click", ()=>confirmModal("Изтриване на ред","Действието е необратимо.",()=>{ Store.deleteResource(id); toast("Редът е изтрит","🗑️"); renderContent(); renderSidebar(); }));
+  });
+}
+
+function openSaveViewModal(){
+  document.getElementById("modalRoot").innerHTML = `
+    <div class="modal-backdrop" id="mBackdrop">
+      <div class="modal small fade-in">
+        <div class="modal-head"><h3>Запази текущия изглед</h3><button class="modal-close" id="mClose">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Име на изгледа</label><input type="text" id="viewName" placeholder="напр. НВО материали"></div>
+          <p class="field-hint" style="margin-top:-6px;">Ще запази текущите филтри и текстовото търсене в таблицата, за да ги заредите отново с един клик.</p>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" id="mCancel">Отказ</button>
+          <button class="btn btn-primary" id="mSave">Запази</button>
+        </div>
+      </div>
+    </div>`;
+  const close = ()=>closeModal();
+  document.getElementById("mClose").addEventListener("click", close);
+  document.getElementById("mCancel").addEventListener("click", close);
+  document.getElementById("mBackdrop").addEventListener("click",(e)=>{ if(e.target.id==="mBackdrop") close(); });
+  document.getElementById("mSave").addEventListener("click", ()=>{
+    const name = document.getElementById("viewName").value.trim();
+    if(!name){ toast("Въведете име за изгледа","⚠️"); return; }
+    const view = { id: uid(), name, filters: Object.assign({}, View.fieldFilters), tableFilter: View.tableFilter, incompleteOnly: View.incompleteOnly };
+    Store.settings.savedViews = [...(Store.settings.savedViews||[]), view];
+    Store.save();
+    toast("Изгледът е запазен","💾");
+    close(); renderContent();
+  });
+}
+
+function bindTopicsTableEvents(){
+  document.querySelectorAll("th[data-tsort]").forEach(th=>{
+    th.addEventListener("click", ()=>{
+      const col = th.getAttribute("data-tsort");
+      if(View.topicSortCol===col) View.topicSortDir = View.topicSortDir==="asc"?"desc":"asc";
+      else { View.topicSortCol = col; View.topicSortDir = "asc"; }
+      renderContent();
+    });
+  });
+  const filterInput = document.getElementById("tableFilter");
+  if(filterInput){
+    filterInput.addEventListener("input", debounce(e=>{ View.tableFilter = e.target.value; renderContent(); }, 180));
+  }
+  document.querySelectorAll('[data-qa="addtopicrow"]').forEach(b=>b.addEventListener("click", ()=>{
+    Store.addTopic({name:"Нова тема"});
+    toast("Добавена е нова тема","✚");
+    renderContent(); renderSidebar();
+  }));
+
+  document.querySelectorAll("tr[data-trow-id]").forEach(tr=>{
+    const id = tr.getAttribute("data-trow-id");
+    tr.querySelectorAll("[data-tf]").forEach(field=>{
+      const key = field.getAttribute("data-tf");
+      const evt = (field.tagName==="SELECT") ? "change" : "input";
+      field.addEventListener(evt, debounce(()=>{
+        let val = field.value;
+        if((key==="grade"||key==="subject") && val==="") val = null;
+        Store.updateTopic(id, {[key]: val});
+        renderSidebar();
+      }, 220));
+    });
+    const fav = tr.querySelector("[data-tfavtoggle]");
+    fav.addEventListener("click", ()=>{ const t=Store.topics.find(x=>x.id===id); Store.updateTopic(id,{favorite: !t.favorite}); renderContent(); });
+    tr.querySelector("[data-topenrow]").addEventListener("click", ()=>{ Store.touchTopic(id); View.go("topic",{id}); });
+    tr.querySelector("[data-trowdel]").addEventListener("click", ()=>confirmModal("Изтриване на тема","Ресурсите в темата ще останат, но ще бъдат разкачени от нея.",()=>{ Store.deleteTopic(id); toast("Темата е изтрита","🗑️"); renderContent(); renderSidebar(); }));
+  });
+}
+
+/* ============================================================
+   PAGE: SETTINGS
+   ============================================================ */
+function pageSettings(){
+  return `
+    <div class="page-head"><div><div class="page-eyebrow">Конфигурация</div><h1>⚙️ Настройки</h1></div></div>
+
+    <div class="section-title">Изглед</div>
+    <div class="stat-card" style="max-width:420px;display:flex;align-items:center;justify-content:space-between;">
+      <div><strong>Тъмен режим</strong><div class="muted" style="font-size:12px;">Превключете темата на приложението</div></div>
+      <button class="btn btn-ghost" id="stThemeBtn">${Store.settings.theme==="dark"?"☀️ Светла":"🌙 Тъмна"}</button>
+    </div>
+
+    <div class="section-title">Данни</div>
+    <div class="tile-grid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr));">
+      <div class="stat-card">
+        <strong>⬇ Експорт на базата</strong>
+        <p class="muted" style="font-size:12.5px;margin:8px 0 12px;">Запазете всички ресурси и теми в JSON файл — за резервно копие или прехвърляне.</p>
+        <button class="btn btn-primary btn-sm" id="stExport">Изтегли JSON</button>
+      </div>
+      <div class="stat-card">
+        <strong>⬆ Импорт на база</strong>
+        <p class="muted" style="font-size:12.5px;margin:8px 0 12px;">Заредете JSON файл. Ще замени текущите данни в браузъра.</p>
+        <button class="btn btn-ghost btn-sm" id="stImport">Избери файл</button>
+        <input type="file" id="stImportFile" accept="application/json" style="display:none;">
+      </div>
+      <div class="stat-card" style="border-color:var(--rose-500);">
+        <strong style="color:var(--bad)">⚠ Изчисти всички данни</strong>
+        <p class="muted" style="font-size:12.5px;margin:8px 0 12px;">Изтрива всички ресурси и теми от този браузър безвъзвратно.</p>
+        <button class="btn btn-danger btn-sm" id="stWipe">Изчисти</button>
+      </div>
+    </div>
+
+    <div class="section-title">За приложението</div>
+    <p class="muted" style="font-size:13px;max-width:640px;line-height:1.6;">
+      Кабинет е локален инструмент за организация на учебни и административни ресурси. Приложението не съхранява
+      самите файлове — те остават в OneDrive или друго облачно пространство. Тук се пазят само имена, описания,
+      класификация, тагове и линкове, за да намирате нужното за секунди. Архитектурата е подготвена за бъдещо
+      разширение с AI търсене, автоматично тагване, OCR и директна интеграция с OneDrive API.
+    </p>
+  `;
+}
+function bindSettingsEvents(){
+  const tBtn = document.getElementById("stThemeBtn"); if(tBtn) tBtn.addEventListener("click", ()=>{ toggleTheme(); renderContent(); });
+  const ex = document.getElementById("stExport"); if(ex) ex.addEventListener("click", exportData);
+  const im = document.getElementById("stImport"); if(im) im.addEventListener("click", ()=>document.getElementById("stImportFile").click());
+  const imf = document.getElementById("stImportFile"); if(imf) imf.addEventListener("change", handleImportFile);
+  const wipe = document.getElementById("stWipe"); if(wipe) wipe.addEventListener("click", ()=>{
+    confirmModal("Изчистване на всички данни","Всички ресурси и теми ще бъдат изтрити безвъзвратно от този браузър. Препоръчваме първо да направите експорт.", ()=>{
+      Store.resources = []; Store.topics = []; Store.save(); toast("Всички данни са изчистени","⚠️"); renderContent(); renderSidebar();
+    });
+  });
+}
+
+/* ============================================================
+   IMPORT / EXPORT
+   ============================================================ */
+function exportData(){
+  const payload = { exportedAt: nowISO(), resources: Store.resources, topics: Store.topics };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `kabinet-export-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast("Експортът е изтеглен","⬇");
+}
+function triggerImport(){
+  const el = document.createElement("input");
+  el.type = "file"; el.accept = "application/json";
+  el.addEventListener("change", handleImportFile);
+  el.click();
+}
+function handleImportFile(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  if(file.size>5*1024*1024){ toast("Файлът е прекалено голям (максимум 5 MB)", "⚠️"); return; }
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = validateImport(JSON.parse(reader.result));
+      if(!data || !Array.isArray(data.resources) || !Array.isArray(data.topics)) throw new Error("bad format");
+      confirmModal("Импорт на данни", `Файлът съдържа ${data.resources.length} ресурса и ${data.topics.length} теми. Те ще заменят текущата база. Продължавате ли?`, ()=>{
+        Store.loadFailed = false;
+        Store.resources = data.resources;
+        Store.topics = data.topics;
+        Store.save();
+        toast("Данните са импортирани успешно","✅");
+        renderContent(); renderSidebar();
+      });
+    }catch(err){
+      toast("Невалиден JSON файл","⚠️");
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function closeModal(){ document.getElementById("modalRoot").innerHTML = ""; }
+
+function confirmModal(title, msg, onConfirm){
+  document.getElementById("modalRoot").innerHTML = `
+    <div class="modal-backdrop" id="mBackdrop">
+      <div class="modal small fade-in">
+        <div class="modal-head"><h3>${escapeHtml(title)}</h3><button class="modal-close" id="mClose">✕</button></div>
+        <div class="modal-body"><p style="margin:0;font-size:13.5px;color:var(--text-dim);line-height:1.55;">${escapeHtml(msg)}</p></div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" id="mCancel">Отказ</button>
+          <button class="btn btn-danger" id="mOk">Потвърди</button>
+        </div>
+      </div>
+    </div>`;
+  const close = ()=>closeModal();
+  document.getElementById("mClose").addEventListener("click", close);
+  document.getElementById("mCancel").addEventListener("click", close);
+  document.getElementById("mBackdrop").addEventListener("click", (e)=>{ if(e.target.id==="mBackdrop") close(); });
+  document.getElementById("mOk").addEventListener("click", ()=>{ onConfirm(); close(); });
+}
+
+function openTopicModal(id){
+  const editing = !!id;
+  const t = editing ? Store.topics.find(x=>x.id===id) : {grade:GRADES[0],subject:SUBJECTS[0],name:"",description:"",favorite:false};
+  document.getElementById("modalRoot").innerHTML = `
+    <div class="modal-backdrop" id="mBackdrop">
+      <div class="modal fade-in">
+        <div class="modal-head"><h3>${editing?"Редактиране на тема":"Нова тема"}</h3><button class="modal-close" id="mClose">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Име на темата</label><input type="text" id="fName" value="${escapeHtml(t.name)}" placeholder="напр. Линейни уравнения"></div>
+          <div class="field-row">
+            <div class="field"><label>Клас</label><select id="fGrade"><option value="">Без клас</option>${GRADES.map(g=>`<option value="${g}" ${t.grade===g?'selected':''}>${g}. клас</option>`).join("")}</select></div>
+            <div class="field"><label>Предмет</label><select id="fSubject"><option value="">Без предмет</option>${SUBJECTS.map(s=>`<option value="${s}" ${t.subject===s?'selected':''}>${s}</option>`).join("")}</select></div>
+          </div>
+          <div class="field"><label>Описание</label><textarea id="fDesc" placeholder="Кратко описание на образователния комплект">${escapeHtml(t.description||"")}</textarea></div>
+          <label class="checkline"><input type="checkbox" id="fFav" ${t.favorite?'checked':''}> Добави в любими</label>
+        </div>
+        <div class="modal-foot">
+          ${editing?`<button class="btn btn-danger" id="mDelete" style="margin-right:auto;">Изтрий темата</button>`:""}
+          <button class="btn btn-ghost" id="mCancel">Отказ</button>
+          <button class="btn btn-primary" id="mSave">Запази</button>
+        </div>
+      </div>
+    </div>`;
+  const close = ()=>closeModal();
+  document.getElementById("mClose").addEventListener("click", close);
+  document.getElementById("mCancel").addEventListener("click", close);
+  document.getElementById("mBackdrop").addEventListener("click",(e)=>{ if(e.target.id==="mBackdrop") close(); });
+  document.getElementById("mSave").addEventListener("click", ()=>{
+    const data = {
+      name: document.getElementById("fName").value.trim() || "Без име",
+      grade: document.getElementById("fGrade").value || null,
+      subject: document.getElementById("fSubject").value || null,
+      description: document.getElementById("fDesc").value.trim(),
+      favorite: document.getElementById("fFav").checked
+    };
+    if(editing){ Store.updateTopic(id, data); toast("Темата е обновена","✅"); }
+    else { const nt = Store.addTopic(data); toast("Темата е създадена","✅"); }
+    close(); renderContent(); renderSidebar();
+  });
+  if(editing){
+    document.getElementById("mDelete").addEventListener("click", ()=>{
+      close();
+      confirmModal("Изтриване на тема","Ресурсите в темата ще останат, но ще бъдат разкачени от нея.", ()=>{
+        Store.deleteTopic(id); toast("Темата е изтрита","🗑️");
+        if(View.route.name==="topic" && View.route.params.id===id) View.go("topics"); else { renderContent(); renderSidebar(); }
+      });
+    });
+  }
+}
+
+function openResourceModal(id, presetTopicId){
+  const editing = !!id;
+  const r = editing ? Store.resources.find(x=>x.id===id) : {
+    name:"", description:"", resourceType:"PDF", link:"", tags:[], favorite:false, archived:false,
+    section: presetTopicId ? "learning" : "learning", grade:null, subject:null, topicId: presetTopicId||null, adminCategory:null, personalCategory:null
+  };
+  const relevantTopics = Store.topics.filter(t=> !r.grade || !r.subject || (t.grade===r.grade && t.subject===r.subject));
+
+  document.getElementById("modalRoot").innerHTML = `
+    <div class="modal-backdrop" id="mBackdrop">
+      <div class="modal fade-in">
+        <div class="modal-head"><h3>${editing?"Редактиране на ресурс":"Нов ресурс"}</h3><button class="modal-close" id="mClose">✕</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Име</label><input type="text" id="fName" value="${escapeHtml(r.name)}" placeholder="напр. Тест — Линейни уравнения"></div>
+          <div class="field"><label>Описание</label><textarea id="fDesc" placeholder="Кратко описание">${escapeHtml(r.description||"")}</textarea></div>
+          <div class="field-row">
+            <div class="field"><label>Тип ресурс</label><select id="fType">${RESOURCE_TYPES.map(t=>`<option value="${t}" ${r.resourceType===t?'selected':''}>${typeIcon(t)} ${t}</option>`).join("")}</select></div>
+            <div class="field"><label>Раздел</label><select id="fSection"><option value="learning" ${r.section==='learning'?'selected':''}>Учебен ресурс</option><option value="admin" ${r.section==='admin'?'selected':''}>Администрация</option><option value="personal" ${r.section==='personal'?'selected':''}>Лично</option></select></div>
+          </div>
+          <div class="field"><label>Учебна година (по избор)</label><select id="fSchoolYear"><option value="">—</option>${SCHOOL_YEARS.map(y=>`<option value="${y}" ${r.schoolYear===y?'selected':''}>${y}</option>`).join("")}</select></div>
+          <div id="learningFields" class="${r.section!=='learning'?'hidden':''}">
+            <div class="field-row">
+              <div class="field"><label>Клас</label><select id="fGrade"><option value="">—</option>${GRADES.map(g=>`<option value="${g}" ${r.grade===g?'selected':''}>${g}. клас</option>`).join("")}</select></div>
+              <div class="field"><label>Предмет</label><select id="fSubject"><option value="">—</option>${SUBJECTS.map(s=>`<option value="${s}" ${r.subject===s?'selected':''}>${s}</option>`).join("")}</select></div>
+            </div>
+            <div class="field"><label>Тема (по избор)</label><select id="fTopic"><option value="">Без тема</option>${relevantTopics.map(t=>`<option value="${escapeHtml(t.id)}" ${r.topicId===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join("")}</select></div>
+          </div>
+          <div id="adminFields" class="${r.section==='admin'?'':'hidden'}">
+            <div class="field"><label>Административна категория</label><select id="fAdminCat"><option value="">—</option>${ADMIN_CATEGORIES.map(a=>`<option value="${escapeHtml(a)}" ${r.adminCategory===a?'selected':''}>${a}</option>`).join("")}</select></div>
+          </div>
+          <div id="personalFields" class="${r.section==='personal'?'':'hidden'}">
+            <div class="field"><label>Лична категория</label><select id="fPersonalCat"><option value="">—</option>${PERSONAL_CATEGORIES.map(p=>`<option value="${escapeHtml(p)}" ${r.personalCategory===p?'selected':''}>${PERSONAL_ICON[p]||"📁"} ${p}</option>`).join("")}</select></div>
+          </div>
+          <div class="field"><label>Линк към ресурса (OneDrive / уебсайт)</label><input type="url" id="fLink" value="${escapeHtml(r.link)}" placeholder="https://…"></div>
+          <div class="field">
+            <label>Тагове</label>
+            <div class="chip-input" id="chipInput">
+              ${(r.tags||[]).map(t=>`<span class="chip-editable" data-tag="${escapeHtml(t)}">#${escapeHtml(t)}<button data-rmtag="${escapeHtml(t)}">✕</button></span>`).join("")}
+              <input type="text" id="tagEntry" placeholder="добави таг + Enter">
+            </div>
+            <div class="field-hint">Тагове помагат ресурсът да принадлежи към няколко категории едновременно.</div>
+          </div>
+          <label class="checkline"><input type="checkbox" id="fFav" ${r.favorite?'checked':''}> Добави в любими</label>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" id="mCancel">Отказ</button>
+          <button class="btn btn-primary" id="mSave">Запази ресурса</button>
+        </div>
+      </div>
+    </div>`;
+
+  let currentTags = [...(r.tags||[])];
+  const close = ()=>closeModal();
+  document.getElementById("mClose").addEventListener("click", close);
+  document.getElementById("mCancel").addEventListener("click", close);
+  document.getElementById("mBackdrop").addEventListener("click",(e)=>{ if(e.target.id==="mBackdrop") close(); });
+
+  document.getElementById("fSection").addEventListener("change", (e)=>{
+    const v = e.target.value;
+    document.getElementById("learningFields").classList.toggle("hidden", v!=="learning");
+    document.getElementById("adminFields").classList.toggle("hidden", v!=="admin");
+    document.getElementById("personalFields").classList.toggle("hidden", v!=="personal");
+  });
+
+  function renderTagChips(){
+    const wrap = document.getElementById("chipInput");
+    const input = document.getElementById("tagEntry");
+    wrap.querySelectorAll(".chip-editable").forEach(c=>c.remove());
+    currentTags.forEach(t=>{
+      const chip = document.createElement("span");
+      chip.className = "chip-editable";
+      chip.innerHTML = `#${escapeHtml(t)}<button data-rmtag="${escapeHtml(t)}">✕</button>`;
+      wrap.insertBefore(chip, input);
+    });
+    wrap.querySelectorAll("[data-rmtag]").forEach(b=>{
+      b.addEventListener("click", ()=>{ currentTags = currentTags.filter(x=>x!==b.getAttribute("data-rmtag")); renderTagChips(); });
+    });
+  }
+  document.getElementById("tagEntry").addEventListener("keydown",(e)=>{
+    if(e.key==="Enter" || e.key===","){
+      e.preventDefault();
+      const val = e.target.value.trim().replace(/,$/,"");
+      if(val && !currentTags.includes(val)){ currentTags.push(val); renderTagChips(); }
+      e.target.value = "";
+    } else if(e.key==="Backspace" && !e.target.value && currentTags.length){
+      currentTags.pop(); renderTagChips();
+    }
+  });
+  renderTagChips();
+
+  document.getElementById("mSave").addEventListener("click", ()=>{
+    const section = document.getElementById("fSection").value;
+    const data = {
+      name: document.getElementById("fName").value.trim() || "Без име",
+      description: document.getElementById("fDesc").value.trim(),
+      resourceType: document.getElementById("fType").value,
+      section,
+      schoolYear: document.getElementById("fSchoolYear").value || null,
+      link: document.getElementById("fLink").value.trim(),
+      tags: currentTags,
+      favorite: document.getElementById("fFav").checked,
+      grade: section==="learning" ? (document.getElementById("fGrade").value || null) : null,
+      subject: section==="learning" ? (document.getElementById("fSubject").value || null) : null,
+      topicId: section==="learning" ? (document.getElementById("fTopic").value || null) : null,
+      adminCategory: section==="admin" ? (document.getElementById("fAdminCat").value || null) : null,
+      personalCategory: section==="personal" ? (document.getElementById("fPersonalCat").value || null) : null
+    };
+    if(editing){ Store.updateResource(id, data); toast("Ресурсът е обновен","✅"); }
+    else { Store.addResource(data); toast("Ресурсът е добавен","✅"); }
+    close(); renderContent(); renderSidebar();
+  });
+}
+
+/* ============================================================
+   MASTER RENDER
+   ============================================================ */
+function renderContent(){
+  const content = document.getElementById("content");
+  const r = View.route;
+  let html = "";
+
+  if(View.searchQuery && View.searchQuery.trim().length>0){
+    html = pageSearch(View.searchQuery.trim());
+  } else {
+    switch(r.name){
+      case "dashboard": html = pageDashboard(); break;
+      case "subject": html = pageSubject(r.params.grade, r.params.subject); break;
+      case "topic": html = pageTopic(r.params.id); break;
+      case "topics": html = pageTopics(); break;
+      case "admin": html = pageAdmin(r.params.cat); break;
+      case "personal": html = pagePersonal(r.params.cat); break;
+      case "favorites": html = pageFavorites(); break;
+      case "archive": html = pageArchive(); break;
+      case "table": html = pageTable(); break;
+      case "settings": html = pageSettings(); break;
+      default: html = pageDashboard();
+    }
+  }
+  content.innerHTML = `<aside style="font-size:12px;line-height:1.6;padding:12px;margin-bottom:18px;border:1px solid var(--border);border-radius:10px;color:var(--text-dim)">Ресурсите се запазват автоматично в този браузър. За резервно копие или прехвърляне на друг компютър използвайте Експорт и Импорт.<br>Пазят се имена, описания и връзки — документите не се качват в DIDO. Може да добавяте връзки към OneDrive, Google Drive, YouTube, Wordwall и други сайтове.</aside>` + html;
+
+  // generic bindings
+  content.querySelectorAll("[data-crumb]").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const c = el.getAttribute("data-crumb");
+      if(c==="dashboard") View.go("dashboard");
+      else if(c==="topics") View.go("topics");
+      else if(c==="subject") View.go("subject",{grade:el.getAttribute("data-grade"), subject:el.getAttribute("data-subject")});
+    });
+  });
+  content.querySelectorAll('[data-qa="addres"]').forEach(b=>b.addEventListener("click", ()=>{
+    const r2 = View.route;
+    let preset = {};
+    if(r2.name==="subject") preset = {section:"learning", grade:r2.params.grade, subject:r2.params.subject};
+    if(r2.name==="admin") preset = {section:"admin", adminCategory:r2.params.cat};
+    if(r2.name==="personal") preset = {section:"personal", personalCategory:r2.params.cat};
+    if(r2.name==="topic"){ const t=Store.topics.find(x=>x.id===r2.params.id); preset = {section:"learning", grade:t?.grade||null, subject:t?.subject||null, topicId:r2.params.id}; }
+    openResourceModalWithPreset(preset);
+  }));
+  content.querySelectorAll('[data-qa="addtopic"], [data-qa="addtopic2"]').forEach(b=>b.addEventListener("click", ()=>{
+    const r2 = View.route;
+    let preset = {};
+    if(r2.name==="subject") preset = {grade:r2.params.grade, subject:r2.params.subject};
+    openTopicModalWithPreset(preset);
+  }));
+  content.querySelectorAll('[data-qa="edittopic"]').forEach(b=>b.addEventListener("click", ()=>openTopicModal(View.route.params.id)));
+  content.querySelectorAll('[data-qa="deltopic"]').forEach(b=>b.addEventListener("click", ()=>{
+    const id = View.route.params.id;
+    confirmModal("Изтриване на тема","Ресурсите в темата ще останат, но ще бъдат разкачени от нея.", ()=>{
+      Store.deleteTopic(id); toast("Темата е изтрита","🗑️"); View.go("topics");
+    });
+  }));
+  content.querySelectorAll("[data-fav-topic]").forEach(el=>{
+    el.addEventListener("click",(e)=>{ e.stopPropagation(); const id=el.getAttribute("data-fav-topic"); const t=Store.topics.find(x=>x.id===id); Store.updateTopic(id,{favorite: !t.favorite}); renderContent(); });
+  });
+
+  bindResourceCardEvents(content);
+  bindTopicTileEvents(content);
+  bindDashboardEvents();
+  if(r.name==="table" && !(View.searchQuery&&View.searchQuery.trim())) bindTableEvents();
+  if(r.name==="settings" && !(View.searchQuery&&View.searchQuery.trim())) bindSettingsEvents();
+}
+function openResourceModalWithPreset(preset){
+  openResourceModal(null);
+  // apply preset after modal render
+  requestAnimationFrame(()=>{
+    if(preset.section){ const s=document.getElementById("fSection"); if(s){ s.value=preset.section; s.dispatchEvent(new Event("change")); } }
+    if(preset.grade){ const g=document.getElementById("fGrade"); if(g) g.value = preset.grade; }
+    if(preset.subject){ const s=document.getElementById("fSubject"); if(s) s.value = preset.subject; }
+    if(preset.adminCategory){ const a=document.getElementById("fAdminCat"); if(a) a.value = preset.adminCategory; }
+    if(preset.personalCategory){ const p=document.getElementById("fPersonalCat"); if(p) p.value = preset.personalCategory; }
+    if(preset.topicId){ const t=document.getElementById("fTopic"); if(t) t.value = preset.topicId; }
+  });
+}
+function openTopicModalWithPreset(preset){
+  openTopicModal(null);
+  requestAnimationFrame(()=>{
+    if(preset.grade){ const g=document.getElementById("fGrade"); if(g) g.value = preset.grade; }
+    if(preset.subject){ const s=document.getElementById("fSubject"); if(s) s.value = preset.subject; }
+  });
+}
+
+function render(){
+  renderSidebar();
+  renderTopbar();
+  renderContent();
+}
+
+/* ============================================================
+   KEYBOARD SHORTCUTS
+   ============================================================ */
+document.addEventListener("keydown",(e)=>{
+  if((e.key==="/" ) && document.activeElement.tagName!=="INPUT" && document.activeElement.tagName!=="TEXTAREA"){
+    e.preventDefault();
+    const s = document.getElementById("globalSearch");
+    if(s) s.focus();
+  }
+  if(e.key==="Escape"){ closeModal(); }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+Store.load();
+applyTheme();
+render();
+
+})();
+</script>
+</body>
+</html>
