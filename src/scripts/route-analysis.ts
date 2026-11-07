@@ -56,7 +56,7 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
       dot.setAttribute("cx", String(x(p.x))); dot.setAttribute("cy", String(y(p.ele)));
       svg.dataset.selectedDistance = String(p.x);
       const direction = p.grade === undefined ? "Начало на сегмент" : Math.abs(p.grade) < .0035 ? "→ Слаб наклон" : p.grade > 0 ? "↑ Нагоре" : "↓ Надолу";
-      put(card, "[data-profile-readout]", `${direction} · ${km(p.x)} км · ${metres(p.ele)} · локален наклон след изглаждане ${percent(p.grade)} · обиколка ${p.lap}. Точката е отбелязана и на картата, след като я отвориш.`);
+      put(card, "[data-profile-readout]", `${direction} · ${km(p.x)} км · ${metres(p.ele)} · локален наклон след изглаждане ${percent(p.grade)} · GPX повторение ${p.lap}. Точката е отбелязана и на картата, след като я отвориш.`);
       mapFor(slot)?.selectPoint(p);
     }
     slider.oninput = () => choose(Number(slider.value));
@@ -85,7 +85,7 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
       const positions = [-15, 20, -40, 45, -65, 70].map((offset) => Math.max(18, Math.min(193, y(peak.ele) + offset)));
       const cy = positions.find((candidate) => annotations.every((p) => Math.abs(p.x - cx) >= 24 || Math.abs(p.y - candidate) >= 24)) ?? positions[0];
       annotations.push({ x: cx, y: cy });
-      const label = `Изкачване №${climb.rank}, обиколка ${climb.lap}, ${km(climb.startM)}–${km(climb.endM)} км, +${metres(climb.gainM)}, средно ${percent(climb.averageGrade)}`;
+      const label = `Изкачване №${climb.rank}, GPX повторение ${climb.lap}, ${km(climb.startM)}–${km(climb.endM)} км, +${metres(climb.gainM)}, средно ${percent(climb.averageGrade)}`;
       const marker = svgNode("g", { "data-climb-marker": climb.rank, tabindex: 0, role: "button", "aria-label": label });
       marker.append(svgNode("title", {}, label), svgNode("line", { x1: cx, x2: x(peak.x), y1: cy + 9, y2: y(peak.ele), stroke: "white" }), svgNode("circle", { cx, cy, r: 10, fill: "#fff", stroke: "#0e1828", "stroke-width": 1.5 }), svgNode("text", { x: cx, y: cy + 4, fill: "#0e1828", "text-anchor": "middle", "font-size": 12, "font-weight": "bold" }, String(climb.rank)));
       const activate = () => { slider.value = String(climb.endM); choose(climb.endM, peak); };
@@ -107,7 +107,7 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
     }
     put(card, "[data-profile-notice]", profile.available ? `Изглаждане ${smoothing.value} м. Устойчива посока: ↑ оранжево-червено — нагоре; ↓ зелено — надолу; → сиво — равно/слаб наклон. Линиите са също плътни, прекъснати и точкови.${noise}` : PROFILE_MESSAGES[route.status === "ready" ? "unavailable" : route.status]);
     const stats = card.querySelector("[data-profile-stats]")!; stats.replaceChildren();
-    const entries = [["Обща дистанция", `${km(profile.distanceM)} км`], ["Обиколки", `${route.lapCount} × ${km(profile.baseDistanceM)} км`], ["Начална височина", metres(profile.startM)], ["Мин. / макс.", `${metres(profile.minM)} / ${metres(profile.maxM)}`], ["Изкачване", metres(profile.ascentM)], ["Спускане", metres(profile.descentM)]];
+    const entries = [["Обща дистанция", `${km(profile.distanceM)} км`], ["Повторения на целия GPX", `${route.lapCount} × ${km(profile.baseDistanceM)} км`], ["Начална височина", metres(profile.startM)], ["Мин. / макс.", `${metres(profile.minM)} / ${metres(profile.maxM)}`], ["Изкачване", metres(profile.ascentM)], ["Спускане", metres(profile.descentM)]];
     for (const [label, value] of entries) { const div = document.createElement("div"), dt = document.createElement("dt"), dd = document.createElement("dd"); dt.textContent = label; dd.textContent = value; div.append(dt, dd); stats.append(div); }
     card.querySelector<HTMLElement>("[data-profile-details]")!.hidden = !profile.available;
     const body = card.querySelector("[data-profile-hills]")!; body.replaceChildren();
@@ -115,7 +115,7 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
     if (!profile.available) return;
     const climbs = topClimbs(profile);
     put(card, "[data-top-climbs-summary]", `${climbs.length < 3 ? `Намерени са ${climbs.length} изкачвания над прага; не допълваме до три с измислени участъци.` : "Топ 3 по натрупано изкачване."} Долина–връх: поне 200 м, 10 м изкачване и 0,5% среден наклон; допускаме спад до 5 м за до 300 м. При равенство: среден наклон, дължина, по-ранен километър. Обиколките и сегментите остават отделни.`);
-    for (const c of climbs) row(topBody, [`№${c.rank} · обиколка ${c.lap}`, km(c.startM), km(c.endM), `${Math.round(c.lengthM)} м`, `+${metres(c.gainM)}`, percent(c.averageGrade)]).dataset.climbRank = String(c.rank);
+    for (const c of climbs) row(topBody, [`№${c.rank} · GPX повторение ${c.lap}`, km(c.startM), km(c.endM), `${Math.round(c.lengthM)} м`, `+${metres(c.gainM)}`, percent(c.averageGrade)]).dataset.climbRank = String(c.rank);
     if (!climbs.length) row(topBody, ["Няма изкачвания над прага", "—", "—", "—", "—", "—"]);
     const strongest = [...profile.hills].filter((h) => h.type === "up").sort((a, b) => b.gainM - a.gainM)[0];
     put(card, "[data-hills-summary]", strongest ? `Най-голямо изкачване по натрупване: ${km(strongest.startM)}–${km(strongest.endM)} км, +${metres(strongest.gainM)}, средно ${percent(strongest.averageGrade)}. Това не е обща оценка за трудност.` : "Няма изкачвания над избрания праг.");
@@ -163,7 +163,7 @@ document.querySelectorAll<HTMLElement>("[data-route-analysis]").forEach((root) =
       const body = root.querySelector("[data-pace-rows]")!; body.replaceChildren();
       for (const r of plan.rows) row(body, [`${km(r.startM)}–${km(r.endM)}`, formatPace(r.pace), formatDuration(r.seconds), formatDuration(r.cumulativeSeconds)]);
       const checkpoints = root.querySelector("[data-pace-checkpoints]")!; checkpoints.replaceChildren();
-      for (const p of plan.checkpoints) { const li = document.createElement("li"); li.textContent = `Обиколка ${p.lap} · ${km(p.distanceM)} км · ${formatDuration(p.seconds)}`; checkpoints.append(li); }
+      for (const p of plan.checkpoints) { const li = document.createElement("li"); li.textContent = `GPX повторение ${p.lap} · ${km(p.distanceM)} км · ${formatDuration(p.seconds)}`; checkpoints.append(li); }
       result.hidden = false;
     } catch { put(root, "[data-pace-status]", "Планът не може да се изчисли. Провери времето, разрешенията за профила и параметрите (U: 0–8, D: 0–4)."); }
   }

@@ -54,7 +54,7 @@ test("analysis UI: real permissions, synthetic profiles, comparison, smoothing, 
       await numbered.press('Enter');
       const expectedPeak = Number((await realCard.locator('[data-climb-rank="1"] td').nth(2).textContent()).replace(',', '.')) * 1000;
       await page.waitForFunction((expected) => Math.abs(Number(document.querySelector('[data-profile-chart]').dataset.selectedDistance) - expected) < 11, expectedPeak);
-      assert.match(await numbered.getAttribute('aria-label'), /Изкачване №1, обиколка 1/);
+      assert.match(await numbered.getAttribute('aria-label'), /Изкачване №1, GPX повторение 1/);
       await overflow();
       await page.locator("[data-smoothing]").selectOption("25"); await waitPlan();
       assert.match(await page.locator("[data-profile-notice]").first().textContent(), /GPS шум/);
@@ -146,7 +146,7 @@ test("analysis UI: real permissions, synthetic profiles, comparison, smoothing, 
       assert.notEqual(await marker.getAttribute("d"), oldPath);
       assert.match(await page.locator('[data-profile="primary"] [data-profile-readout]').textContent(), /0,50 км/);
       const slider = page.locator('[data-profile="primary"] [data-profile-position]'); await slider.focus(); await page.keyboard.press("End");
-      assert.match(await page.locator('[data-profile="primary"] [data-profile-readout]').textContent(), /обиколка 2/);
+      assert.match(await page.locator('[data-profile="primary"] [data-profile-readout]').textContent(), /GPX повторение 2/);
       await overflow();
       if ([390, 1440].includes(width)) { await page.evaluate(() => { document.activeElement?.blur(); scrollTo(0, 0); }); await page.waitForFunction(() => document.querySelector(".skip-link").getBoundingClientRect().bottom < 0); await page.locator(".analysis-grid").screenshot({ path: `${screenshotDir}/synthetic-comparison-${width}.png` }); }
     }
