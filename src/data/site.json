@@ -2,8 +2,8 @@
   "siteName": "DIDO",
   "siteSubtitle": "Личен сайт",
   "useImageLogo": true,
-  "headerLogoWidthDesktop": 144,
-  "headerLogoWidthMobile": 120,
+  "headerLogoWidthDesktop": 128,
+  "headerLogoWidthMobile": 108,
   "logoImage": "/images/Лого „Dido“ с оранжеви акценти.png",
   "navigation": {
     "home": "Начало",
