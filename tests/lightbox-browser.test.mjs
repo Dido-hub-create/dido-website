@@ -31,7 +31,7 @@ test('lightbox zoom, keyboard, wheel, drag, pinch, reset and video thumbnail con
  await page.keyboard.press('ArrowLeft');assert.match(await page.locator('[data-counter]').textContent(),/^1 \/ /);
  await page.keyboard.press('Escape');assert.equal(await page.locator('dialog').isVisible(),false);
  assert.equal(await page.locator('[data-gallery-photo]').first().evaluate(el=>el===document.activeElement),true);
- await page.goto(origin+'/byagane/');await page.locator('.records-photo').scrollIntoViewIfNeeded();await page.locator('.records').screenshot({path:`work/final-visuals/records-${width}.png`});
+ await page.goto(origin+'/byagane/');await page.locator('.records').scrollIntoViewIfNeeded();await page.locator('.records').screenshot({path:`work/final-visuals/records-${width}.png`});
  const video=page.locator('[data-video-card]').first();const title=video.locator('h3 a');assert.match(await title.getAttribute('href'),/^https:\/\/www.youtube.com\/watch\?v=/);
  assert.equal(await video.locator('.video-play').innerText(),'');await video.scrollIntoViewIfNeeded();await video.screenshot({path:`work/final-visuals/video-${width}.png`});
  await video.locator('.video-screen').click({position:{x:10,y:10}});assert.match(await video.locator('iframe').getAttribute('src'),/youtube-nocookie.com\/embed\//);

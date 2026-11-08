@@ -208,6 +208,7 @@ content:
         default: true
       - name: headerLogoWidthDesktop
         label: Ширина на логото — компютър (px)
+        description: "За хедъра и футъра. Височината следва пропорциите на изображението; няма отделен таван за двуредово лого."
         type: number
         default: 128
         options:
@@ -215,6 +216,7 @@ content:
           max: 160
       - name: headerLogoWidthMobile
         label: Ширина на логото — телефон/таблет (px)
+        description: "За хедъра и футъра. Височината се определя автоматично, без изрязване или разтягане."
         type: number
         default: 108
         options:

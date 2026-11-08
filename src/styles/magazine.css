@@ -1114,3 +1114,18 @@ body {
 .records-photo {
   object-position: 50% 100%;
 }
+
+/* An uploaded logo may make the header taller; keep the mobile menu below it. */
+@media (max-width: 960px) {
+  .site-header .header-inner > .navigation { top: 100%; }
+}
+/* Preserve the configured logo width instead of shrinking it to fit the menu. */
+@media (min-width: 961px) and (max-width: 1439px) {
+  .site-header .header-inner { gap: 12px; }
+  .site-header .header-inner > .brand-caption { display: none; }
+  .site-header .navigation > a { padding-inline: 5px; }
+}
+
+@media (min-width: 1440px) {
+  .site-header .navigation { gap: 10px; }
+}

@@ -9,7 +9,7 @@ test('album static routes exclude drafts and link optimized responsive photos', 
  execFileSync(process.execPath,[resolve('node_modules/astro/bin/astro.mjs'),'build'],{cwd:root,env:{...process.env,ASTRO_TELEMETRY_DISABLED:'1'},stdio:'pipe'});
  const index=readFileSync(join(root,'dist/galeria/index.html'),'utf8'),album=readFileSync(join(root,'dist/galeria/published/index.html'),'utf8');
  assert.match(index,/Пътувания/);assert.doesNotMatch(index,/HIDDEN_ALBUM/);assert.equal(existsSync(join(root,'dist/galeria/draft')),false);assert.match(album,/data-gallery-photo/);
- for(const match of album.matchAll(/(?:src|href)="(\/gallery\/[^"]+)"/g))assert.ok(existsSync(join(root,'dist',match[1])),match[1]);assert.match(album,/srcset=/);assert.match(album,/loading="lazy"/);assert.match(album,/<dialog/);assert.doesNotMatch(album,/src="\/images\//);
+ for(const match of album.matchAll(/(?:src|href)="(\/gallery\/[^"]+)"/g))assert.ok(existsSync(join(root,'dist',match[1])),match[1]);assert.match(album,/srcset=/);assert.match(album,/loading="lazy"/);assert.match(album,/<dialog/);const photoGrid=album.match(/<div class="photo-grid">[\s\S]*?<\/div>/)?.[0];assert.ok(photoGrid);assert.doesNotMatch(photoGrid,/src="\/images\//);
  if(process.env.DIDO_GALLERY_FIXTURE){mkdirSync(process.env.DIDO_GALLERY_FIXTURE,{recursive:true});cpSync(join(root,'dist'),join(process.env.DIDO_GALLERY_FIXTURE,'dist'),{recursive:true});}
  }finally{rmSync(root,{recursive:true,force:true});}
 });

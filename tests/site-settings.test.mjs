@@ -65,7 +65,8 @@ test("a realistic CMS save omitting optional fields passes Astro/TypeScript AND 
     const home = page("index.html"), about = page("za-men/index.html"), running = page("byagane/index.html");
     assert.ok(home.includes(current.records.halfMarathon));
     assert.equal((home.match(/<small>Предстои<\/small>/g) ?? []).length, 3);
-    assert.ok(home.includes(current.recordsImage));
+    if (current.recordsImage) assert.ok(home.includes(current.recordsImage));
+    else assert.doesNotMatch(home, /src="undefined"/);
     assert.ok(running.includes(current.youtubeChannel));
     assert.match(about, /Портретът предстои|Данни за връзка ще бъдат добавени/);
     assert.doesNotMatch(about, /mailto:undefined|href="undefined"|src="undefined"/);
