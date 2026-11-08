@@ -1,0 +1,14 @@
+---
+import {legacyPlacing} from '../lib/race-results.mjs';
+interface Props {race:{result:string;placing:string;rankings:{key:string;label:string;place:number;total:number}[]}}
+const {race}=Astro.props;
+const legacy=legacyPlacing(race);
+---
+<div class="race-result">
+ {race.result && <div class="official-time"><span>ОФИЦИАЛНО ВРЕМЕ</span><strong>{race.result}</strong></div>}
+ {race.rankings.length>0 && <dl class="race-rankings">{race.rankings.map(rank=><div class:list={['ranking-panel',`ranking-${rank.key}`]}><dt>{rank.label}</dt><dd><strong>{rank.place}</strong><span>от {rank.total}</span></dd></div>)}</dl>}
+ {legacy && <p class="legacy-placing">Класиране: {legacy}</p>}
+</div>
+<style>
+.official-time{text-align:center;margin:8px 0}.official-time>span{display:block;font-size:12px;line-height:1.2;letter-spacing:.09em;color:#b7c5d8}.official-time>strong{display:block;font-size:34px;line-height:1.2;font-weight:800;overflow-wrap:anywhere;color:#f5f8ff;font-variant-numeric:tabular-nums;text-shadow:0 1px 12px #ff8a1615}.race-rankings{display:flex;gap:8px;margin:0}.ranking-panel{flex:1;min-width:0;min-height:72px;border:1px solid #3f6289;border-radius:10px;padding:6px 5px;text-align:center;background:#1843702b}.ranking-men{border-color:#655580;background:#58377d26}.ranking-ageGroup{border-color:#8a7346;background:#73571825}.ranking-panel dt{font-size:12px;line-height:1.2;color:#abcff8;overflow-wrap:anywhere}.ranking-men dt{color:#d2bdf4}.ranking-ageGroup dt{color:#f0ce8e}.ranking-panel dd{margin:3px 0 0}.ranking-panel dd strong{display:block;font-size:25px;line-height:1.15;font-variant-numeric:tabular-nums;color:#f5f8ff;overflow-wrap:anywhere}.ranking-panel dd span{font-size:12px;line-height:1.2;color:#c1ccdb;display:block;overflow-wrap:anywhere}.legacy-placing{font-size:.82rem!important;line-height:1.5;color:#b7c5d8;margin:10px 0 0!important}@media(max-width:360px){.race-rankings{gap:5px}.ranking-panel dd strong{font-size:23px}.official-time>strong{font-size:32px}}
+</style>
