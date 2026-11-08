@@ -1,0 +1,27 @@
+{
+  "title": "Wizz Air Sofia halfmarathon 11.10.2026",
+  "publicationStatus": "published",
+  "date": "2026-10-11",
+  "startTime": "09:45",
+  "timeZone": "Europe/Sofia",
+  "location": "София",
+  "distance": "21,1 км",
+  "status": "completed",
+  "cover": "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-2.jpg",
+  "result": "2:07:14",
+  "rankings": {
+    "overall": {
+      "place": 1806,
+      "total": 3574
+    },
+    "men": {
+      "place": 1445,
+      "total": 2477
+    },
+    "ageGroup": {
+      "label": "60+",
+      "place": 38,
+      "total": 76
+    }
+  }
+}
