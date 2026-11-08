@@ -15,7 +15,7 @@ const brand = brandPresentation(site);
   aria-label={`${brand.alt} — ${identity.navigation[0][1]}`}
   style={`--logo-desktop:${brand.desktopWidth}px;--logo-mobile:${brand.mobileWidth}px`}
 >
-  {brand.src && <img class="brand-logo" data-brand-logo src={brand.src} alt={brand.alt} width="2030" height="620" />}
+  {brand.src && <img class="brand-logo" data-brand-logo src={brand.src} alt={brand.alt} width={brand.desktopWidth} />}
   <span class="brand-wordmark" data-brand-fallback hidden={!!brand.src}>
     {identity.name === "DIDO" ? "Dido" : identity.name}<svg viewBox="0 0 110 13" aria-hidden="true">
     <path d="M3 10Q49-4 106 8 50 3 3 12Z" fill="currentColor"></path>
@@ -30,18 +30,19 @@ const brand = brandPresentation(site);
   .brand.magazine-brand {
     display: flex;
     align-items: center;
-    height: 49px;
+    min-height: 49px;
+    height: auto;
     padding-bottom: 0;
     flex-shrink: 0;
   }
   .brand.is-image { width: var(--logo-desktop); }
-  .brand.brand-footer { height: 42px; }
-  .brand.brand-footer.is-image { width: min(var(--logo-desktop), 112px); }
+  .brand.brand-footer { min-height: 42px; }
   .brand-logo {
     display: block;
     width: 100%;
     max-width: none;
-    height: 100%;
+    height: auto;
+    flex-shrink: 0;
     object-fit: contain;
     object-position: left center;
   }
@@ -54,16 +55,12 @@ const brand = brandPresentation(site);
     height: 11px;
     color: var(--accent);
   }
-  @media (min-width: 961px) and (max-width: 1200px) {
-    .brand.is-image { width: min(var(--logo-desktop), 128px); }
-  }
   @media (max-width: 960px) {
     .brand.is-image { width: var(--logo-mobile); }
-    .brand.brand-footer.is-image { width: min(var(--logo-mobile), 112px); }
   }
   @media (max-width: 640px) {
-    .brand.magazine-brand { height: 44px; }
-    .brand.brand-footer { height: 42px; }
+    .brand.magazine-brand { min-height: 44px; }
+    .brand.brand-footer { min-height: 42px; }
   }
 </style>
 
