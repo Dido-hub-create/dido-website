@@ -1,6 +1,9 @@
 {
   "siteName": "DIDO",
   "siteSubtitle": "Личен сайт",
+  "useImageLogo": true,
+  "headerLogoWidthDesktop": 128,
+  "headerLogoWidthMobile": 108,
   "navigation": {
     "home": "Начало",
     "running": "Бягане",
@@ -9,7 +12,7 @@
     "about": "За мен",
     "finance": "Финанси"
   },
-  "recordsImage": "/images/IMG-4a64148048c44ebcb450fa03afe7d8c7-V-1.jpg",
+  "recordsImage": "/images/Спортни рекорди_ бягане напред.png",
   "financeImage": "/images/dido-bitcoin.svg",
   "aboutImage": "/images/dido-mountain-hero.webp",
   "aboutIntro": "Кой съм аз, какви са интересите ми и защо създадох този сайт.",
@@ -55,6 +58,7 @@
     },
     "runningDescription": "Тук ще споделям състезания, тренировки и полезно за бегачи.",
     "technologyDescription": "Приложения, изкуствен интелект и технологични открития — скоро тук.",
-    "financeDescription": "Лични размисли, наблюдения и интерес към Bitcoin — тема, която следя и проучвам."
+    "financeDescription": "Лични размисли, наблюдения и интерес към Bitcoin — тема, която следя и проучвам.",
+    "runnerSize": 100
   }
 }
