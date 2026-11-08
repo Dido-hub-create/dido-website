@@ -639,6 +639,62 @@ content:
       - name: placing
         label: Класиране (по желание)
         type: string
+      - name: rankings
+        label: Три класирания (по желание)
+        type: object
+        description: "Попълнете място и общ брой за съответното класиране. Само положителни цели числа; мястото не може да надвишава общия брой. Непълна или невалидна двойка не се показва."
+        fields:
+          - name: overall
+            label: Общо класиране
+            type: object
+            fields:
+              - name: place
+                label: Място
+                type: number
+                options:
+                  min: 1
+                  step: 1
+              - name: total
+                label: Общ брой класирани
+                type: number
+                options:
+                  min: 1
+                  step: 1
+          - name: men
+            label: Класиране сред мъжете
+            type: object
+            fields:
+              - name: place
+                label: Място
+                type: number
+                options:
+                  min: 1
+                  step: 1
+              - name: total
+                label: Общ брой класирани
+                type: number
+                options:
+                  min: 1
+                  step: 1
+          - name: ageGroup
+            label: Възрастова група
+            type: object
+            fields:
+              - name: label
+                label: Наименование на групата (например М60–64)
+                type: string
+              - name: place
+                label: Място
+                type: number
+                options:
+                  min: 1
+                  step: 1
+              - name: total
+                label: Общ брой класирани
+                type: number
+                options:
+                  min: 1
+                  step: 1
       - name: gallery
         label: Галерия
         type: image

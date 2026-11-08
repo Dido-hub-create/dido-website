@@ -1,3 +1,4 @@
+import { normalizeRankings } from "./race-results.mjs";
 import {
   existsSync,
   readdirSync,
@@ -207,6 +208,7 @@ export function loadRaces(root = process.cwd()) {
       notes: text(data.notes),
       result: text(data.result),
       placing: text(data.placing),
+      rankings: normalizeRankings(data.rankings),
       gallery: Array.isArray(data.gallery)
         ? data.gallery.filter((item) => typeof item === "string")
         : [],

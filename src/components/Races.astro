@@ -9,6 +9,9 @@ import {
 import { allPosts, usableImage } from "../lib/posts";
 import FramedImage from "./FramedImage.astro";
 import RouteGallery from "./RouteGallery.astro";
+import { compareArchivedRaces } from "../lib/race-results.mjs";
+import ArchivedRace from "./ArchivedRace.astro";
+import RaceResult from "./RaceResult.astro";
 import Icon from "./Icon.astro";
 interface Props {
   archive?: boolean;
@@ -20,7 +23,7 @@ const races = loadRaces().filter((race) => !raceId || race.id === raceId),
   posts = await allPosts();
 const now = Date.now();
 const upcoming = races.filter((race) => !archivedRace(race, now));
-const past = races.filter((race) => archivedRace(race, now)).reverse();
+const past = races.filter((race) => archivedRace(race, now)).sort(compareArchivedRaces);
 const groups = (archive
   ? [
       { title: "Предстоящи състезания", id: "upcoming", entries: upcoming },
@@ -54,7 +57,7 @@ const groups = (archive
         <div class="section-heading">
           <div>
             <>
-              <p class="eyebrow">Следващият старт</p>
+              <p class="eyebrow">{group.id === "archive" ? "След финала" : "Следващият старт"}</p>
               <h2 id={`races-${group.id}`}>
                 {group.title}
                 <span>.</span>
@@ -67,12 +70,12 @@ const groups = (archive
             </a>
           )}
         </div>
-        <div class="race-grid" data-race-group={group.id}>
+        <div class:list={["race-grid", {"archive-race-grid": group.id === "archive" && !raceId}]} id={`race-list-${group.id}`} data-race-group={group.id}>
           {group.entries.map((race) => {
             const image = usableImage(race.cover),
               route = routes.find((item) => item.id === race.routeId),
               post = posts.find((item) => item.id === race.postId);
-            return (
+            return (group.id === "archive" && !raceId ? <ArchivedRace race={race}/> :
               <article
                 class="race-card"
                 id={`race-${race.id}`}
@@ -83,6 +86,7 @@ const groups = (archive
                   status: race.status,
                 })}
               >
+                {!raceId && <template data-archive-template><ArchivedRace race={race}/></template>}
                 {image && (
                   <div class="race-photo">
                     <FramedImage
@@ -116,19 +120,8 @@ const groups = (archive
                         <dd>{race.distance}</dd>
                       </>
                     )}
-                    {race.result && (
-                      <>
-                        <dt>Резултат</dt>
-                        <dd>{race.result}</dd>
-                      </>
-                    )}
-                    {race.placing && (
-                      <>
-                        <dt>Класиране</dt>
-                        <dd>{race.placing}</dd>
-                      </>
-                    )}
                   </dl>
+                  <div data-completed-results hidden={!archivedRace(race,now)}><RaceResult race={race}/></div>
                   {race.notes && <p class="running-notes">{race.notes}</p>}
                   <div class="running-links">
                     {race.officialUrl && (
@@ -162,6 +155,7 @@ const groups = (archive
             );
           })}
         </div>
+        {group.id === "archive" && !raceId && <button class="button button-outline" type="button" data-race-more aria-controls="race-list-archive" aria-expanded="false" hidden>Покажи още</button>}
         <div
           class="empty-state running-empty"
           data-race-empty={group.id}
@@ -188,34 +182,10 @@ const groups = (archive
     ))
   }
 </div>
+<style is:global>
+.archive-race-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch}.archive-race-grid>[hidden]{display:none!important}[data-race-more]{margin-top:20px}@media(max-width:760px){.archive-race-grid{grid-template-columns:minmax(0,1fr)!important}}
+</style>
 <script>
-  import { archivedRace, countdownText } from "../lib/races.mjs";
-  document
-    .querySelectorAll<HTMLElement>("[data-races-widget]")
-    .forEach((widget) => {
-      function update() {
-        widget.querySelectorAll<HTMLElement>("[data-race]").forEach((card) => {
-          const race = JSON.parse(card.dataset.race ?? "{}");
-          const counter = card.querySelector<HTMLElement>("[data-countdown]");
-          if (counter) counter.textContent = countdownText(race);
-          if (archivedRace(race)) {
-            const archive = widget.querySelector('[data-race-group="archive"]');
-            if (archive) {
-              if (!archive.contains(card)) archive.prepend(card);
-            } else card.hidden = true;
-          }
-        });
-        ["upcoming", "archive"].forEach((group) => {
-          const empty = widget.querySelector<HTMLElement>(
-            `[data-race-empty="${group}"]`,
-          );
-          const cards = widget.querySelectorAll(
-            `[data-race-group="${group}"] > .race-card:not([hidden])`,
-          );
-          if (empty) empty.hidden = cards.length > 0;
-        });
-      }
-      update();
-      setInterval(update, 60000);
-    });
+ import {initializeRaceWidgets} from '../lib/race-archive-client.mjs';
+ initializeRaceWidgets();
 </script>
