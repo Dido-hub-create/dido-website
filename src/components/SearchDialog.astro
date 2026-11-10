@@ -1,0 +1,18 @@
+---
+import '../styles/search.css';
+---
+<dialog id="site-search" class="site-search" aria-labelledby="search-heading">
+  <div class="search-heading"><h2 id="search-heading">Търсене в DIDO</h2><button type="button" class="search-close" data-search-close aria-label="Затвори търсенето">×</button></div>
+  <label for="search-query" class="search-label">Какво търсиш?</label>
+  <div class="search-input-wrap">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+    <input id="search-query" type="search" placeholder="Статия, състезание, маршрут…" maxlength="80" autocomplete="off" spellcheck="false" aria-controls="search-results" aria-describedby="search-status" autofocus />
+  </div>
+  <p id="search-status" class="search-status" role="status" aria-live="polite" aria-atomic="true">Напиши дума или заглавие.</p>
+  <button type="button" class="search-retry" data-search-retry hidden>Опитай отново</button>
+  <ul id="search-results" class="search-results" aria-label="Резултати от търсенето"></ul>
+  <p class="search-help"><span>Кирилица или латиница</span><span>↑ ↓ избор · Enter отваря · Esc затваря</span></p>
+</dialog>
+<script>
+  import '../scripts/site-search';
+</script>

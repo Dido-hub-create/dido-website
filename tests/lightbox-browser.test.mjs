@@ -29,7 +29,7 @@ test('lightbox zoom, keyboard, wheel, drag, pinch, reset and video thumbnail con
  await page.screenshot({path:`work/final-visuals/lightbox-${width}.png`});
  await page.keyboard.press('ArrowRight');assert.equal(await level(),'1.0×');assert.match(await page.locator('[data-counter]').textContent(),/^2 \/ /);
  await page.keyboard.press('ArrowLeft');assert.match(await page.locator('[data-counter]').textContent(),/^1 \/ /);
- await page.keyboard.press('Escape');assert.equal(await page.locator('dialog').isVisible(),false);
+ await page.keyboard.press('Escape');assert.equal(await page.locator('.photo-lightbox').isVisible(),false);
  assert.equal(await page.locator('[data-gallery-photo]').first().evaluate(el=>el===document.activeElement),true);
  await page.goto(origin+'/byagane/');await page.locator('.records').scrollIntoViewIfNeeded();await page.locator('.records').screenshot({path:`work/final-visuals/records-${width}.png`});
  const video=page.locator('[data-video-card]').first();const title=video.locator('h3 a');assert.match(await title.getAttribute('href'),/^https:\/\/www.youtube.com\/watch\?v=/);
@@ -49,6 +49,6 @@ test('lightbox zoom, keyboard, wheel, drag, pinch, reset and video thumbnail con
  await touch('touchStart',[[0,195,y]]);await touch('touchMove',[[0,215,y+30]]);await touch('touchEnd',[]);await page.waitForTimeout(150);assert.notEqual(await page.locator('.lightbox-photo').getAttribute('style'),touchBefore);
  await page.locator('[data-fit]').tap();await page.waitForFunction(()=>document.querySelector('[data-zoom-level]').textContent==='1.0×');
  await touch('touchStart',[[0,280,y]]);await touch('touchMove',[[0,80,y]]);await touch('touchEnd',[]);await page.waitForTimeout(150);assert.match(await page.locator('[data-counter]').textContent(),/^2 \/ /);
- await page.locator('[data-close]').tap();await page.locator('dialog').waitFor({state:'hidden'});
+ await page.locator('[data-close]').tap();await page.locator('.photo-lightbox').waitFor({state:'hidden'});
  }finally{await browser.close();}
 });

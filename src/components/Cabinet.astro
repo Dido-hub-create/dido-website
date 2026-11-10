@@ -1,8 +1,8 @@
 ---
-interface Props { app: {title:string;description:string;image?:string;online?:string;download?:string;} }
+interface Props { app: {id:string;title:string;description:string;image?:string;online?:string;download?:string;} }
 const {app}=Astro.props;
 ---
-<article class="application-card cabinet">
+<article class="application-card cabinet" id={`application-${app.id}`}>
  {app.image && <div class="app-art"><img src={app.image} alt={app.title} width="1535" height="564" loading="lazy" /></div>}
  <div class="app-copy"><h2>{app.title}</h2><p>{app.description}</p>
  <div class="cabinet-actions">
