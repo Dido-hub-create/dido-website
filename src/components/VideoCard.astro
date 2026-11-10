@@ -4,7 +4,7 @@ interface Props { video: any; featured?: boolean }
 const { video, featured = false } = Astro.props;
 const preview = usableImage(video.cover) || video.thumbnail;
 ---
-<article class:list={["video-card", { "is-featured": featured }]} data-video-card>
+<article class:list={["video-card", { "is-featured": featured }]} id={video.id ? `video-${video.id}` : undefined} data-video-card>
   <div class="video-screen" data-video-screen>
     <img src={preview} alt="" width="480" height="360" loading="lazy" referrerpolicy="no-referrer" />
     <button class="video-play" type="button" data-video-play data-video-id={video.videoId} data-video-title={video.title} aria-label={`Гледай: ${video.title}`}>

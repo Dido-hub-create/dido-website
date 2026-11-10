@@ -9,6 +9,7 @@ import "../styles/v05.css";
 import { site, siteIdentity } from "../lib/site.mjs";
 import { publicOrigin, absolutePublicUrl, socialImage } from "../lib/social.mjs";
 import Share from "../components/Share.astro";
+import SearchDialog from "../components/SearchDialog.astro";
 interface Props {
   title?: string;
   description?: string;
@@ -97,9 +98,13 @@ const socialUrl = social ? absolutePublicUrl(social.path, origin) : undefined;
               </a>
             ))
           }
+          <button type="button" class="search-trigger" data-search-open aria-label="Търсене в сайта (Ctrl+K)" title="Търсене (Ctrl+K)" aria-haspopup="dialog" aria-controls="site-search" aria-expanded="false" hidden>
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="search-trigger-label">Търсене</span>
+          </button>
         </nav>
       </div>
     </header>
+    <SearchDialog />
     <main id="main"><slot />{canonical && <Share url={canonical} title={pageTitle} description={description} />}</main>
     <footer class="site-footer">
       <div class="container magazine-footer">
