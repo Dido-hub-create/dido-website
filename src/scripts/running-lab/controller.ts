@@ -1,7 +1,7 @@
 import {LabWorker} from './rpc';
-import {el,num,km,pace,duration,date,action,table,download,parseDuration} from './dom';
-import {lineChart,routeMap,chartValues,nearest} from './charts';
-import {overviewStats,detailed,recordViews,historyViews,comparisonView} from './views';
+import {el,num,km,pace,duration,date,action,download,parseDuration} from './dom';
+import {WorkoutView} from './workout-view';
+import {recordViews,historyViews,comparisonView} from './views';
 import {openLibrary} from '../../lib/running-lab/library.mjs';
 import {defaultPreferences,validatePreferences} from '../../lib/running-lab/backup.mjs';
 import {probableDuplicate} from '../../lib/running-lab/compare.mjs';
@@ -18,10 +18,10 @@ if(root)initialize(root);
 function initialize(root:HTMLElement){
  const q=<T extends HTMLElement=HTMLElement>(selector:string)=>root.querySelector<T>(selector)!;
  const rpc=new LabWorker();let library:any=null,metadata:any[]=[],preferences:LabPreferences=defaultPreferences(),previews:Preview[]=[],active:Preview|null=null,restoration:any=null,comparison:any=null;
- let busy=false,cancelled=false,visibleLimit=100,cursorDistance=0;const selected=new Set<string>();
- let chartUpdates:((x:number)=>void)[]=[],updateMap:((point:any)=>void)=()=>{},zoomRange:{startM:number;endM:number}|null=null;
+ let busy=false,cancelled=false,visibleLimit=100;const selected=new Set<string>();
  const status=(message:string)=>{q('[data-lab-status]').textContent=message;};
  const show=(panel:string)=>{root.querySelectorAll<HTMLElement>('[data-panel]').forEach(node=>node.hidden=node.dataset.panel!==panel);root.querySelectorAll<HTMLElement>('[data-tab]').forEach(node=>{if(node.dataset.tab===panel)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});};
+ const workout=new WorkoutView(root,{run:task,status,isBusy:()=>busy,changeSettings:async change=>{const entry=requireActive();entry.model.settings={...entry.model.settings,...change};await reanalyze();},range:async(startM,endM)=>rpc.run('range',{model:requireActive().model,startM,endM})});
  function renderInto(selector:string,content:Node){q(selector).replaceChildren(content);}
  async function task(job:()=>Promise<void>){
   if(busy){status('Изчакай текущата операция или я прекрати.');return;}
@@ -54,7 +54,7 @@ function initialize(root:HTMLElement){
   const list=Array.from(files);if(!list.length)return;
   if(list.length>LIMITS.files||list.reduce((sum,file)=>sum+file.size,0)>LIMITS.batchBytes)throw new Error('Избери до 200 файла / 64 MiB за една партида.');
   if(previews.length&& !confirm('Да заменим временния преглед? Незаписаните тренировки ще бъдат освободени; библиотеката не се променя.'))return;
-  previews=[];active=null;zoomRange=null;q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();renderOverview();const errors:any[]=[];let processed=0,valid=0,duplicates=0,totalPoints=0,totalFiles=0;
+  previews=[];active=null;workout.resetView();q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();renderOverview();const errors:any[]=[];let processed=0,valid=0,duplicates=0,totalPoints=0,totalFiles=0;
   for(const file of list){
    if(cancelled)break;
    try{
@@ -87,40 +87,7 @@ function initialize(root:HTMLElement){
  }
  function renderSaveButton(){q<HTMLButtonElement>('[data-action="save-selected"]').disabled=busy||!previews.some(p=>p.selected&&!p.saved&&p.duplicate!=='exact');}
  function renderActiveOptions(){const select=q<HTMLSelectElement>('[data-lab-active]');select.replaceChildren(new Option('Избери от импорта или библиотеката',''));previews.forEach((p,i)=>select.append(new Option(`${p.model.name}${p.saved?' · записано':' · временно'}`,'preview:'+i)));for(const row of metadata)if(!previews.some(p=>p.model.id===row.id))select.append(new Option(row.name+' · библиотека',row.id));if(active){const index=previews.indexOf(active);select.value=index>=0?'preview:'+index:active.model.id;}}
- function renderOverview(){
-  q('[data-lab-overview]').hidden=!active;q('[data-lab-empty-overview]').hidden=!!active;if(!active){for(const selector of ['[data-lab-stats]','[data-lab-charts]','[data-lab-map]','[data-lab-pace-summary]','[data-lab-findings]','[data-lab-splits]','[data-lab-fractions]','[data-lab-laps]','[data-lab-climbs]','[data-lab-range-result]'])q(selector).replaceChildren();chartUpdates=[];updateMap=()=>{};return;}
-  const a=active.analysis;q('[data-lab-workout-name]').textContent=active.model.name;
-  q('[data-lab-source]').textContent=`${active.model.source.format.toUpperCase()} · ${date(a.stats.start,preferences.timeZone)} · ${active.saved?'записана тренировка':'временен анализ'}${active.dirty?' · има незаписани настройки':''} · GPS ${num(a.quality.geometryCoverage*100,0)}% · спорт: ${active.model.reported.sport||'не е отчетен във файла'}`;
-  q('[data-lab-stats]').replaceChildren(...Array.from(overviewStats(a,preferences.timeZone).children));
-  const quality=el('div');for(const message of [...a.quality.messages,...active.model.warnings])quality.append(el('p',message,'lab-notice'));if(!a.elevation.available)quality.append(el('p',a.elevation.reason,'lab-muted'));renderInto('[data-lab-quality]',quality);
-  q<HTMLSelectElement>('[data-lab-smoothing]').value=String(active.model.settings.smoothingM);q<HTMLSelectElement>('[data-lab-altitude]').value=active.model.settings.altitudeSource;
-  const axisSelect=q<HTMLSelectElement>('[data-lab-axis]');axisSelect.querySelector<HTMLOptionElement>('[value="distance"]')!.disabled=a.stats.distanceM===null;if(a.stats.distanceM===null&&a.quality.clockReliable)axisSelect.value='time';
-  const timeOption=q<HTMLSelectElement>('[data-lab-axis]').querySelector<HTMLOptionElement>('[value="time"]')!;timeOption.disabled=!a.quality.clockReliable;if(!a.quality.clockReliable)q<HTMLSelectElement>('[data-lab-axis]').value='distance';
-  const endInput=q<HTMLInputElement>('[data-lab-range-end]');if(!endInput.value||Number(endInput.value)*1000>a.stats.distanceM)endInput.value=(a.stats.distanceM/1000).toFixed(3);renderCharts();
-  const detail=detailed(a);renderInto('[data-lab-pace-summary]',detail.pacing);renderInto('[data-lab-findings]',detail.findings);renderInto('[data-lab-splits]',splitTableNode(a));renderInto('[data-lab-fractions]',detail.fractions);renderInto('[data-lab-laps]',detail.laps);renderInto('[data-lab-climbs]',detail.climbs);
- }
- function splitTableNode(a:any){return table(['km','Дистанция m','Време','Темпо','Пулс','Каданс','Δ височина m','↑ / ↓ m'],a.splits.map((r:any,i:number)=>[i+1,num(r.lengthM),duration(r.seconds),pace(r.pace),num(r.hr),num(r.cad),num(r.deltaElevationM),`${num(r.ascentM)} / ${num(r.descentM)}`]));}
- function renderCharts(){
-  if(!active)return;const a=active.analysis,axis=q<HTMLSelectElement>('[data-lab-axis]').value,time=axis==='time';const charts=q('[data-lab-charts]');charts.replaceChildren();chartUpdates=[];
-  const distanceFor=(x:number)=>time?nearestTime(a.samples,a.stats.start+x*60000)?.d??0:x*1000;
-  const toX=(distance:number)=>time?(nearest(a.samples,distance).t-a.stats.start)/60000:distance/1000;
-  const markers:{x:number;label:string;lap?:boolean}[]=a.splits.map((row:any,i:number)=>({x:toX(row.endM),label:String(i+1)}));
-  a.manualLaps.forEach((row:any,i:number)=>markers.push({x:toX(row.endM),label:'L'+(i+1)+' изч.',lap:true}));
-  a.deviceLaps.forEach((row:any,i:number)=>{const end=typeof row.end==='number'?row.end:typeof row.end==='string'?Date.parse(row.end):null;if(a.quality.clockReliable&&end!==null&&Number.isFinite(end)){const point=nearestTime(a.samples,end);if(point)markers.push({x:toX(point.d),label:'L'+(i+1)+' устр.',lap:true});}});
-  for(const [key,title,unit,color,inverse]of [['pace','Темпо','мин/км · по-бързо ↑','#ff9d40',true],['hr','Пулс','bpm','#f284a6',false],['elevation','Височина','m','#55c4e1',false],['cad','Каданс','отчетени цикли/min','#b5a2ff',false]] as const){
-   const domain=zoomRange?[toX(zoomRange.startM),toX(zoomRange.endM)] as [number,number]:undefined;
-   const points=(key==='elevation'&&!a.elevation.available?[]:chartValues(a,key,axis)).filter((p:any)=>!domain||p.x>=domain[0]&&p.x<=domain[1]);const chart=lineChart({title,unit,color,inverse,axis:time?'изминало min':'дистанция km',points,markers,domain,format:key==='pace'?v=>pace(v).replace(' /км',''):undefined,onCursor:x=>setCursor(distanceFor(x)),onRange:(left,right)=>{q<HTMLInputElement>('[data-lab-range-start]').value=(distanceFor(left)/1000).toFixed(3);q<HTMLInputElement>('[data-lab-range-end]').value=(distanceFor(right)/1000).toFixed(3);void task(calculateRange);}});charts.append(chart.card);chartUpdates.push(chart.update);
-  }
-  const map=routeMap(a.samples);renderInto('[data-lab-map]',map.node);updateMap=map.update;setCursor(Math.min(cursorDistance,a.stats.distanceM));
- }
- function nearestTime(points:any[],t:number){if(!points.length)return null;let lo=0,hi=points.length-1;while(lo+1<hi){const m=(lo+hi)>>1;if(points[m].t<=t)lo=m;else hi=m;}return Math.abs(points[lo].t-t)<=Math.abs(points[hi].t-t)?points[lo]:points[hi];}
- function setCursor(distanceM:number){
-  if(!active||!active.analysis.samples.length)return;cursorDistance=distanceM;const a=active.analysis,p=nearest(a.samples,distanceM);if(!p)return;
-  const elevation=a.elevation.available?nearest(a.elevation.samples,distanceM):null;
-  q('[data-lab-cursor]').textContent=`${num(p.d/1000,3)} km · ${p.t!==null?duration((p.t-a.stats.start)/1000):'Няма време'} · темпо ${pace(p.pace)} · пулс ${num(p.hr)} bpm · височина ${num(elevation?.ele??p.z)} m · наклон ${num(elevation?elevation.grade*100:null,2)}%`;
-  const x=q<HTMLSelectElement>('[data-lab-axis]').value==='time'?(p.t-a.stats.start)/60000:p.d/1000;chartUpdates.forEach(update=>update(x));updateMap(p);
- }
- async function calculateRange(){const entry=requireActive(),startM=Number(q<HTMLInputElement>('[data-lab-range-start]').value)*1000,endM=Number(q<HTMLInputElement>('[data-lab-range-end]').value)*1000;if(!(startM>=0&&endM>startM&&endM<=entry.analysis.stats.distanceM+1))throw new Error('Избери валиден диапазон в тренировката.');const value=await rpc.run('range',{model:entry.model,startM,endM:Math.min(endM,entry.analysis.stats.distanceM)});q('[data-lab-range-result]').textContent=value?`${num(value.lengthM)} m · ${duration(value.seconds)} · ${pace(value.pace)} · пулс ${num(value.heart)} bpm`:'Недостатъчно надеждни данни за този участък.';}
+ function renderOverview(){workout.render(active,preferences.timeZone);}
  async function reanalyze(){const entry=requireActive();try{const value=await rpc.run('analyze',{model:entry.model,distances:preferences.customDistances});entry.analysis=value.analysis;entry.meta=value.meta;entry.dirty=true;renderOverview();status('Анализът е преизчислен временно. Използвай „Запази текущата тренировка“, за да запазиш настройките.');}catch(error){entry.model.settings={...entry.analysis.settings};renderOverview();throw error;}}
  function renderLibrary(){
   const container=q('[data-lab-library]');container.replaceChildren();if(!library){container.append(el('p','Библиотеката не е достъпна. Временните тренировки не са загубени от прегледа.','lab-empty'));return;}
@@ -137,7 +104,7 @@ function initialize(root:HTMLElement){
  }
  function renderRecords(){const value=recordViews(metadata,preferences);renderInto('[data-lab-records]',value.main);renderInto('[data-lab-record-history]',value.history);renderInto('[data-lab-official]',value.official);const distances=q('[data-lab-distances]');distances.replaceChildren();for(const d of preferences.customDistances)distances.append(action(`Премахни ${num(d/1000,4)} km`,'delete-distance',String(d)));}
  function renderHistory(){const value=historyViews(metadata);q('[data-lab-history-totals]').replaceChildren(...Array.from(value.totals.children));renderInto('[data-lab-history-chart]',value.chart);renderInto('[data-lab-history]',value.table);renderInto('[data-lab-years]',value.years);}
- async function openSaved(id:string){requireLibrary();const model=await library.get(id);if(!model)throw new Error('Тренировката е изтрита от този браузър. Обнови библиотеката.');const value=await rpc.run('analyze',{model,distances:preferences.customDistances});active={model,...value,selected:false,duplicate:null,saved:true};zoomRange=null;q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();renderOverview();show('overview');status('Тренировката е заредена от локалната библиотека.');}
+ async function openSaved(id:string){requireLibrary();const model=await library.get(id);if(!model)throw new Error('Тренировката е изтрита от този браузър. Обнови библиотеката.');const value=await rpc.run('analyze',{model,distances:preferences.customDistances});active={model,...value,selected:false,duplicate:null,saved:true};workout.resetView();q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();renderOverview();show('overview');status('Тренировката е заредена от локалната библиотека.');}
  async function saveEntries(entries:Preview[],overwrite=false){
   requireLibrary();if(!entries.length)throw new Error('Избери нови тренировки за запазване.');
   if(!confirm(`Запази ${entries.length} тренировка/и само в този браузър?${entries.some(e=>e.duplicate==='probable')?' Има вероятни дубликати — ще се запазят отделно.':''}${overwrite?' Съществуващият запис ще получи текущото име/настройки.':''}`))return;
@@ -158,11 +125,11 @@ function initialize(root:HTMLElement){
   if(name==='cancel'){cancelled=true;rpc.cancel();status('Прекратяване…');return;}
   if(name==='clear-preview'){if(busy)throw new Error('Първо прекрати текущата операция.');previews=[];active=null;renderPreviews();renderActiveOptions();renderOverview();status('Временните данни са освободени. Библиотеката не е променяна.');return;}
   if(name==='more-library'){visibleLimit+=100;renderLibrary();return;}
-  if(name==='reset-zoom'){zoomRange=null;renderCharts();return;}
-  if(name==='zoom'){const entry=requireActive(),startM=Number(q<HTMLInputElement>('[data-lab-range-start]').value)*1000,endM=Number(q<HTMLInputElement>('[data-lab-range-end]').value)*1000;if(!(startM>=0&&endM>startM&&endM<=entry.analysis.stats.distanceM+1))throw new Error('Невалиден диапазон за приближаване.');zoomRange={startM,endM};renderCharts();return;}
+  if(name==='reset-zoom'){workout.resetZoom();return;}
+  if(name==='zoom'){workout.zoom();return;}
   if(name==='print'){window.print();return;}
   await task(async()=>{
-   if(name==='open-preview'){active=previews[Number(id)];zoomRange=null;q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();renderOverview();show('overview');}
+   if(name==='open-preview'){active=previews[Number(id)];workout.resetView();q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();renderOverview();show('overview');}
    else if(name==='open-saved')await openSaved(id!);
    else if(name==='save-selected')await saveEntries(previews.filter(p=>p.selected&&!p.saved&&p.duplicate!=='exact'));
    else if(name==='save-active')await saveEntries([requireActive()],metadata.some(row=>row.id===active?.model.id));
@@ -174,7 +141,9 @@ function initialize(root:HTMLElement){
    }else if(name==='delete-library'){
     requireLibrary();if(!confirm(`Изтрий всички ${metadata.length} тренировки, официални резултати и потребителски дистанции само в Running Lab? Първо направи архив, ако искаш да ги запазиш.`))return;await library.write([],defaultPreferences(),{replace:true,confirmed:true});selected.clear();active=null;await refresh();renderOverview();status('Локалната библиотека на Running Lab е изчистена. Другите приложения не са променяни.');
    }else if(name==='compare-selected')await compare();
-   else if(name==='range')await calculateRange();
+   else if(name==='range')await workout.calculateRange();
+   else if(name==='mark-finish')await workout.markFinish();
+   else if(name==='clear-finish')await workout.clearFinish();
    else if(name==='recompute-records')await recompute();
    else if(name==='delete-distance'){await savePreferences({...preferences,customDistances:preferences.customDistances.filter(d=>d!==Number(id))});status('Потребителската дистанция е премахната.');}
    else if(name==='delete-official'){if(confirm('Изтрий този ръчно въведен официален резултат?')){await savePreferences({...preferences,officialResults:preferences.officialResults.filter(r=>r.id!==id)});status('Официалният резултат е изтрит.');}}
@@ -191,22 +160,21 @@ function initialize(root:HTMLElement){
  root.addEventListener('click',event=>{const button=event.target instanceof Element?event.target.closest<HTMLElement>('[data-tab],[data-action]'):null;if(!button)return;if(button.dataset.tab){show(button.dataset.tab);return;}void handleAction(button.dataset.action!,button.dataset.id).catch(error=>status(error.message));});
  q<HTMLInputElement>('[data-lab-files]').addEventListener('change',event=>{const input=event.target as HTMLInputElement;if(input.files){const files=Array.from(input.files);input.value='';void task(()=>importFiles(files));}});
  const drop=q('[data-lab-drop]');drop.addEventListener('dragover',event=>{event.preventDefault();drop.classList.add('dragging');});drop.addEventListener('dragleave',()=>drop.classList.remove('dragging'));drop.addEventListener('drop',event=>{event.preventDefault();drop.classList.remove('dragging');if(event.dataTransfer?.files)void task(()=>importFiles(event.dataTransfer!.files));});
- q<HTMLSelectElement>('[data-lab-active]').addEventListener('change',event=>{const id=(event.target as HTMLSelectElement).value;if(id.startsWith('preview:')){active=previews[Number(id.slice(8))];zoomRange=null;q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderOverview();}else if(id)void task(()=>openSaved(id));});
- q('[data-lab-axis]').addEventListener('change',renderCharts);
- for(const selector of ['[data-lab-smoothing]','[data-lab-altitude]'])q(selector).addEventListener('change',()=>{if(!active)return;if(busy){q<HTMLSelectElement>('[data-lab-smoothing]').value=String(active.model.settings.smoothingM);q<HTMLSelectElement>('[data-lab-altitude]').value=active.model.settings.altitudeSource;status('Изчакай или прекрати текущото изчисление.');return;}active.model.settings={...active.model.settings,smoothingM:Number(q<HTMLSelectElement>('[data-lab-smoothing]').value)as 25|50|100|200,altitudeSource:q<HTMLSelectElement>('[data-lab-altitude]').value as 'unknown'|'gps'|'barometer'};void task(reanalyze);});
+ q<HTMLSelectElement>('[data-lab-active]').addEventListener('change',event=>{const id=(event.target as HTMLSelectElement).value;if(id.startsWith('preview:')){active=previews[Number(id.slice(8))];workout.resetView();q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderOverview();}else if(id)void task(()=>openSaved(id));});
  for(const selector of ['[data-lab-search]','[data-lab-sort]','[data-lab-from]','[data-lab-to]','[data-lab-min-distance]','[data-lab-max-distance]'])q(selector).addEventListener('input',()=>{visibleLimit=100;renderLibrary();});
  q('[data-lab-compare-mode]').addEventListener('change',()=>{if(selected.size>=2)void task(compare);});
  q<HTMLSelectElement>('[data-lab-compare-metric]').addEventListener('change',()=>{if(comparison)renderInto('[data-lab-comparison]',comparisonView(comparison,q<HTMLSelectElement>('[data-lab-compare-metric]').value));});
  q<HTMLInputElement>('[data-lab-print-map]').addEventListener('change',event=>root.classList.toggle('lab-print-route',(event.target as HTMLInputElement).checked));
- q<HTMLFormElement>('[data-lab-laps-form]').addEventListener('submit',event=>{event.preventDefault();void task(async()=>{const entry=requireActive(),data=new FormData(event.target as HTMLFormElement),length=String(data.get('length')||''),input=String(data.get('boundaries')||'');const boundaries=input?input.split(';').map(value=>Number(value.trim().replace(',','.'))*1000):[];if(boundaries.length>1000||boundaries.some((n,i)=>!Number.isFinite(n)||n<=0||n>=entry.analysis.stats.distanceM||i>0&&n<=boundaries[i-1]))throw new Error('Границите трябва да са подредени, уникални и вътре в тренировката.');entry.model.settings={...entry.model.settings,lapLengthM:length?validateDistance(Number(length)*1000):null,lapBoundaries:boundaries};await reanalyze();});});
  q<HTMLFormElement>('[data-lab-distance-form]').addEventListener('submit',event=>{event.preventDefault();void task(async()=>{const data=new FormData(event.target as HTMLFormElement),distance=validateDistance(Number(String(data.get('km')).replace(',','.'))*1000);await savePreferences({...preferences,customDistances:[...new Set([...preferences.customDistances,distance])]});await recompute();});});
  q<HTMLFormElement>('[data-lab-official-form]').addEventListener('submit',event=>{event.preventDefault();void task(async()=>{const form=event.target as HTMLFormElement,data=new FormData(form),result=officialResult({id:data.get('id')||undefined,distanceM:Number(String(data.get('km')).replace(',','.'))*1000,seconds:parseDuration(String(data.get('time'))),date:data.get('date'),race:data.get('race'),url:data.get('url'),comment:data.get('comment')});await savePreferences({...preferences,officialResults:[...preferences.officialResults.filter(row=>row.id!==result.id),result]});form.reset();status('Официалният резултат е запазен отделно от GPS рекордите.');});});
  q<HTMLFormElement>('[data-lab-timezone-form]').addEventListener('submit',event=>{event.preventDefault();void task(async()=>{const data=new FormData(event.target as HTMLFormElement);await savePreferences({...preferences,timeZone:String(data.get('zone'))});renderOverview();status('Часовата зона за показване е запазена; времената остават UTC в данните.');});});
  q<HTMLInputElement>('[data-lab-restore]').addEventListener('change',event=>{const file=(event.target as HTMLInputElement).files?.[0];if(!file)return;(event.target as HTMLInputElement).value='';void task(async()=>{restoration=null;q('[data-lab-restore-preview]').textContent='';q<HTMLButtonElement>('[data-action="restore"]').disabled=true;if(file.size>LIMITS.archiveBytes)throw new Error('Архивът надвишава 64 MiB.');restoration=await rpc.run('validate-backup',{text:await file.text()},progress);const exact=restoration.entries.filter((e:any)=>metadata.some(row=>probableDuplicate(e.meta,row)==='exact')).length,probable=restoration.entries.filter((e:any)=>metadata.some(row=>probableDuplicate(e.meta,row)==='probable')).length;q('[data-lab-restore-preview]').textContent=`Проверен архив: ${restoration.entries.length} тренировки, ${restoration.preferences.officialResults.length} официални резултата, ${exact} точни и ${probable} вероятни дубликата. Нищо не е записано.`;q<HTMLButtonElement>('[data-action="restore"]').disabled=false;status('Архивът е проверен. Избери режим и потвърди възстановяването.');});});
  window.addEventListener('beforeunload',()=>{rpc.cancel();library?.close();});
- let resizeTimer:ReturnType<typeof setTimeout>;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(active)renderCharts();if(comparison)renderInto('[data-lab-comparison]',comparisonView(comparison,q<HTMLSelectElement>('[data-lab-compare-metric]').value));renderHistory();},150);});
+ let resizeTimer:ReturnType<typeof setTimeout>;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(active)workout.redraw();if(comparison)renderInto('[data-lab-comparison]',comparisonView(comparison,q<HTMLSelectElement>('[data-lab-compare-metric]').value));renderHistory();},150);});
+ const fontProbe=el('span',undefined,'lab-font-probe');fontProbe.setAttribute('aria-hidden','true');root.append(fontProbe);
+ if(typeof ResizeObserver!=='undefined'){let previous=0;const observer=new ResizeObserver(entries=>{const width=entries[0].contentRect.width;if(previous&&Math.abs(width-previous)>.1){workout.redraw();if(comparison)renderInto('[data-lab-comparison]',comparisonView(comparison,q<HTMLSelectElement>('[data-lab-compare-metric]').value));renderHistory();}previous=width;});observer.observe(fontProbe);window.addEventListener('beforeunload',()=>observer.disconnect());}
  root.querySelectorAll<HTMLElement>('[data-panel]').forEach(node=>{node.id='lab-panel-'+node.dataset.panel;root.querySelector(`[data-tab="${node.dataset.panel}"]`)?.setAttribute('aria-controls',node.id);});
  void initLibrary();renderPreviews();renderActiveOptions();
  // A separate explicit save action also persists analysis settings without changing raw points.
- const saveCurrent=action('Запази текущата тренировка / настройки','save-active');q('[data-lab-overview] .lab-actions').prepend(saveCurrent);
+ const saveCurrent=action('Запази текущата тренировка / настройки','save-active');q('[data-lab-save-actions]').prepend(saveCurrent);
 }

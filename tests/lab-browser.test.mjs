@@ -37,15 +37,15 @@ test('Running Lab browser: explicit saves, library, charts, 2–3 comparisons, r
   await dialogAction(page,'save-selected',false);assert.equal((await database(page)).length,0);
   await dialogAction(page,'save-selected');assert.equal((await database(page)).length,3);
   await action(page,'open-preview');
-  assert.equal(await page.locator('[data-lab-charts] svg').count(),4);assert.match(await page.locator('[data-lab-stats]').textContent(),/5 km/);
+  assert.equal(await page.locator('[data-lab-charts] svg').count(),5);assert.match(await page.locator('[data-lab-stats]').textContent(),/5 km/);
   const chart=page.locator('[data-lab-charts] svg').first();await chart.scrollIntoViewIfNeeded();const box=await chart.boundingBox();
   const before=await page.locator('[data-lab-map-cursor]').getAttribute('cy');await page.mouse.move(box.x+box.width*.65,box.y+70);
   assert.notEqual(await page.locator('[data-lab-map-cursor]').getAttribute('cy'),before);
   const cursors=await page.locator('[data-lab-charts] .lab-cursor-line').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('x1')));assert.equal(new Set(cursors).size,1,'all charts share the cursor');
-  await chart.focus();await chart.press('Home');assert.match(await page.locator('[data-lab-cursor]').textContent(),/^0 km/);await chart.press('End');assert.match(await page.locator('[data-lab-cursor]').textContent(),/^5 km/);
-  await page.locator('[data-lab-range-start]').fill('1');await page.locator('[data-lab-range-end]').fill('2');await action(page,'range');assert.match(await page.locator('[data-lab-range-result]').textContent(),/1.?000 m.*0:05:00/);
+  await chart.focus();await chart.press('Home');assert.match(await page.locator('[data-lab-cursor]').textContent(),/^0 км/);await chart.press('End');assert.match(await page.locator('[data-lab-cursor]').textContent(),/^5 км/);
+  await page.locator('[data-lab-range-start]').fill('1');await page.locator('[data-lab-range-end]').fill('2');await action(page,'range');assert.match(await page.locator('[data-lab-range-result]').textContent(),/1.?000 м.*0:05:00/);
   const oldPath=await chart.locator('path').getAttribute('d');await action(page,'zoom');assert.notEqual(await page.locator('[data-lab-charts] svg path').first().getAttribute('d'),oldPath);await action(page,'reset-zoom');
-  await page.locator('[data-lab-axis]').selectOption('time');assert.match(await page.locator('[data-lab-charts] svg').first().getAttribute('aria-label'),/min/);await page.locator('[data-lab-axis]').selectOption('distance');
+  await page.locator('[data-lab-axis]').selectOption('time');assert.match(await page.locator('[data-lab-charts] svg').first().getAttribute('aria-label'),/мин/);await page.locator('[data-lab-axis]').selectOption('distance');
   await page.locator('[data-lab-smoothing]').selectOption('50');await idle(page);assert.equal((await database(page,'activities'))[0].settings.smoothingM,100,'settings are not saved automatically');
   await dialogAction(page,'save-active');assert.ok((await database(page,'activities')).some(row=>row.settings.smoothingM===50));
   await page.locator('[data-lab-smoothing]').selectOption('100');await idle(page);await dialogAction(page,'save-active');
@@ -54,11 +54,11 @@ test('Running Lab browser: explicit saves, library, charts, 2–3 comparisons, r
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'no page overflow at '+width);
    const svg=page.locator('[data-lab-charts] svg').first();await svg.scrollIntoViewIfNeeded();const b=await svg.boundingBox();
    await page.touchscreen.tap(b.x+b.width*.55,b.y+85);assert.match(await page.locator('[data-lab-cursor]').textContent(),/наклон/);
-   if(width===390){const cdp=await context.newCDPSession(page);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:0,x:b.x+b.width*.35,y:b.y+85}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:0,x:b.x+b.width*.75,y:b.y+85}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();await idle(page);assert.match(await page.locator('[data-lab-range-result]').textContent(),/m/);}
+   if(width===390){const cdp=await context.newCDPSession(page);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:0,x:b.x+b.width*.35,y:b.y+85}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:0,x:b.x+b.width*.75,y:b.y+85}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();await idle(page);assert.match(await page.locator('[data-lab-range-result]').textContent(),/м/);}
    if([390,1440].includes(width)){await page.evaluate(()=>document.activeElement?.blur());await page.waitForFunction(()=>document.querySelector('.skip-link').getBoundingClientRect().bottom<0);await page.locator('[data-panel="overview"]').screenshot({path:`${shots}/overview-${width}.png`});await page.locator('[data-lab-charts]').screenshot({path:`${shots}/charts-${width}.png`});}
   }
-  await page.setViewportSize({width:1440,height:1000});await nav(page,'analysis');assert.equal(await page.locator('[data-lab-splits] tbody tr').count(),5);assert.equal(await page.locator('[data-lab-laps] tbody tr').count(),0,'no invented laps');
-  await page.locator('[data-lab-laps-form] [name="length"]').fill('2.5');await page.locator('[data-lab-laps-form] button').click();await idle(page);assert.equal(await page.locator('[data-lab-laps] tbody tr').count(),2);
+  await page.setViewportSize({width:1440,height:1000});await nav(page,'analysis');assert.equal(await page.locator('[data-lab-splits] tbody tr').count(),5);assert.equal(await page.locator('[data-lab-lap-table] tbody tr').count(),0,'no invented laps');
+  await page.locator('.lab-lap-settings > summary').click();await page.locator('[data-lab-laps-form] [name="length"]').fill('2.5');await page.locator('[data-lab-laps-form] button').click();await idle(page);assert.equal(await page.locator('[data-lab-lap-table] tbody tr').count(),2);
   await nav(page,'overview');await dialogAction(page,'save-active');
   const summary=JSON.parse(await downloaded(page,'summary'));assert.equal(summary.coordinateDataIncluded,false);assert.equal(JSON.stringify(summary).includes('"lat"'),false);
   const csv=await downloaded(page,'metrics-csv');assert.match(csv,/Дистанция m/);assert.doesNotMatch(csv,/latitude|longitude|"lat"/);
@@ -100,7 +100,7 @@ test('Running Lab browser: no IndexedDB, local-only requests, cancellation and b
  const browser=await launch();let context;
  try{
   context=await browser.newContext();await context.addInitScript(()=>{Object.defineProperty(window,'indexedDB',{get(){throw new DOMException('Denied','SecurityError');}});});const page=await context.newPage();await page.goto(base+'/byagane/running-lab/');await page.locator('[data-lab-storage]').waitFor({state:'visible'});
-  await upload(page,[fixture('Без хранилище.gpx')]);assert.equal(await page.locator('[data-lab-previews] article').count(),1);await action(page,'open-preview');assert.equal(await page.locator('[data-lab-charts] svg').count(),4);await action(page,'save-active');assert.match(await page.locator('[data-lab-status]').textContent(),/не е достъпна/);await context.close();
+  await upload(page,[fixture('Без хранилище.gpx')]);assert.equal(await page.locator('[data-lab-previews] article').count(),1);await action(page,'open-preview');assert.equal(await page.locator('[data-lab-charts] svg').count(),5);await action(page,'save-active');assert.match(await page.locator('[data-lab-status]').textContent(),/не е достъпна/);await context.close();
   context=await browser.newContext();const cancel=await context.newPage();await ready(cancel);
   const batch=Array.from({length:80},(_,i)=>fixture(`Партида ${i}.gpx`,{distance:5000,offset:i}));await cancel.locator('[data-lab-files]').setInputFiles(batch);await cancel.locator('[data-action="cancel"]').click();await idle(cancel);assert.match(await cancel.locator('[data-lab-status]').textContent(),/прекратен/);assert.equal((await database(cancel)).length,0);
   const pending=await cancel.locator('[data-lab-previews] article').count();if(pending)cancel.once('dialog',dialog=>dialog.accept());await upload(cancel,[binary('real-wire.fit',fit({developer:true}))]);assert.equal(await cancel.locator('[data-lab-previews] article').count(),1,'worker can restart after cancellation');await context.close();
