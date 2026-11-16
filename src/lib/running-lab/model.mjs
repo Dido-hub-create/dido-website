@@ -4,10 +4,12 @@ export const number = value => value!==null && value!==undefined && String(value
 export const bounded = (value,min,max) => {const n=number(value);return n!==null && n>=min && n<=max ? n : null;};
 export const text = (value,max=200) => typeof value==='string'?value.trim().slice(0,max):'';
 export function timestamp(value) {
- if(value instanceof Date)return Number.isFinite(+value)?+value:null;
+ if(value instanceof Date)return Number.isFinite(+value)?timestamp(+value):null;
  if(typeof value==='number')return value>=631152000000 && value<=7258118400000?value:null;
  if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:\d\d)$/i.test(value))return null;
- const n=Date.parse(value);return Number.isFinite(n)?n:null;
+ const [year,month,day]=value.slice(0,10).split('-').map(Number),calendar=new Date(Date.UTC(year,month-1,day));
+ if(calendar.getUTCFullYear()!==year||calendar.getUTCMonth()!==month-1||calendar.getUTCDate()!==day)return null;
+ const n=Date.parse(value);return Number.isFinite(n)?timestamp(n):null;
 }
 export function point(raw={},segment=0) {
  const lat=bounded(raw.lat,-90,90),lon=bounded(raw.lon,-180,180);
@@ -20,7 +22,10 @@ export async function checksum(value) {
 }
 export function activity({points,source,name,laps=[],events=[],reported={},warnings=[]}) {
  if(!Array.isArray(points)||points.length<2||points.length>LIMITS.points)throw new Error(`Нужни са 2–${LIMITS.points.toLocaleString('bg')} точки.`);
+ laps=laps.slice(0,2000).map(lap=>{let start=timestamp(lap.start),end=timestamp(lap.end);if(start!==null&&end!==null&&end<start)start=end=null;
+  return {start,end,distanceM:bounded(lap.distanceM,0,2000000),timerSeconds:bounded(lap.timerSeconds,0,604800),source:'device'};});
+ events=events.slice(0,10000).flatMap(event=>{const t=timestamp(event.t);return t!==null&&['start','stop'].includes(event.type)?[{t,type:event.type,source:'device'}]:[];});
  return {version:MODEL_VERSION,id:`run-${source.hash}-${source.index||0}`,name:text(name)||text(source.name)||'Бягане',comment:'',source:{...source,originalBytesRetained:false,timeConvention:'UTC epoch ms; изходните ISO отмествания се зачитат'},points,
-  laps:laps.slice(0,2000),events:events.slice(0,10000),reported,warnings:warnings.slice(0,100),settings:{smoothingM:100,altitudeSource:'unknown',lapLengthM:null,lapBoundaries:[]},
+  laps,events,reported,warnings:warnings.slice(0,100),settings:{smoothingM:100,altitudeSource:'unknown',lapLengthM:null,lapBoundaries:[]},
   provenance:{coordinates:'file',time:'file, timezone-aware',deviceDistance:'device',altitude:'device, sensor type unconfirmed',heartRate:'sensor report',cadence:'reported cycles/min; no doubling',derived:'DIDO distance/time algorithms v1'}};
 }

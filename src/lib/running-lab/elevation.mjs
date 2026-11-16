@@ -1,5 +1,12 @@
 import {cleanRuns} from './series.mjs';
 import {detectClimbs} from '../profile-terrain.mjs';
+export function elevationInterval(profile,start,end){
+ const points=profile.samples;if(!profile.available||!points.length)return null;
+ const at=d=>{let lo=0,hi=points.length-1;while(lo+1<hi){const m=(lo+hi)>>1;if(points[m].d<=d)lo=m;else hi=m;}const a=points[lo],b=points[hi],ratio=b.d>a.d?(d-a.d)/(b.d-a.d):0;return {d,ele:a.ele+ratio*(b.ele-a.ele)};};
+ const section=[at(start),...points.filter(p=>p.d>start&&p.d<end),at(end)];let ascentM=0,descentM=0;
+ for(let i=1;i<section.length;i++){const delta=section[i].ele-section[i-1].ele;ascentM+=Math.max(0,delta);descentM+=Math.max(0,-delta);}
+ return {ascentM,descentM,deltaElevationM:section.at(-1).ele-section[0].ele};
+}
 export function elevationProfile(points,windowM=100){
  if(![25,50,100,200].includes(windowM))throw new Error('Невалидно изглаждане.');
  if(points.some(p=>!Number.isFinite(p.z)))return {available:false,reason:'Липсват пълни височини.',samples:[],climbs:[]};

@@ -10,5 +10,6 @@ export async function importWorkout(bytes,name){
  }else if(format==='fit'){const {parseFitWorkout}=await import('./fit-import.mjs');runs=await parseFitWorkout(bytes);}
  else throw new Error('Поддържат се GPX, TCX и FIT.');
  if(!runs.length)throw new Error('Файлът няма използваема тренировка.');
+ if(runs.length>LIMITS.files)throw new Error('Твърде много тренировки в един файл; раздели го на части.');
  return runs.map((run,index)=>activity({...run,source:{format,name:String(name).slice(0,200),hash,index}}));
 }

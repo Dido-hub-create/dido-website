@@ -11,6 +11,7 @@ export function makeSplits(points,length=1000){
  return rows;
 }
 export function manualLaps(points,settings){
+ if(!settings.lapLengthM&&!settings.lapBoundaries?.length)return [];
  const end=points.at(-1).d,markers=[0,...(settings.lapBoundaries||[]),end];
  if(settings.lapLengthM>0){markers.splice(1,markers.length-2);for(let x=settings.lapLengthM;x<end;x+=settings.lapLengthM)markers.splice(markers.length-1,0,x);}
  return markers.slice(1).flatMap((x,i)=>{const row=interval(points,markers[i],x,{last:i===markers.length-2});return row?[{...row,source:'calculated'}]:[];});

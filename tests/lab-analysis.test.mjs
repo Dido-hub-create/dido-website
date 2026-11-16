@@ -7,7 +7,7 @@ test('Lab known distance/time, weighted sensors, km/final partial splits and int
  const model=await activity({distance:5280}),a=analyzeActivity(model);close(a.stats.distanceM,5280);close(a.stats.elapsedSeconds,1584);close(a.stats.pace,300);close(a.stats.heart.mean,140);assert.equal(a.splits.length,6);close(a.splits.at(-1).lengthM,280);close(a.splits.reduce((sum,r)=>sum+r.seconds,0),a.stats.elapsedSeconds);assert.equal(a.fractions[4].length,4);assert.equal(a.records.filter(r=>r.distanceM===5000).length,1);assert.equal(a.elevation.available,true);assert.ok(a.stats.ascentM>20&&a.stats.ascentM<27);
 });
 test('Lab records evaluate sample and shifted end boundaries, including starts between GPS and kilometre markers',async()=>{
- const model=await activity({distance:2000});const positions=[...new Set([...model.points.map((p,i)=>i*10),1237.5])].sort((a,b)=>a-b);let seconds=0,last=0;
+ const model=await activity({distance:2000});const positions=[...new Set([...model.points.map((_,i)=>i*10),1237.5])].sort((a,b)=>a-b);let seconds=0,last=0;
  model.points=positions.map(d=>{const midpoint=(last+d)/2;seconds+=(d-last)*(midpoint<400?.5:midpoint<1237.5?.2:.8);last=d;return {...model.points[0],lat:42+d/111195.0802335329,t:model.points[0].t+seconds*1000};});
  const a=analyzeActivity(model),best=fastestWindow(a.points,1000,a.quality);close(best.startM,237.5);close(best.seconds,248.75);assert.ok(best.startM%10>1);
  for(const distance of [1000,3000,5000,10000,21097.5,42195,2300]){const large=analyzeActivity(await activity({distance:distance+100} ),{distances:[distance]});const record=large.records.find(r=>r.distanceM===distance);assert.ok(record);close(record.seconds,distance*.3);}
@@ -24,6 +24,7 @@ test('Lab elapsed, moving estimate, timer and real stop events are distinct; sta
  model.events=[{t:model.points[0].t,type:'start'},{t:model.points[100].t,type:'stop'},{t:duplicate.t,type:'start'},{t:model.points.at(-1).t,type:'stop'}];
  const a=analyzeActivity(model);close(a.stats.elapsedSeconds,610);close(a.stats.movingSeconds,600);close(a.stats.timerSeconds,600);close(a.stats.confirmedPauseSeconds,10);close(a.splits.reduce((sum,r)=>sum+r.seconds,0),610);assert.equal(a.stats.confirmedStops,2);
  const noEvents=structuredClone(model);noEvents.events=[];assert.equal(analyzeActivity(noEvents).stats.confirmedPauseSeconds,null);
+ const early=structuredClone(model);early.events[0].t-=5000;close(analyzeActivity(early).stats.confirmedPauseSeconds,10);
 });
 test('Lab record history ignores ties/worse results and recomputes after deletion; custom distances work',async()=>{
  const slow=analyzeActivity(await activity({distance:6000,pace:()=>330})),fast=analyzeActivity(await activity({distance:6000,pace:()=>300}));fast.id='new';fast.stats.start+=86400000;

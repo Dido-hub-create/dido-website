@@ -18,16 +18,18 @@ export function atTime(points,t){
 export function sensorStats(points,key,start=-Infinity,end=Infinity){
  const valid=points.filter(p=>Number.isFinite(p[key])&& (p.t===null||p.t>=start&&p.t<=end));
  if(!valid.length)return {mean:null,min:null,max:null,coverage:0,method:'unavailable'};
+ const reliableClock=points.every((p,i)=>Number.isFinite(p.t)&&(!i||p.t>points[i-1].t));
+ if(!reliableClock)return {mean:valid.reduce((sum,p)=>sum+p[key],0)/valid.length,min:valid.reduce((n,p)=>Math.min(n,p[key]),Infinity),max:valid.reduce((n,p)=>Math.max(n,p[key]),-Infinity),coverage:0,method:'sample mean, unreliable clock'};
  let area=0,coverage=0;
  for(let i=1;i<points.length;i++){
-  const a=points[i-1],b=points[i];if(!Number.isFinite(a.t)||!Number.isFinite(b.t)||b.t<=a.t||b.t-a.t>30000||a[key]===null||b[key]===null)continue;
+  const a=points[i-1],b=points[i];if(a.run!==b.run||b.t-a.t>30000||a[key]===null||b[key]===null)continue;
   const l=Math.max(start,a.t),r=Math.min(end,b.t);if(r<=l)continue;
   const x=a[key]+(b[key]-a[key])*(l-a.t)/(b.t-a.t),y=a[key]+(b[key]-a[key])*(r-a.t)/(b.t-a.t);
   area+=(x+y)/2*(r-l);coverage+=r-l;
  }
  const total=Number.isFinite(start)&&Number.isFinite(end)?end-start:points.at(-1).t-points[0].t;
  const fraction=total>0?Math.min(1,coverage/total):0;
- return {mean:coverage>0&&fraction>=.8?area/coverage:points.every(p=>p.t===null)?valid.reduce((sum,p)=>sum+p[key],0)/valid.length:null,min:valid.reduce((n,p)=>Math.min(n,p[key]),Infinity),max:valid.reduce((n,p)=>Math.max(n,p[key]),-Infinity),coverage:fraction,method:coverage>0?'time-weighted':'sample mean, no clock'};
+ return {mean:coverage>0&&fraction>=.8?area/coverage:null,min:valid.reduce((n,p)=>Math.min(n,p[key]),Infinity),max:valid.reduce((n,p)=>Math.max(n,p[key]),-Infinity),coverage:fraction,method:coverage>0&&fraction>=.8?'time-weighted':'insufficient coverage'};
 }
 export function cleanRuns(points){
  const runs=[];for(const p of points){if(!runs.length||runs.at(-1)[0].run!==p.run)runs.push([]);runs.at(-1).push(p);}return runs.filter(run=>run.length>=2&&run.at(-1).d>run[0].d);
