@@ -10,11 +10,13 @@ import { site, siteIdentity } from "../lib/site.mjs";
 import { publicOrigin, absolutePublicUrl, socialImage } from "../lib/social.mjs";
 import Share from "../components/Share.astro";
 import SearchDialog from "../components/SearchDialog.astro";
+import FavoriteControls from "../components/FavoriteControls.astro";
 interface Props {
   title?: string;
   description?: string;
   image?: string;
   socialType?: "website" | "article";
+  share?: boolean;
 }
 const identity = siteIdentity();
 const {
@@ -22,6 +24,7 @@ const {
   description = `Личният свят на ${identity.name} — бягане, технологии, полезни идеи и нови хоризонти.`,
   image,
   socialType = "website",
+  share: showShare = true,
 } = Astro.props;
 const pageTitle = title
   ? `${title} — ${identity.name}`
@@ -98,6 +101,9 @@ const socialUrl = social ? absolutePublicUrl(social.path, origin) : undefined;
               </a>
             ))
           }
+          <a href="/lyubimi/" class:list={['favorite-nav',{active:current==='/lyubimi/'}]} aria-label="Моите любими" aria-current={current==='/lyubimi/'?'page':undefined} title="Моите любими">
+            <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4Z"/></svg><span>Любими</span>
+          </a>
           <button type="button" class="search-trigger" data-search-open aria-label="Търсене в сайта (Ctrl+K)" title="Търсене (Ctrl+K)" aria-haspopup="dialog" aria-controls="site-search" aria-expanded="false" hidden>
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="search-trigger-label">Търсене</span>
           </button>
@@ -105,12 +111,14 @@ const socialUrl = social ? absolutePublicUrl(social.path, origin) : undefined;
       </div>
     </header>
     <SearchDialog />
-    <main id="main"><slot />{canonical && <Share url={canonical} title={pageTitle} description={description} />}</main>
+    <FavoriteControls />
+    <main id="main"><slot />{canonical && showShare && <Share url={canonical} title={pageTitle} description={description} />}</main>
     <footer class="site-footer">
       <div class="container magazine-footer">
         <div class="footer-identity"><Brand footer /></div>
         <nav aria-label="Навигация в долния колонтитул">
           {navigation.map(([href, label]) => <a href={href} style={href === "/prilozheniya/" ? "white-space:normal;text-align:center" : undefined}>{label}</a>)}
+          <a href="/lyubimi/">Моите любими</a>
         </nav>
         <p>Бягане · Технологии · Полезно · Лични теми</p>
       </div>

@@ -1,0 +1,23 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Моите любими" description="Запазени материали от DIDO в този браузър." share={false}>
+  <section class="container favorites-page" data-favorites-page aria-labelledby="favorites-heading">
+    <header class="page-intro"><div><p class="eyebrow">Винаги подръка</p><h1 id="favorites-heading">Моите любими<span>.</span></h1><p>Статии, състезания, маршрути и приложения, към които искаш да се върнеш.</p></div></header>
+    <p class="favorites-privacy">Запазват се само адресите на материалите в този браузър. Без регистрация и синхронизация между устройства. Изчистването на данните на сайта премахва и любимите.</p>
+    <p data-favorites-storage class="favorites-notice" role="status" hidden></p>
+    <div class="favorites-toolbar">
+      <p data-favorites-count role="status" aria-live="polite"></p>
+      <label data-favorites-filter-wrap hidden>Категория<select data-favorites-filter aria-controls="favorite-list"><option value="all">Всички</option></select></label>
+    </div>
+    <p data-favorites-progress role="status" hidden></p>
+    <button type="button" class="button button-outline" data-favorites-retry hidden>Опитай отново</button>
+    <div id="favorite-list" class="favorite-grid" role="list" aria-label="Запазени материали"></div>
+    <div data-favorites-empty class="favorites-empty" hidden>
+      <svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3h12v18l-6-4-6 4Z"/></svg>
+      <h2>Тук ще те чакат любимите ти материали.</h2><p>Натисни отметката до статия, състезание, маршрут или приложение, за да го запазиш за по-късно.</p>
+      <div><a class="button button-outline" href="/byagane/">Разгледай бягането</a><a class="text-link" href="/prilozheniya/">Моите приложения →</a></div>
+    </div>
+    <noscript><p class="content-notice">За показване и запазване на любими включи JavaScript в браузъра. Материалите остават достъпни от основната навигация.</p></noscript>
+  </section>
+</Layout>

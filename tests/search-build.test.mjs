@@ -4,6 +4,7 @@ import { cpSync, mkdtempSync, rmSync, symlinkSync, writeFileSync, readFileSync, 
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import {resolveFavorites} from '../src/lib/favorites.mjs';
 
 test('production builds regenerate search from publication permissions, without drafts, GPS or application storage', {timeout:120000},()=>{
  const root=resolve('.'),fixture=mkdtempSync(join(tmpdir(),'dido-search-'));
@@ -37,11 +38,15 @@ test('production builds regenerate search from publication permissions, without 
    if(url.hash)assert.match(readFileSync(join(fixture,'dist',url.pathname,'index.html'),'utf8'),new RegExp(`id="${url.hash.slice(1)}"`));
   }
   // Content publication and withdrawal take effect on the very next build.
+  write('src/content/posts/search-published.md','---\ntitle: Ново заглавие през CMS\nstatus: published\n---\nАктуален текст.');
   post('private-draft','published');
   write('src/content/races/search-race.json',{...race,publicationStatus:'draft'});
   write('src/content/routes/search-route.json',{...route,title:'Search Route Approved',publicApproved:true,privateNote:'PRIVATE_ROUTE_FIELD'});
   write('src/data/applications.json',{apps:[{...app,title:'Search App Published',status:'published'}]});
   const second=build(),updated=JSON.stringify(second);
+  const saved=resolveFavorites(['/posts/search-published/','/byagane/sastezaniya/search-race/'],second.documents);
+  assert.equal(saved[0].title,'Ново заглавие през CMS');assert.equal(saved[0].available,true);assert.equal(saved[1].available,false);
+  assert.match(readFileSync(join(fixture,'dist/posts/search-published/index.html'),'utf8'),/data-favorite-title="Ново заглавие през CMS"/);
   for(const title of ['private-draft','Search Route Approved','Search App Published'])assert.ok(updated.includes(title),title);
   assert.doesNotMatch(updated,/Search Race|private-legacy|PRIVATE|"segments"|"lat"|"lon"/);
   assert.equal(second.documents.filter(doc=>doc.type==='Приложение' && doc.title==='Search App Published')[0]?.url,'/prilozheniya/fitnes-trakeri/#application-search-app');

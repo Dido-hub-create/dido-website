@@ -5,6 +5,7 @@ import Icon from "./Icon.astro";
 import FramedImage from "./FramedImage.astro";
 import { frameForImage } from "../lib/images.mjs";
 import { siteIdentity } from "../lib/site.mjs";
+import FavoriteButton from './FavoriteButton.astro';
 interface Props {
   post: Post;
 }
@@ -46,10 +47,10 @@ const { post } = Astro.props;
       }
     </div><h3><a href={post.href}>{post.data.title}</a></h3><p>
       {post.summary}
-    </p><a class="text-link" href={post.href}
+    </p><div class="favorite-card-actions"><a class="text-link" href={post.href}
       >Прочети публикацията <Icon name="arrow" size={19} /><span class="sr-only"
         >: {post.data.title}</span
       ></a
-    >
+    ><FavoriteButton url={post.href} title={post.data.title} compact /></div>
   </div>
 </article>

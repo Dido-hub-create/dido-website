@@ -1,5 +1,5 @@
 import { categories, isPublished } from './content-utils.mjs';
-import { applicationCategories } from './applications.mjs';
+import { applicationCategories, applicationPage } from './applications.mjs';
 import { loadRaces, loadRoutes } from './running.mjs';
 import { formatRaceDate } from './races.mjs';
 import { loadAlbums } from './albums.mjs';
@@ -44,7 +44,7 @@ export async function buildSearchIndex({ posts=[], root=process.cwd() }={}) {
   }
   for(const category of applicationCategories(root)) {
     add(category.href,category.title,'Категория приложения',category.description,category.apps.length?'Публикувани приложения.':'Предстои. Все още няма публикувани приложения в тази категория.');
-    for(const app of category.apps) add(app.online || `${category.href}#application-${app.id}`,app.title,'Приложение',app.description);
+    for(const app of category.apps) add(applicationPage(app),app.title,'Приложение',app.description);
   }
   for(const post of posts) {
     if(!post.data || !isPublished(post.data))continue;
