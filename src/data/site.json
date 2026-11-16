@@ -18,9 +18,14 @@
   "aboutIntro": "Кой съм аз, какви са интересите ми и защо създадох този сайт.",
   "records": {
     "oneKm": "5:13",
+    "oneKmDate": "2026-11-16",
     "fiveKm": "28:14",
+    "fiveKmDate": "2026-11-16",
     "tenKm": "59:32",
-    "halfMarathon": "2:05:07"
+    "tenKmDate": "2026-11-16",
+    "halfMarathon": "2:05:07",
+    "halfMarathonPlace": "Маратон Кайлъка - Плевен",
+    "halfMarathonDate": "2026-11-15"
   },
   "recordsFrame": {
     "fit": "cover",
