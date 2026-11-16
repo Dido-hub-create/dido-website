@@ -11,7 +11,7 @@ test("omitted/null optional settings and nested groups have safe defaults withou
     const site = normalizeSiteSettings(value);
     assert.equal(site.siteName, "DIDO");
     assert.equal(site.siteSubtitle, "Личен сайт");
-    assert.deepEqual(site.records, { oneKm: "", fiveKm: "", tenKm: "", halfMarathon: "" });
+    assert.deepEqual(site.records, Object.fromEntries(['oneKm','fiveKm','tenKm','halfMarathon'].flatMap(key => [[key,''],[key+'Place',''],[key+'Date','']])));
     for (const key of ["publicSiteUrl", "youtubeChannel", "biography", "email", "contactUrl", "portrait", "logoImage", "socialImage"])
       assert.equal(site[key], "", key);
     assert.deepEqual(site.home.selectedPosts, []);
@@ -64,7 +64,7 @@ test("a realistic CMS save omitting optional fields passes Astro/TypeScript AND 
     const page = (path) => readFileSync(join(fixture, "dist", path), "utf8");
     const home = page("index.html"), about = page("za-men/index.html"), running = page("byagane/index.html");
     assert.ok(home.includes(current.records.halfMarathon));
-    assert.equal((home.match(/<small>Предстои<\/small>/g) ?? []).length, 3);
+    assert.equal((home.match(/<small(?:\s[^>]*)?>Предстои<\/small>/g) ?? []).length, 3);
     if (current.recordsImage) assert.ok(home.includes(current.recordsImage));
     else assert.doesNotMatch(home, /src="undefined"/);
     assert.ok(running.includes(current.youtubeChannel));
