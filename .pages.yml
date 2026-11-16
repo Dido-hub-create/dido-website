@@ -297,15 +297,55 @@ content:
           - name: oneKm
             label: 1 км — време (празно, ако предстои)
             type: string
+          - name: oneKmPlace
+            label: 1 км — място на постижението (по желание)
+            type: string
+            required: false
+          - name: oneKmDate
+            label: 1 км — дата на постижението (по желание)
+            type: date
+            required: false
+            options:
+              format: yyyy-MM-dd
           - name: fiveKm
             label: 5 км — време (празно, ако предстои)
             type: string
+          - name: fiveKmPlace
+            label: 5 км — място на постижението (по желание)
+            type: string
+            required: false
+          - name: fiveKmDate
+            label: 5 км — дата на постижението (по желание)
+            type: date
+            required: false
+            options:
+              format: yyyy-MM-dd
           - name: tenKm
             label: 10 км — време (празно, ако предстои)
             type: string
+          - name: tenKmPlace
+            label: 10 км — място на постижението (по желание)
+            type: string
+            required: false
+          - name: tenKmDate
+            label: 10 км — дата на постижението (по желание)
+            type: date
+            required: false
+            options:
+              format: yyyy-MM-dd
           - name: halfMarathon
             label: Полумаратон — време
             type: string
+          - name: halfMarathonPlace
+            label: Полумаратон — място на постижението (по желание)
+            type: string
+            required: false
+          - name: halfMarathonDate
+            label: Полумаратон — дата на постижението (по желание)
+            type: date
+            required: false
+            options:
+              format: yyyy-MM-dd
       - name: recordsFrame
         label: Кадриране — Снимка при личните рекорди
         component: imageFrame

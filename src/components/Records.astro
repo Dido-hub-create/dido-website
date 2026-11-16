@@ -3,14 +3,17 @@ import Icon from "./Icon.astro";
 import FramedImage from "./FramedImage.astro";
 import { site } from "../lib/site.mjs";
 import { usableImage } from "../lib/posts";
+import { recordDate } from '../lib/record-date.mjs';
 const image = usableImage(site.recordsImage);
 const records = [
-  { label: "1 км", time: site.records?.oneKm?.trim(), half: false },
-  { label: "5 км", time: site.records?.fiveKm?.trim(), half: false },
-  { label: "10 км", time: site.records?.tenKm?.trim(), half: false },
+  { label: "1 км", time: site.records.oneKm.trim(), place:site.records.oneKmPlace.trim(), date:recordDate(site.records.oneKmDate), half: false },
+  { label: "5 км", time: site.records.fiveKm.trim(), place:site.records.fiveKmPlace.trim(), date:recordDate(site.records.fiveKmDate), half: false },
+  { label: "10 км", time: site.records.tenKm.trim(), place:site.records.tenKmPlace.trim(), date:recordDate(site.records.tenKmDate), half: false },
   {
     label: "Полумаратон",
-    time: site.records?.halfMarathon?.trim(),
+    time: site.records.halfMarathon.trim(),
+    place:site.records.halfMarathonPlace.trim(),
+    date:recordDate(site.records.halfMarathonDate),
     half: true,
   },
 ];
@@ -46,15 +49,17 @@ const records = [
             {record.label}
           </span>
           <strong>{record.time || "—"}</strong>
-          <small>
-            {record.time
-              ? record.half
-                ? "час:мин:сек"
-                : "мин:сек"
-              : "Предстои"}
-          </small>
+          {!record.time && <small>Предстои</small>}
+          {(record.place || record.date) && <small class="record-details">
+            {record.place && <span>{record.place}</span>}
+            {record.date && <time datetime={record.date.iso}>{record.date.label}</time>}
+          </small>}
         </>
       </div>
     ))
   }
 </section>
+<style>
+  .record-details{display:flex;flex-direction:column;gap:2px;max-width:100%;font-size:11px;line-height:1.45;overflow-wrap:anywhere;white-space:normal}
+  @media(max-width:600px){.record-details{font-size:12px}}
+</style>

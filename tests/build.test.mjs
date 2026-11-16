@@ -75,9 +75,13 @@ test("every generated local link, image, stylesheet, script and fragment has a t
 });
 test("saved running results are shown and apps have no pretend launch links", () => {
   const html = read("index.html");
-  assert.match(html, /2:07:14/);
-  assert.equal((html.match(/<small>Предстои<\/small>/g) ?? []).length, 0);
-  for (const time of ["5:13", "28:14", "59:32"]) assert.ok(html.includes(time));
+  const records = JSON.parse(readFileSync("src/data/site.json", "utf8")).records ?? {};
+  const values = ['oneKm','fiveKm','tenKm','halfMarathon'].map(key => typeof records[key]==='string' ? records[key].trim() : '');
+  const section = html.match(/<section\b[^>]*\bid="lichni-rekordi"[^>]*>[\s\S]*?<\/section>/)?.[0];
+  assert.ok(section, 'the personal records section exists');
+  const escaped = value => value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+  assert.deepEqual(Array.from(section.matchAll(/<strong\b[^>]*>([^<]*)<\/strong>/g), match=>match[1]), values.map(value=>escaped(value || '—')));
+  assert.equal((section.match(/<small(?:\s[^>]*)?>Предстои<\/small>/g) ?? []).length, values.filter(value=>!value).length);
   assert.doesNotMatch(html, /Планирано|В разработка|Достъпно/);
   assert.ok(html.includes('/prilozheniya/'));
   assert.doesNotMatch(html, /href="#"/);
