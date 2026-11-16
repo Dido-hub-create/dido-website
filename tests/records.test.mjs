@@ -8,7 +8,8 @@ import {recordDate} from '../src/lib/record-date.mjs';
 const keys=['oneKm','fiveKm','tenKm','halfMarathon'];
 test('record metadata is optional, independent and read-only; existing time fields retain their values',()=>{
  const current=JSON.parse(readFileSync('src/data/site.json','utf8'));
- const input={records:{...current.records,oneKmPlace:'Тестова писта',fiveKmDate:'2026-11-16',tenKmPlace:null,tenKmDate:42,halfMarathonPlace:{bad:true}}};
+ const times=Object.fromEntries(keys.map(key=>[key,current.records[key]]));
+ const input={records:{...times,oneKmPlace:'Тестова писта',fiveKmDate:'2026-11-16',tenKmPlace:null,tenKmDate:42,halfMarathonPlace:{bad:true}}};
  const before=structuredClone(input),normalized=normalizeSiteSettings(input).records;
  for(const key of keys)assert.equal(normalized[key],current.records[key]);
  assert.equal(normalized.oneKmPlace,'Тестова писта');assert.equal(normalized.oneKmDate,'');

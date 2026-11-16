@@ -6,6 +6,7 @@ import {tmpdir} from 'node:os';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {createServer} from 'node:http';
+import {recordDate} from '../src/lib/record-date.mjs';
 const enabled=process.env.DIDO_BROWSER_MODULE && process.env.DIDO_BROWSER_URL;
 
 test('personal records: legacy times, optional CMS places/dates, invalid dates and responsive typography',{skip:!enabled,timeout:120000},async()=>{
@@ -32,7 +33,8 @@ test('personal records: legacy times, optional CMS places/dates, invalid dates a
    for(const path of ['/','/byagane/']){
     await page.goto(process.env.DIDO_BROWSER_URL+path);await page.locator('.records-photo').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
     const records=page.locator('.records .record');assert.equal(await records.count(),4);assert.deepEqual(await records.locator('strong').allTextContents(),keys.map(key=>site.records[key]));
-    assert.equal(await page.locator('.records .record-details').count(),0,'old CMS save must not add empty details');assert.doesNotMatch(await page.locator('.records').textContent(),/мин:сек/);
+    const details=keys.filter(key=>(site.records[key+'Place']||'').trim()||recordDate(site.records[key+'Date'])).length;
+    assert.equal(await page.locator('.records .record-details').count(),details,'only currently populated CMS details are shown');assert.doesNotMatch(await page.locator('.records').textContent(),/мин:сек/);
     baseline=await records.locator('strong').evaluateAll(nodes=>nodes.map(node=>({size:getComputedStyle(node).fontSize,color:getComputedStyle(node).color})));
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     if(path==='/byagane/' && [390,1440].includes(width))await page.locator('.records').screenshot({path:`work/record-details-preview/current-${width}.png`});
