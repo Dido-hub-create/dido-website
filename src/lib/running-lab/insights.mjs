@@ -1,6 +1,12 @@
 import {interval} from './splits.mjs';
 import {sensorStats} from './series.mjs';
 const finding=(id,title,values,method,limitation)=>({id,title,values,method,limitation});
+export function confirmedRecordFindings(analysis,previous,saved){
+ if(!saved)return [];
+ return analysis.records.flatMap(record=>{const old=previous.find(row=>row.distanceM===record.distanceM)?.current;if(old&&record.seconds>=old.seconds-1e-6)return [];
+  return [finding(`record-${record.distanceM}`,old?'Нова най-добра GPS оценка':'Първа налична GPS оценка',`${(record.distanceM/1000).toFixed(4)} km · ${record.seconds.toFixed(1)} сек${old?` · подобрение ${(old.seconds-record.seconds).toFixed(1)} сек`:''}`,'Само след потвърден локален запис; непрекъснат интерполиран прозорец.','Не е официален състезателен резултат и не доказва едно и също географско трасе.')];
+ });
+}
 export function insights(analysis){
  const a=analysis,out=[];
  if(!a.quality.complete||!a.quality.clockReliable){out.push(finding('quality','Част от изводите са потиснати',a.quality.messages.join(' '),'Нужни са непрекъсната дистанция и последователни времена.','Изминалото време може да включва неизвестни прекъсвания.'));return out;}
