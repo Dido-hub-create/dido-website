@@ -18,7 +18,7 @@ test('Running Lab reads the existing real Kaylaka source without inventing pace 
 test('Running Lab real FIT corpus: running developer fields, cycling rejection and five sport sessions',{skip:!process.env.DIDO_LAB_EXTERNAL_FIT_DIR},async()=>{
  const root=process.env.DIDO_LAB_EXTERNAL_FIT_DIR;
  const [running]=await load(join(root,'test/running-with-developer-data.fit')),a=analyzeActivity(running);
- assert.equal(running.points.length,1681);assert.equal(running.laps.length,14);assert.equal(a.quality.complete,true);assert.equal(a.stats.elapsedSeconds,1680);assert.ok(Math.abs(a.stats.distanceM-5392)<1);assert.ok(Math.abs(a.stats.heart.mean-157.655)<.01);assert.equal(a.records.length,3);
+ assert.equal(running.points.length,1681);assert.equal(running.laps.length,14);assert.equal(a.quality.complete,true);assert.equal(a.stats.elapsedSeconds,1680);assert.ok(Math.abs(a.stats.distanceM-5392)<1);assert.ok(Math.abs(a.stats.heart.mean-157.655)<.01);assert.equal(a.records.length,3);assert.equal(a.elevation.available,true,'sub-metre height noise at near-stationary points must not hide the whole real profile');
  const [cycling]=await load(join(root,'test/test.fit'));assert.equal(cycling.reported.sport,'cycling');assert.equal(analyzeActivity(cycling).records.length,0);
  const sessions=await load(join(root,'examples/triathlon_summary_last.fit'));assert.equal(sessions.length,5);assert.equal(sessions.filter(s=>s.reported.sport==='running').length,1);
  assert.ok(sessions.filter(s=>s.reported.sport!=='running').every(s=>analyzeActivity(s).records.length===0));

@@ -66,3 +66,9 @@ test('Lab rejects impossible dates and duplicate nonidentical clocks, preserves 
  const a=analyzeActivity(tcx);assert.equal(a.quality.duplicates,1);assert.equal(a.quality.clockReliable,true);assert.equal(tcx.points.length,302,'raw measurements are retained');
  tcx.points[51].lat+=.00001;assert.equal(analyzeActivity(tcx).quality.clockReliable,false);
 });
+
+test('Lab height quality tolerates sub-metre stationary GPS noise but rejects a large vertical jump',async()=>{
+ const run=await model({distance:2000,elevation:()=>100});run.points[50].lat=run.points[49].lat+.2/111195.0802335329;run.points[50].z+=.2;
+ const a=analyzeActivity(run);assert.equal(a.elevation.available,true);assert.ok(a.stats.ascentM<1,'small jitter is smoothed, not counted as a climb');
+ run.points[50].z+=30;const bad=analyzeActivity(run);assert.equal(bad.elevation.available,false);assert.equal(bad.stats.ascentM,null);
+});
