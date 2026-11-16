@@ -20,12 +20,12 @@ export async function checksum(value) {
  const bytes=typeof value==='string'?new TextEncoder().encode(value):value;
  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
 }
-export function activity({points,source,name,laps=[],events=[],reported={},warnings=[]}) {
+export function activity({points,source,name,laps=[],events=[],reported={},warnings=[],provenance={}}) {
  if(!Array.isArray(points)||points.length<2||points.length>LIMITS.points)throw new Error(`Нужни са 2–${LIMITS.points.toLocaleString('bg')} точки.`);
  laps=laps.slice(0,2000).map(lap=>{let start=timestamp(lap.start),end=timestamp(lap.end);if(start!==null&&end!==null&&end<start)start=end=null;
   return {start,end,distanceM:bounded(lap.distanceM,0,2000000),timerSeconds:bounded(lap.timerSeconds,0,604800),source:'device'};});
  events=events.slice(0,10000).flatMap(event=>{const t=timestamp(event.t);return t!==null&&['start','stop'].includes(event.type)?[{t,type:event.type,source:'device'}]:[];});
  return {version:MODEL_VERSION,id:`run-${source.hash}-${source.index||0}`,name:text(name)||text(source.name)||'Бягане',comment:'',source:{...source,originalBytesRetained:false,timeConvention:'UTC epoch ms; изходните ISO отмествания се зачитат'},points,
-  laps,events,reported,warnings:warnings.slice(0,100),settings:{smoothingM:100,altitudeSource:'unknown',lapLengthM:null,lapBoundaries:[]},
-  provenance:{coordinates:'file',time:'file, timezone-aware',deviceDistance:'device',altitude:'device, sensor type unconfirmed',heartRate:'sensor report',cadence:'reported cycles/min; no doubling',derived:'DIDO distance/time algorithms v1'}};
+  laps,events,reported,warnings:warnings.slice(0,100),settings:{smoothingM:100,altitudeSource:'unknown',lapLengthM:null,lapBoundaries:[],manualFinishElapsedS:null},
+  provenance:{coordinates:'file',time:'file, timezone-aware',deviceDistance:'device',altitude:'device, sensor type unconfirmed',heartRate:'sensor report',cadence:'reported value, unit unconfirmed',derived:'DIDO distance/time algorithms v1',...provenance}};
 }

@@ -17,7 +17,10 @@ export function parseGpxWorkout(source){
  const tracks=array(root.trk),segments=tracks.flatMap(track=>array(track.trkseg).map(segment=>array(segment?.trkpt)));
  segments.push(...array(root.rte).map(route=>array(route.rtept)));
  let count=0;const points=segments.flatMap((segment,index)=>segment.map(p=>{if(++count>LIMITS.points)throw new Error('Твърде много GPS точки.');return point({lat:p?.['@_lat'],lon:p?.['@_lon'],t:scalar(p?.time),z:scalar(p?.ele),hr:extension(p?.extensions,'hr'),cad:extension(p?.extensions,'cad'),speed:extension(p?.extensions,'speed'),power:extension(p?.extensions,'power'),temperature:extension(p?.extensions,'atemp')},index);}));
- return [{name:text(tracks[0]?.name),points,laps:[],events:[],reported:{},warnings:[]}];
+ const types=tracks.map(track=>text(track.type).toLowerCase()),type=types.length&&types.every(t=>t===types[0])?types[0]:'';
+ const sport=['running','run'].includes(type)?'running':['cycling','walking'].includes(type)?type:'';
+ const garminRunning=sport==='running'&&!root.rte&&/https?:\/\/www\.garmin\.com\/xmlschemas\/TrackPointExtension\/v[12]/.test(source);
+ return [{name:text(tracks[0]?.name),points,laps:[],events:[],reported:{sport},provenance:garminRunning?{cadence:'garmin-tpx-running-cycles'}:{},warnings:[]}];
 }
 export function parseTcxWorkout(source){
  const root=xml(source).TrainingCenterDatabase;if(!root)throw new Error('Липсва TCX корен.');

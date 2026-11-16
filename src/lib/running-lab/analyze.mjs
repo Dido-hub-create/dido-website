@@ -3,6 +3,9 @@ import {elevationProfile,elevationInterval} from './elevation.mjs';
 import {atDistance,sensorStats} from './series.mjs';
 import {makeSplits,manualLaps,interval} from './splits.mjs';
 import {STANDARD_DISTANCES,fastestWindow} from './records.mjs';
+import {cadenceDisplay} from './cadence.mjs';
+import {gradientProfile} from './gradient.mjs';
+import {manualFinishReport} from './finish.mjs';
 export function analyzeActivity(activity,{distances=STANDARD_DISTANCES,...overrides}={}){
  const settings={...activity.settings,...overrides},base=prepareActivity(activity),{points,quality,stats}=base;
  const elevation=elevationProfile(points,settings.smoothingM);
@@ -18,5 +21,5 @@ export function analyzeActivity(activity,{distances=STANDARD_DISTANCES,...overri
  if(samples.at(-1)!==points.at(-1))samples.push({...points.at(-1),pace:samples.at(-1)?.pace??null});
  const evaluatedDistances=[...new Set([...STANDARD_DISTANCES,...distances])];const records=evaluatedDistances.map(d=>fastestWindow(points,d,quality)).filter(Boolean);
  const pacings=splits.filter(row=>row.lengthM>=999).map(row=>row.pace),mean=pacings.length?pacings.reduce((a,b)=>a+b,0)/pacings.length:null;
- return {id:activity.id,name:activity.name,settings,evaluatedDistances,stats:{...stats,heart:sensorStats(points,'hr'),cadence:sensorStats(points,'cad'),ascentM:elevation.available?elevation.ascentM:null,descentM:elevation.available?elevation.descentM:null,startElevationM:points[0].z,endElevationM:points.at(-1).z,paceCV:mean?Math.sqrt(pacings.reduce((sum,v)=>sum+(v-mean)**2,0)/pacings.length)/mean:null,fastestKm:pacings.length?Math.min(...pacings):null,slowestKm:pacings.length?Math.max(...pacings):null},quality,elevation,splits,fractions,manualLaps:laps,deviceLaps:activity.laps,records,samples,points};
+ return {id:activity.id,name:activity.name,settings,evaluatedDistances,cadenceDisplay:cadenceDisplay(activity),gradient:gradientProfile(elevation,settings.smoothingM),manualFinish:manualFinishReport(activity,base,settings.manualFinishElapsedS),stats:{...stats,heart:sensorStats(points,'hr'),cadence:sensorStats(points,'cad'),ascentM:elevation.available?elevation.ascentM:null,descentM:elevation.available?elevation.descentM:null,startElevationM:points[0].z,endElevationM:points.at(-1).z,paceCV:mean?Math.sqrt(pacings.reduce((sum,v)=>sum+(v-mean)**2,0)/pacings.length)/mean:null,fastestKm:pacings.length?Math.min(...pacings):null,slowestKm:pacings.length?Math.max(...pacings):null},quality,elevation,splits,fractions,manualLaps:laps,deviceLaps:activity.laps,records,samples,points};
 }

@@ -22,6 +22,7 @@ export function validateActivity(value){
  const settings=value.settings;
  if(!settings||![25,50,100,200].includes(settings.smoothingM)||!['unknown','gps','barometer'].includes(settings.altitudeSource)||!Array.isArray(settings.lapBoundaries)||settings.lapBoundaries.length>1000||settings.lapBoundaries.some((n,i)=>!Number.isFinite(n)||n<=0||n>2000000||i&&n<=settings.lapBoundaries[i-1]))throw new Error('Невалидни настройки на анализа.');
  if(settings.lapLengthM!==null)validateDistance(settings.lapLengthM);
+ if(settings.manualFinishElapsedS!==undefined&&settings.manualFinishElapsedS!==null&&(!Number.isFinite(settings.manualFinishElapsedS)||settings.manualFinishElapsedS<=0||settings.manualFinishElapsedS>604800))throw new Error('Невалиден ръчен момент за финал.');
  if(!Array.isArray(value.events)||value.events.length>10000||value.events.some(e=>!e||timestamp(e.t)!==e.t||!['start','stop'].includes(e.type)))throw new Error('Невалидни timer събития.');
  if(!Array.isArray(value.laps)||value.laps.length>2000||value.laps.some(lap=>!lap||lap.source!=='device'||['start','end'].some(k=>lap[k]!==null&&(timestamp(lap[k])!==lap[k]))||lap.start!==null&&lap.end!==null&&lap.end<lap.start||lap.distanceM!==null&&bounded(lap.distanceM,0,2000000)!==lap.distanceM||lap.timerSeconds!==null&&bounded(lap.timerSeconds,0,604800)!==lap.timerSeconds)||!Array.isArray(value.warnings)||value.warnings.length>100||value.warnings.some(message=>typeof message!=='string'||message.length>2000))throw new Error('Невалидни обиколки/диагностика.');
  return value;

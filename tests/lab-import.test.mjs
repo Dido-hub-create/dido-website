@@ -15,6 +15,7 @@ test('Lab FIT decodes actual wire definitions, endian variants, compressed times
   if(options.noGps)assert.equal(a.points[0].lat,null);else assert.ok(Math.abs(a.points[0].lat-42)<1e-6);
  }
  const bad=fit();bad[25]^=1;await assert.rejects(importWorkout(bad,'bad.fit'),/CRC/);await assert.rejects(importWorkout(fit().subarray(0,80),'short.fit'));
+ const [withLap]=await importWorkout(fit({lap:true}),'device-lap.fit');assert.equal(withLap.laps.length,1);assert.equal(withLap.laps[0].timerSeconds,120);assert.equal(withLap.laps[0].distanceM,360);
  await assert.rejects(importWorkout(fit({recordCount:LIMITS.points+1}),'too-many.fit'),/точки/,'FIT framing must reject excessive record counts before full decoder allocation');
 });
 test('Lab malformed/oversized XML and unsafe ZIPs fail closed, supported members import locally',async()=>{
