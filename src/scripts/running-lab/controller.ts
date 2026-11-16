@@ -58,13 +58,14 @@ function initialize(root:HTMLElement){
   for(const file of list){
    if(cancelled)break;
    try{
+    if(previews.length>=LIMITS.files)throw new Error('Достигнати са 200 тренировки в прегледа. Раздели партидата.');
     if(file.size>(/\.zip$/i.test(file.name)?LIMITS.batchBytes:LIMITS.fileBytes))throw new Error('Файлът надвишава ограниченията.');
     if(!/\.(gpx|tcx|fit|zip)$/i.test(file.name))throw new Error('Неподдържано разширение.');
     const bytes=await file.arrayBuffer();if(cancelled)break;
     const result=await rpc.run('import',{bytes,name:file.name,distances:preferences.customDistances},value=>{q<HTMLProgressElement>('[data-lab-progress]').value=100*(processed+value.done/value.total)/list.length;},[bytes]);
     totalFiles+=result.files;if(totalFiles>LIMITS.files)throw new Error('Общият брой файлове след ZIP надвишава 200. Раздели партидата.');
     errors.push(...result.errors);
-    for(const value of result.entries){totalPoints+=value.model.points.length;if(totalPoints>LIMITS.batchPoints)throw new Error('Достигнати са 200 000 точки в партидата; останалите не са задържани.');
+    for(const value of result.entries){if(previews.length>=LIMITS.files)throw new Error('Достигнати са 200 тренировки в прегледа; останалите сесии не са задържани.');totalPoints+=value.model.points.length;if(totalPoints>LIMITS.batchPoints)throw new Error('Достигнати са 200 000 точки в партидата; останалите не са задържани.');
      const entry:Preview={...value,selected:true,duplicate:null};entry.duplicate=findDuplicate(entry);if(entry.duplicate){entry.selected=false;duplicates++;}else valid++;previews.push(entry);
     }
    }catch(error){if(cancelled)break;errors.push({name:file.name,message:error instanceof Error?error.message:'Невалиден файл.'});}

@@ -17,7 +17,7 @@ self.onmessage=async(event:MessageEvent)=>{
   if(type==='import'){
    const bytes=new Uint8Array(payload.bytes),files=/\.zip$/i.test(payload.name)?await expandZip(bytes):[{name:payload.name,bytes}];const entries=[],errors=[];let totalPoints=0;
    for(let i=0;i<files.length;i++){
-    try{const file=files[i];if('error' in file)throw new Error(file.error);const models=await importWorkout(file.bytes,file.name);for(const model of models){totalPoints+=model.points.length;if(totalPoints>LIMITS.batchPoints)throw new Error('Партидата надвишава 200 000 точки; раздели я на по-малки части.');const analysis=analyzeActivity(model,{distances:payload.distances});entries.push({model,analysis:compact(analysis),meta:metadata(model,analysis)});}}
+    try{const file=files[i];if(entries.length>=LIMITS.files)throw new Error('Достигнати са 200 тренировки в партидата; раздели многосесийните файлове.');if('error' in file)throw new Error(file.error);const models=await importWorkout(file.bytes,file.name);for(const model of models){if(entries.length>=LIMITS.files)throw new Error('Достигнати са 200 тренировки в партидата; останалите сесии не са задържани.');totalPoints+=model.points.length;if(totalPoints>LIMITS.batchPoints)throw new Error('Партидата надвишава 200 000 точки; раздели я на по-малки части.');const analysis=analyzeActivity(model,{distances:payload.distances});entries.push({model,analysis:compact(analysis),meta:metadata(model,analysis)});}}
     catch(error){errors.push({name:files[i].name,message:error instanceof Error?error.message:'Файлът не може да се обработи.'});}
     self.postMessage({id,progress:{done:i+1,total:files.length}});
    }result={entries,errors,files:files.length};

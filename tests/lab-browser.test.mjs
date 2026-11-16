@@ -120,6 +120,9 @@ test('Running Lab browser: bounded 200-file import and 10,000-point FIT keep the
   const batch=Array.from({length:200},(_,i)=>fixture(`Контролиран масов тест ${i}.gpx`,{distance:1000,step:20,offset:i}));
   let started=performance.now();await upload(page,batch);const batchMs=Math.round(performance.now()-started);assert.equal(await page.locator('[data-lab-previews] article').count(),200);assert.equal((await database(page)).length,0);
   assert.ok(await page.evaluate(()=>window.__labTicks>10),'main thread responds while the worker imports a batch');
+  await action(page,'clear-preview');
+  const activity=tcx.match(/<Activity[\s\S]*<\/Activity>/)[0],manyTcx='<TrainingCenterDatabase><Activities>'+activity.repeat(200)+'</Activities></TrainingCenterDatabase>';
+  await upload(page,[binary('many-sessions.zip',zipSync({'first.tcx':strToU8(manyTcx),'second.tcx':strToU8(manyTcx+'\n')}))]);assert.equal(await page.locator('[data-lab-previews] article').count(),200,'multiple sessions cannot exceed the per-batch activity limit');assert.match(await page.locator('[data-lab-import-report]').textContent(),/200 тренировки/);
   await action(page,'clear-preview');const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
   const before=await page.evaluate(()=>window.__labTicks);started=performance.now();await upload(page,[binary('Контролиран FIT 10000.fit',fit({recordCount:10000}))]);const fitMs=Math.round(performance.now()-started);assert.equal(await page.locator('[data-lab-previews] article').count(),1);assert.ok(await page.evaluate(()=>window.__labTicks>0));assert.ok(await page.evaluate(previous=>window.__labTicks-previous,before)>5);
   await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});await cdp.detach();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);console.log(JSON.stringify({labPerformance:{files:200,batchMs,fitPoints:10000,fitMs,cpuThrottle:4}}));
