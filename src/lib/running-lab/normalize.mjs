@@ -2,6 +2,7 @@ import {distanceBetween} from '../geo.mjs';
 import {bounded} from './model.mjs';
 export const QUALITY_RULES=Object.freeze({maxSpeedMps:12,maxGapS:30,maxEdgeM:500,recordGapS:10,recordEdgeM:100});
 export function prepareActivity(activity){
+ const sport=String(activity.reported?.sport||'').toLowerCase(),runningEligible=!sport||['running','run','generic','unknown'].includes(sport);
  // Exact repeated measurements at a TCX lap boundary are redundant, not a backwards clock.
  // The unmodified input remains in the stored model. Explicit GPX segments stay separate.
  const raw=activity.points.filter((p,i,all)=>!(activity.source.format==='tcx'&&i&&p.t!==null&&Object.keys(p).every(key=>p[key]===all[i-1][key])));
@@ -43,13 +44,15 @@ export function prepareActivity(activity){
  const eventTimer=clockReliable&&knownAtStart&&eventValid?timer:null;
  const timerSeconds=reportedTimer??eventTimer;
  const messages=[];
+ if(!runningEligible)messages.push(`Отчетеният спорт е „${sport}“. GPS рекордите и бегаческите изводи са потиснати. Филтрите за скорост са за бягане, не за този спорт.`);
  if(duplicates)messages.push(`Пропуснати са ${duplicates} точно повторени TCX измервания; оригиналните точки са запазени.`);
  if(!clockReliable)messages.push('Липсват надеждни последователни времена: темпо, отсечки и GPS рекорди са ограничени.');
  if(gaps||jumps||missing||breaks)messages.push(`Прекъсвания: ${gaps+missing+breaks}; отхвърлени скокове: ${jumps}. Не свързваме отсечените интервали.`);
  if(distanceSource==='device')messages.push('Дистанцията е от устройството; липсва пълна GPS геометрия. GPS рекорди не се присъждат.');
  if(distanceSource==='partial-gps')messages.push('GPS геометрията е непълна; дистанцията е сбор само на проверимите интервали.');
  if(distanceSource==='unavailable')messages.push('Няма измерима дистанция. Не я заместваме с нула; времевите и сензорните данни могат да се анализират отделно.');
+ else if(!distanceM)messages.push('Няма положителна измерена дистанция; темпо и GPS рекорди не се изчисляват.');
  if(activity.reported?.distanceM>0&&Math.abs(activity.reported.distanceM-distanceM)/activity.reported.distanceM>.1)messages.push('Изчислената дистанция се различава с над 10% от отчета на устройството; няма автоматично коригиране.');
- return {points,quality:{clockReliable,complete,distanceSource,geometryCoverage:geometry,gaps,jumps,missing,breaks,nonmonotonic,duplicates,maxStepSeconds,messages},
+ return {points,quality:{clockReliable,complete,runningEligible,reportedSport:sport||null,distanceSource,geometryCoverage:geometry,gaps,jumps,missing,breaks,nonmonotonic,duplicates,maxStepSeconds,messages},
   stats:{distanceM:distanceSource==='unavailable'?null:distanceM,start,end,elapsedSeconds,timerSeconds,timerSource:reportedTimer!==null?'device summary':eventTimer!==null?'device events':null,confirmedPauseSeconds:eventTimer!==null?elapsedSeconds-eventTimer:null,confirmedStops:eventTimer!==null?stops:0,movingSeconds:clockReliable&&complete?moving:null,estimatedStopSeconds:clockReliable&&complete?elapsedSeconds-moving:null,pace:clockReliable&&complete?elapsedSeconds*1000/distanceM:null,speed:clockReliable&&complete?distanceM/elapsedSeconds:null}};
 }

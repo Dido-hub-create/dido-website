@@ -33,7 +33,7 @@ function libraryApi(db){
     if(replace){activities.clear();meta.clear();transaction.objectStore('preferences').clear();}
     for(const entry of incoming){activities.put(entry.model);meta.put(entry.meta);written++;}
     if(prefs)transaction.objectStore('preferences').put({id:'main',value:prefs});
-   }catch(error){failure=error instanceof Error?error.message:'Записът е отказан.';transaction.abort();}};
+   }catch(error){failure=error?.name==='QuotaExceededError'?'Недостатъчна квота. Предишната библиотека е запазена.':error instanceof Error?error.message:'Записът е отказан.';transaction.abort();}};
    transaction.oncomplete=()=>resolve(written);
    transaction.onabort=transaction.onerror=()=>reject(new Error(failure||'Недостатъчно място или отказан запис. Предишната библиотека е запазена.'));
   });

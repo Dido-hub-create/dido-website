@@ -3,7 +3,7 @@ import {distanceBetween} from '../geo.mjs';
 export function compareActivities(analyses,mode='distance'){
  if(analyses.length<2||analyses.length>3)throw new Error('Избери две или три тренировки.');
  if(!['distance','time','splits','laps'].includes(mode))throw new Error('Непознат режим за сравнение.');
- const timed=analyses.every(a=>a.quality.clockReliable&&a.quality.complete);
+ const timed=analyses.every(a=>a.quality.clockReliable&&a.quality.complete&&a.quality.runningEligible!==false);
  const commonDistanceM=analyses.every(a=>a.stats.distanceM!==null)?Math.min(...analyses.map(a=>a.stats.distanceM)):0,commonSeconds=timed?Math.min(...analyses.map(a=>a.stats.elapsedSeconds)):null;
  const rows=analyses.map(a=>{
   const last=mode==='time'&&commonSeconds!==null?atTime(a.points,a.stats.start+commonSeconds*1000):atDistance(a.points,commonDistanceM);
@@ -17,7 +17,7 @@ export function compareActivities(analyses,mode='distance'){
   if(mode!=='time'&&Math.abs(delta)>=1)findings.push({id:'comparison-'+i,title:'Разлика по общия дистанционен участък',values:`${Math.abs(delta).toFixed(1)} сек; ${row.name} е ${delta<0?'по-бързо':'по-бавно'} от ${rows[0].name}`,method:`Първите ${(commonDistanceM/1000).toFixed(2)} км от всяка тренировка.`,limitation:'Сходна дистанция не доказва еднакво трасе, посока, атмосферни условия или усилие.'});
   if(mode==='time'&&Math.abs(distanceDelta)>=10)findings.push({id:'comparison-time-'+i,title:'Разлика по общото изминало време',values:`${row.name}: ${distanceDelta>0?'+':''}${distanceDelta.toFixed(0)} m спрямо ${rows[0].name}`,method:`Първите ${commonSeconds.toFixed(0)} s от всяка тренировка, с интерполация по време.`,limitation:'Не доказва еднакъв маршрут или усилие; спиранията са включени.'});
  }
- return {mode,rows,table,findings,commonDistanceM,commonSeconds,timed,warning:timed?'Сравнението е по общ действителен участък; няма разтягане на данните.':'Темповото сравнение е потиснато: липсват надеждни времена/дистанции.'};
+ return {mode,rows,table,findings,commonDistanceM,commonSeconds,timed,warning:timed?'Сравнението е по общ действителен участък; няма разтягане на данните.':'Темповото сравнение е потиснато: ненадеждни времена/дистанции или неподходящ отчетен спорт.'};
 }
 export function probableDuplicate(a,other){
  if(a.source.hash===other.source.hash&&a.source.index===other.source.index)return 'exact';

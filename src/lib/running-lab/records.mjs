@@ -12,7 +12,7 @@ function timeCursor(points,last){
  };
 }
 export function fastestWindow(points,distanceM,quality){
- if(!quality.clockReliable||quality.distanceSource!=='gps'||!(distanceM>=100&&distanceM<=100000))return null;
+ if(!quality.clockReliable||quality.runningEligible===false||quality.distanceSource!=='gps'||!(distanceM>=100&&distanceM<=100000))return null;
  let best=null;
  for(const run of cleanRuns(points)){
   // A record cannot contain a sparse interval, even if it was usable for totals.

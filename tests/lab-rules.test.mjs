@@ -55,6 +55,7 @@ test('Lab record findings require a successful save; ties are silent, deletion r
  const three=compareActivities([slow,fast,{...fast,id:'third',name:'Трето'}]);assert.equal(three.findings.length,2);
  assert.equal(compareActivities([slow,fast],'time').findings[0].id,'comparison-time-0');
  const unknown=analyzeActivity(await model({times:false}));assert.deepEqual(compareActivities([slow,unknown]).findings,[]);
+ const cycling=await model({distance:5000});cycling.reported.sport='cycling';const bike=analyzeActivity(cycling);assert.equal(bike.records.length,0);assert.deepEqual(ids(bike),['quality']);assert.equal(compareActivities([slow,bike]).timed,false);
  assert.throws(()=>compareActivities([slow]));assert.throws(()=>compareActivities([slow,fast],'arbitrary'));
 });
 

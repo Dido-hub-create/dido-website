@@ -35,6 +35,7 @@ function initialize(root:HTMLElement){
   metadata=await library.list();preferences=validatePreferences(await library.preferences());
   for(const id of selected)if(!metadata.some(row=>row.id===id))selected.delete(id);
   for(const entry of previews){entry.saved=metadata.some(row=>row.id===entry.model.id);entry.duplicate=findDuplicate(entry);if(entry.saved||entry.duplicate==='exact')entry.selected=false;}
+  if(comparison&&comparison.analyses.some((a:any)=>!metadata.some(row=>row.id===a.id&&row.name===a.name&&JSON.stringify(row.settings)===JSON.stringify(a.settings)))){comparison=null;q('[data-lab-comparison]').replaceChildren();}
   if(active?.saved&&!metadata.some(row=>row.id===active!.model.id)){active.saved=false;active.dirty=true;}
   const zoneInput=q<HTMLInputElement>('[data-lab-timezone-form] [name="zone"]');zoneInput.value=preferences.timeZone;renderLibrary();renderRecords();renderHistory();
   const estimate=await navigator.storage?.estimate?.();q('[data-lab-space]').textContent=estimate?`Данни на сайта: ${num((estimate.usage||0)/1048576)} MiB / квота ${num((estimate.quota||0)/1048576)} MiB`:'Браузърът не предоставя оценка за свободното място.';
@@ -53,7 +54,7 @@ function initialize(root:HTMLElement){
   const list=Array.from(files);if(!list.length)return;
   if(list.length>LIMITS.files||list.reduce((sum,file)=>sum+file.size,0)>LIMITS.batchBytes)throw new Error('Избери до 200 файла / 64 MiB за една партида.');
   if(previews.length&& !confirm('Да заменим временния преглед? Незаписаните тренировки ще бъдат освободени; библиотеката не се променя.'))return;
-  previews=[];active=null;zoomRange=null;q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();const errors:any[]=[];let processed=0,valid=0,duplicates=0,totalPoints=0,totalFiles=0;
+  previews=[];active=null;zoomRange=null;q<HTMLInputElement>('[data-lab-range-start]').value='0';q<HTMLInputElement>('[data-lab-range-end]').value='';renderActiveOptions();renderOverview();const errors:any[]=[];let processed=0,valid=0,duplicates=0,totalPoints=0,totalFiles=0;
   for(const file of list){
    if(cancelled)break;
    try{
@@ -86,9 +87,9 @@ function initialize(root:HTMLElement){
  function renderSaveButton(){q<HTMLButtonElement>('[data-action="save-selected"]').disabled=busy||!previews.some(p=>p.selected&&!p.saved&&p.duplicate!=='exact');}
  function renderActiveOptions(){const select=q<HTMLSelectElement>('[data-lab-active]');select.replaceChildren(new Option('Избери от импорта или библиотеката',''));previews.forEach((p,i)=>select.append(new Option(`${p.model.name}${p.saved?' · записано':' · временно'}`,'preview:'+i)));for(const row of metadata)if(!previews.some(p=>p.model.id===row.id))select.append(new Option(row.name+' · библиотека',row.id));if(active){const index=previews.indexOf(active);select.value=index>=0?'preview:'+index:active.model.id;}}
  function renderOverview(){
-  q('[data-lab-overview]').hidden=!active;q('[data-lab-empty-overview]').hidden=!!active;if(!active)return;
+  q('[data-lab-overview]').hidden=!active;q('[data-lab-empty-overview]').hidden=!!active;if(!active){for(const selector of ['[data-lab-stats]','[data-lab-charts]','[data-lab-map]','[data-lab-pace-summary]','[data-lab-findings]','[data-lab-splits]','[data-lab-fractions]','[data-lab-laps]','[data-lab-climbs]','[data-lab-range-result]'])q(selector).replaceChildren();chartUpdates=[];updateMap=()=>{};return;}
   const a=active.analysis;q('[data-lab-workout-name]').textContent=active.model.name;
-  q('[data-lab-source]').textContent=`${active.model.source.format.toUpperCase()} · ${date(a.stats.start,preferences.timeZone)} · ${active.saved?'записана тренировка':'временен анализ'}${active.dirty?' · има незаписани настройки':''} · GPS ${num(a.quality.geometryCoverage*100,0)}%`;
+  q('[data-lab-source]').textContent=`${active.model.source.format.toUpperCase()} · ${date(a.stats.start,preferences.timeZone)} · ${active.saved?'записана тренировка':'временен анализ'}${active.dirty?' · има незаписани настройки':''} · GPS ${num(a.quality.geometryCoverage*100,0)}% · спорт: ${active.model.reported.sport||'не е отчетен във файла'}`;
   q('[data-lab-stats]').replaceChildren(...Array.from(overviewStats(a,preferences.timeZone).children));
   const quality=el('div');for(const message of [...a.quality.messages,...active.model.warnings])quality.append(el('p',message,'lab-notice'));if(!a.elevation.available)quality.append(el('p',a.elevation.reason,'lab-muted'));renderInto('[data-lab-quality]',quality);
   q<HTMLSelectElement>('[data-lab-smoothing]').value=String(active.model.settings.smoothingM);q<HTMLSelectElement>('[data-lab-altitude]').value=active.model.settings.altitudeSource;
@@ -144,7 +145,7 @@ function initialize(root:HTMLElement){
  }
  async function compare(){requireLibrary();const ids=[...selected];if(ids.length<2||ids.length>3)throw new Error('Избери две или три тренировки в библиотеката.');const models=[];for(const id of ids){const model=await library.get(id);if(!model)throw new Error('Избрана тренировка липсва. Обнови библиотеката.');models.push(model);}comparison=await rpc.run('compare',{models,mode:q<HTMLSelectElement>('[data-lab-compare-mode]').value,distances:preferences.customDistances});renderInto('[data-lab-comparison]',comparisonView(comparison,q<HTMLSelectElement>('[data-lab-compare-metric]').value));show('compare');status('Сравнението е по действителния общ участък.');}
  async function recompute(){requireLibrary();const rows=[...metadata];try{for(let i=0;i<rows.length;i++){if(cancelled)break;const model=await library.get(rows[i].id);if(!model)continue;const result=await rpc.run('analyze',{model,distances:preferences.customDistances});await library.write([{model,meta:result.meta}],undefined,{overwrite:true});progress({done:i+1,total:rows.length});}}catch(error){if(!cancelled)throw error;}finally{await refresh();}status(cancelled?'Преизчисляването е прекратено. Част от кеша може да чака обновяване.':'GPS рекордите са преизчислени от наличните оригинални измервания.');}
- async function savePreferences(value:any){requireLibrary();preferences=validatePreferences(value);await library.write([],preferences);await refresh();}
+ async function savePreferences(value:any){requireLibrary();const checked=validatePreferences(value);await library.write([],checked);preferences=checked;await refresh();}
  async function restore(){
   requireLibrary();if(!restoration)throw new Error('Първо избери и валидирай архив.');const replace=q<HTMLSelectElement>('[data-lab-restore-mode]').value==='replace',keepProbable=q<HTMLInputElement>('[data-lab-restore-probable]').checked;
   const entries=replace?restoration.entries:restoration.entries.filter((entry:any)=>!metadata.some(row=>probableDuplicate(entry.meta,row)==='exact')&&(keepProbable||!metadata.some(row=>probableDuplicate(entry.meta,row)==='probable')));

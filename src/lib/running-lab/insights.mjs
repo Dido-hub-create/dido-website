@@ -9,7 +9,7 @@ export function confirmedRecordFindings(analysis,previous,saved){
 }
 export function insights(analysis){
  const a=analysis,out=[];
- if(!a.quality.complete||!a.quality.clockReliable){out.push(finding('quality','Част от изводите са потиснати',a.quality.messages.join(' '),'Нужни са непрекъсната дистанция и последователни времена.','Изминалото време може да включва неизвестни прекъсвания.'));return out;}
+ if(!a.quality.complete||!a.quality.clockReliable||a.quality.runningEligible===false){out.push(finding('quality','Част от изводите са потиснати',a.quality.messages.join(' '),'Нужни са непрекъсната дистанция, последователни времена и подходящ спорт.','Изминалото време може да включва неизвестни прекъсвания.'));return out;}
  const halves=a.fractions[2];
  if(halves?.every(Boolean)&&a.stats.distanceM>=2000){const change=(halves[1].pace/halves[0].pace-1)*100;
   if(Math.abs(change)>=1)out.push(finding('halves',change<0?'По-бърза втора половина':'По-бавна втора половина',`${Math.abs(change).toFixed(1)}% · ${halves[0].pace.toFixed(1)} → ${halves[1].pace.toFixed(1)} сек/км`,'Две равни по дистанция половини, с интерполирани граници и изминало време.','Релефът и условията могат да се различават; това не е оценка за форма.'));
