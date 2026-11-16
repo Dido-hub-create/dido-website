@@ -8,6 +8,7 @@ export default defineConfig({
   cacheDir: "./.astro/cache",
   output: "static",
   trailingSlash: "always",
+  vite: { worker: { format: "es" } },
   integrations: [
     {
       name: "dido-gpx-publication-guard",

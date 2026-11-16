@@ -1,0 +1,53 @@
+import {el,num,km,duration,pace,date,table,findings,action} from './dom';
+import {lineChart,chartValues} from './charts';
+import {STANDARD_DISTANCES,recordHistory} from '../../lib/running-lab/records.mjs';
+import {historicalStats,officialHistory} from '../../lib/running-lab/history.mjs';
+export function metricCards(rows:[string,string,string?][]){const list=el('dl',undefined,'lab-stats');for(const [label,value,source]of rows){const card=el('div',undefined,'lab-stat');card.append(el('dt',label),el('dd',value));if(source)card.append(el('small',source));list.append(card);}return list;}
+export function overviewStats(a:any,zone:string){const s=a.stats;return metricCards([
+ ['Дистанция',km(s.distanceM)+' km',a.quality.distanceSource==='gps'?'Изчислена от GPS':a.quality.distanceSource==='device'?'Отчетена от устройството':'Само проверимите GPS интервали'],
+ ['Изминало време',duration(s.elapsedSeconds),'Първа–последна надеждна отметка'],['Средно темпо',pace(s.pace),'По изминало време'],['Средна скорост',num(s.speed!==null?s.speed*3.6:null)+' km/h'],
+ ['Moving време · оценка',duration(s.movingSeconds),'Праг 0,5 m/s; не е Auto Pause'],['Timer време',duration(s.timerSeconds),s.timerSource==='device summary'?'Отчетено от устройството':s.timerSource==='device events'?'От timer събития':'Няма отчет'],['Потвърдени паузи',duration(s.confirmedPauseSeconds),s.confirmedStops+' timer stop събития'],['Спиране · оценка',duration(s.estimatedStopSeconds),'Изминало минус приблизително moving'],
+ ['Пулс · среден',num(s.heart.mean)+' bpm',s.heart.method==='time-weighted'?'Претеглено по време':s.heart.method.startsWith('sample mean')?'Средно от измерванията без надежден часовник':'Недостатъчно сензорно покритие'],['Пулс · min / max',num(s.heart.min)+' / '+num(s.heart.max)+' bpm','Отчетени валидни измервания'],['Каданс · среден',num(s.cadence.mean),'Отчетени цикли/min, без удвояване'],['Изкачване / спускане',num(s.ascentM)+' / '+num(s.descentM)+' m','Оценка след '+a.settings.smoothingM+' m изглаждане'],
+ ['Височина · начало / край',num(s.startElevationM)+' / '+num(s.endElevationM)+' m',a.settings.altitudeSource==='unknown'?'Типът на сензора не е потвърден':'Деклариран от потребителя: '+(a.settings.altitudeSource==='gps'?'GPS':'барометър')],['Начало',date(s.start,zone)],['Край',date(s.end,zone)],['Пълни / непълни km',String(a.splits.length),'Записани обиколки: '+a.deviceLaps.length]
+ ]);}
+export function splitTable(rows:any[]){return table(['№','От–до km','Дължина m','Време','Темпо','Пулс','Каданс','Δ височина m','↑ / ↓ m'],rows.map((r,i)=>[i+1,`${num(r.startM/1000,3)}–${num(r.endM/1000,3)}`,num(r.lengthM),duration(r.seconds),pace(r.pace),num(r.hr),num(r.cad),num(r.deltaElevationM),`${num(r.ascentM)} / ${num(r.descentM)}`]));}
+export function detailed(a:any){
+ const pacing=metricCards([['Най-бърз пълен km',pace(a.stats.fastestKm),'Сред автоматичните километрови отсечки'],['Най-бавен пълен km',pace(a.stats.slowestKm)],['Колебание на темпото',num(a.stats.paceCV!==null?a.stats.paceCV*100:null,1)+'%','Стандартно отклонение / средно · пълни km'],['Изминало − moving',duration(a.stats.estimatedStopSeconds),'Оценка, не потвърдено спиране']]);
+ const fractions=el('div');for(const [count,rows]of Object.entries(a.fractions)){fractions.append(el('h4',count==='2'?'Две половини':count==='3'?'Третини':'Четвъртини'),splitTable(rows as any[]));}
+ const laps=el('div');laps.append(el('h4','Отчетени от устройството'),table(['№','Начало','Край','Дистанция m','Timer време'],a.deviceLaps.map((r:any,i:number)=>[i+1,r.start===null||r.start===undefined?'—':date(typeof r.start==='number'?r.start:Date.parse(r.start)),r.end===null||r.end===undefined?'—':date(typeof r.end==='number'?r.end:Date.parse(r.end)),num(r.distanceM),duration(r.timerSeconds)])),el('h4','Изчислени от ръчни граници'),splitTable(a.manualLaps));
+ const climbs=table(['№','От–до km','Дължина m','Изкачване m','Среден наклон','Темпо','Пулс'],a.elevation.available?a.elevation.climbs.map((c:any,i:number)=>[i+1,`${num(c.startM/1000,2)}–${num(c.endM/1000,2)}`,num(c.lengthM),num(c.gainM),num(c.averageGrade*100,2)+'%',pace(c.pace),num(c.heartRate)]):[]);
+ return {pacing,fractions,laps,climbs,findings:findings(a.findings)};
+}
+export function recordViews(metadata:any[],preferences:any){
+ const analyses=metadata.map(m=>({id:m.id,name:m.name,stats:m.summary,records:m.records,settings:m.settings}));
+ const records=recordHistory(analyses,[...STANDARD_DISTANCES,...preferences.customDistances]),history=el('div');
+ for(const row of records){if(!row.current)continue;const details=el('details'),summary=el('summary',`${num(row.distanceM/1000,4)} km · история на ${row.history.length} подобрения`);details.append(summary,el('p','GPS оценка от непрекъснат интерполиран прозорец. Без интервали над 10 s / 100 m, без GPS скокове. Изминало време, без moving корекция. Не е рекорд по доказано еднакво трасе.'),table(['Дата','Тренировка / източник','Време','Подобрение','Прозорец km','Настройки'],row.history.map((h:any)=>[date(h.date,preferences.timeZone),h.name+' · GPS',duration(h.seconds),h.improvementSeconds===null?'Първи наличен резултат':duration(h.improvementSeconds),`${num(h.startM/1000,3)}–${num(h.endM/1000,3)}`,`Височини ${h.settings.smoothingM} m; дистанцията и времето не са коригирани`])));history.append(details);}
+ const main=table(['Дистанция','GPS време','Темпо','Дата','Тренировка','Прозорец km'],records.map(r=>[num(r.distanceM/1000,4)+' km',duration(r.current?.seconds),pace(r.current?.pace),r.current?date(r.current.date,preferences.timeZone):'Няма валиден запис',r.current?.name??'—',r.current?`${num(r.current.startM/1000,3)}–${num(r.current.endM/1000,3)}`:'—']));
+ const official=table(['Дистанция','Официално време','Дата','Състезание','Действия'],preferences.officialResults.map((r:any)=>{const controls=el('div',undefined,'lab-actions');controls.append(action('Редактирай','edit-official',r.id),action('Изтрий','delete-official',r.id));if(r.url){const link=el('a','Официален резултат ↗','text-link');link.href=r.url;link.target='_blank';link.rel='noopener noreferrer';controls.append(link);}return [num(r.distanceM/1000,4)+' km',duration(r.seconds),r.date,r.race,controls];}));
+ const pending=metadata.some(m=>preferences.customDistances.some((d:number)=>m.summary.distanceM>=d&&!m.computedDistances?.includes(d)));
+ if(pending)history.prepend(el('p','Има нова дистанция с непроверени тренировки. GPS резултатите са от текущо преизчислената част; използвай „Преизчисли рекордите“.','lab-notice'));
+ const officialBest=officialHistory(preferences.officialResults);if(officialBest.length){
+  const group=el('div');group.append(el('h4','Най-добри официални резултати'),table(['Дистанция','Най-добро време','Дата','Състезание'],officialBest.map(row=>[num(row.distanceM/1000,4)+' km',duration(row.current?.seconds),row.current?.date,row.current?.race])));
+  for(const row of officialBest){const detail=el('details'),summary=el('summary',num(row.distanceM/1000,4)+' km · хронология на официалните подобрения');detail.append(summary,table(['Дата','Състезание','Време','Подобрение'],row.history.map(item=>[item.date,item.race,duration(item.seconds),duration(item.improvementSeconds)])));group.append(detail);}group.append(official);return {main,history,official:group};
+ }
+ return {main,history,official};
+}
+export function historyViews(metadata:any[]){
+ const rows=historicalStats(metadata),totals=metricCards([['Налични тренировки',String(metadata.length)],['Общ измерим пробег',num(metadata.reduce((sum,r)=>sum+(r.summary.distanceM||0),0)/1000)+' km'],['Отчетено изминало време',duration(metadata.reduce((sum,r)=>sum+(r.summary.elapsedSeconds||0),0))],['Месеци с данни',String(rows.length)]]);
+ const chart=lineChart({title:'Пробег по месеци в наличната библиотека',unit:'km',axis:'месец №',color:'#ff9d40',points:rows.map((r,i)=>({x:i+1,y:r.distanceM/1000,run:0}))});
+ const years=el('div');for(const year of [...new Set(rows.map(r=>r.year))]){const group=rows.filter(r=>r.year===year);years.append(el('p',`${year}: ${group.reduce((sum,r)=>sum+r.count,0)} тренировки · ${num(group.reduce((sum,r)=>sum+r.distanceM,0)/1000)} km`));}
+ const undated=metadata.filter(row=>row.date===null).length;if(undated)years.append(el('p',`${undated} тренировки нямат надеждна дата. Измеримата им дистанция влиза в общия пробег, но не в месечните групи.`));
+ const charts=el('div');charts.append(chart.card,lineChart({title:'Промяна на средното темпо по месеци',unit:'мин/км · по-бързо ↑',axis:'месец №',inverse:true,color:'#62d4b1',format:v=>pace(v).replace(' /км',''),points:rows.map((r,i)=>({x:i+1,y:r.pace,run:0}))}).card);
+ return {totals,chart:charts,table:table(['Месец UTC','Тренировки','Дистанция km','Изминало време','Претеглено темпо'],rows.map(r=>[r.month,r.count,num(r.distanceM/1000),duration(r.elapsedSeconds),pace(r.pace)])),years};
+}
+export function comparisonView(value:any,metric='pace'){
+ const {comparison:c,analyses}=value,node=el('div');node.append(el('p',c.warning,'lab-notice'),table(['Тренировка','Общ участък km','Време в него','Темпо в него','Обща дистанция km','Пулс за цялото','Денивелация за цялото'],c.rows.map((r:any)=>[r.name,km(r.distanceM),duration(r.seconds),pace(r.pace),km(r.fullDistanceM),num(r.heartRate),num(r.ascentM)])),findings(c.findings));
+ const colors=['#ff9d40','#47d3ac','#83b9ff'],description=metric==='hr'?['пулс','bpm']:metric==='elevation'?['височина','m']:metric==='cad'?['каданс','отчетени цикли/min']:['темпо','мин/км (по-бързо ↑)'];analyses.forEach((a:any,i:number)=>{
+  const time=c.mode==='time',extent=time?c.commonSeconds/60:c.commonDistanceM/1000;
+  const points=metric==='elevation'&&!a.elevation.available?[]:chartValues(a,metric,time?'time':'distance').filter((p:any)=>p.x<=extent);
+  node.append(lineChart({title:a.name+' · '+description[0],unit:description[1],axis:time?'общо време min':'обща дистанция km',inverse:metric==='pace',color:colors[i],format:metric==='pace'?v=>pace(v).replace(' /км',''):undefined,points,domain:[0,extent]}).card);
+ });
+ if(c.mode==='laps'&&!c.table.length)node.append(el('p','Няма общи отчетени или ръчно зададени обиколки. Задай граници в подробния анализ и запази настройките.','lab-notice'));
+ if(c.table.length)node.append(table(['№',...c.rows.map((r:any)=>r.name+' · време / темпо')],c.table.map((r:any)=>[r.index,...r.values.map((v:any)=>v?duration(v.seconds??v.timerSeconds)+' / '+pace(v.pace??(v.distanceM>0?v.timerSeconds*1000/v.distanceM:null))+' · '+num((v.lengthM??v.distanceM)/1000,3)+' km · '+(c.mode==='splits'?'автоматичен km':v.source==='calculated'?'изчислена обиколка':'timer от устройството'):'Няма съпоставими данни')])));
+ return node;
+}
