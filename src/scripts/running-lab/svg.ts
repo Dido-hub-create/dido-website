@@ -6,7 +6,7 @@ export function svgNode<K extends keyof SVGElementTagNameMap>(tag:K,attributes:R
 export function svgLabel(svg:Element,x:number,y:number,text:string,anchor='start'){
  const node=svgNode('text',{x,y,'text-anchor':anchor});node.textContent=text;svg.append(node);return node;
 }
-export function localPointer(svg:SVGSVGElement,event:PointerEvent){
+export function localPointer(svg:SVGSVGElement,event:{clientX:number;clientY:number}){
  const matrix=svg.getScreenCTM();return matrix?new DOMPoint(event.clientX,event.clientY).matrixTransform(matrix.inverse()):new DOMPoint();
 }
 let sequence=0;

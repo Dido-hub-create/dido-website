@@ -21,7 +21,12 @@ function initialize(root:HTMLElement){
  let busy=false,cancelled=false,visibleLimit=100;const selected=new Set<string>();
  const status=(message:string)=>{q('[data-lab-status]').textContent=message;};
  const show=(panel:string)=>{root.querySelectorAll<HTMLElement>('[data-panel]').forEach(node=>node.hidden=node.dataset.panel!==panel);root.querySelectorAll<HTMLElement>('[data-tab]').forEach(node=>{if(node.dataset.tab===panel)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});};
- const workout=new WorkoutView(root,{run:task,status,isBusy:()=>busy,changeSettings:async change=>{const entry=requireActive();entry.model.settings={...entry.model.settings,...change};await reanalyze();},range:async(startM,endM)=>rpc.run('range',{model:requireActive().model,startM,endM})});
+ const workout=new WorkoutView(root,{run:task,status,isBusy:()=>busy,changeSettings:async change=>{const entry=requireActive();entry.model.settings={...entry.model.settings,...change};await reanalyze();},range:async(startM,endM)=>rpc.run('range',{model:requireActive().model,startM,endM}),loadMapPoints:async()=>{
+  if(busy)throw new Error('Изчакай текущата операция или я прекрати, преди да избираш от картата.');
+  let packed:Float64Array|null=null,problem:unknown;
+  await task(async()=>{try{packed=await rpc.run('map-points',{model:requireActive().model},progress);}catch(error){problem=error;throw error;}});
+  if(problem)throw problem;if(!packed)throw new Error('Зареждането на GPS измерванията е прекратено. Опитай отново.');return packed;
+ }});
  function renderInto(selector:string,content:Node){q(selector).replaceChildren(content);}
  async function task(job:()=>Promise<void>){
   if(busy){status('Изчакай текущата операция или я прекрати.');return;}

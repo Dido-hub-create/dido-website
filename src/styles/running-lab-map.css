@@ -1,0 +1,28 @@
+.lab-map-controls{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:14px 0}
+.running-lab .lab-map-controls button[aria-pressed=true]{background:#403023;border-color:#ff9d40;color:#ffca94}
+.lab-map-consent{display:flex;flex-wrap:wrap;align-items:center;gap:16px;border:1px solid #ad814c;background:#30291f;border-radius:12px;padding:16px;margin:15px 0}
+.lab-map-consent p{margin:0;flex-basis:100%;font-size:.86rem}.lab-map-consent a{color:#ffcd94;font-size:.8rem}
+.lab-map-colour-control{max-width:280px;margin-block:16px}
+.lab-route-colour-legend ul{display:flex;flex-wrap:wrap;gap:9px 20px;list-style:none;padding:0;margin:14px 0}
+.lab-route-colour-legend li{display:flex;align-items:center;gap:8px;color:#d9e6f7;font-size:.79rem}
+.lab-colour-swatch{width:22px;height:5px;border-radius:3px;flex-shrink:0}.lab-colour-swatch.is-missing{background:repeating-linear-gradient(90deg,#909cae 0 5px,transparent 5px 8px)!important}
+.lab-street-map{height:440px;width:100%;border-radius:11px;border:1px solid #49617a;isolation:isolate;background:#c9d3d6;z-index:0}
+.running-lab .lab-street-map:focus-visible{outline:3px solid #ff9d40;outline-offset:4px}
+.lab-street-map .leaflet-control-zoom a{width:42px;height:42px;line-height:42px;color:#152637;background:#f7fbff;font-size:25px}
+.lab-street-map .leaflet-control-attribution{font-family:inherit;font-size:11px;line-height:1.6;background:#fffffff0;color:#172638;max-width:calc(100% - 12px);padding:3px 7px;white-space:normal}
+.lab-street-map .leaflet-control-attribution a{color:#154e83;text-decoration:underline}
+.lab-street-map .leaflet-marker-icon{font-family:inherit;box-sizing:border-box}
+.lab-street-marker span{display:flex;align-items:center;justify-content:center;width:27px;height:27px;border:3px solid #fff;box-shadow:0 1px 5px #12233880;font-size:13px;font-weight:800;color:#071b27}
+.lab-street-marker-start span{border-radius:50%;background:#59dfad}.lab-street-marker-end span{border-radius:4px;background:#ff9d40}
+.lab-street-marker-finish span{border-radius:4px;background:#ffe28b;outline:2px solid #5b4104;transform:rotate(45deg)}.lab-street-marker-finish b{transform:rotate(-45deg)}
+.lab-street-km{border:1px solid #142c45;background:#162e49;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;box-shadow:0 1px 4px #fff9}
+.lab-street-map .leaflet-marker-icon:focus-visible{outline:3px solid #df6615;outline-offset:4px}
+.lab-map-point{padding:13px 15px;border-left:3px solid #ff9d40;background:#172e43;color:#e5effe;font-size:.85rem;overflow-wrap:anywhere}
+.lab-map-help{font-size:.78rem!important}
+.lab-map-passages{padding:17px;border:1px solid #bd8b48;border-radius:12px;background:#242c33;margin-block:16px}
+.lab-map-passages h4{margin:0 0 10px}.lab-map-passages p{font-size:.8rem;color:#d4e2f4}
+.lab-map-candidate-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:10px;margin:14px 0;max-height:320px;overflow:auto;padding:4px}
+.running-lab .lab-map-candidate-list button{text-align:left;line-height:1.65;font-size:.83rem}
+.running-lab .lab-map-candidate-list button[aria-pressed=true]{border-color:#ffb263;background:#413024}
+@media(max-width:600px){.lab-street-map{height:360px}.lab-map-controls>button{flex:1 1 140px}.lab-map-colour-control{max-width:none}.lab-map-consent{padding:13px}.lab-map-consent button{width:100%}.lab-route-colour-legend ul{gap:8px 13px}.lab-street-map .leaflet-control-attribution{font-size:10px}}
+@media print{.lab-map-controls,.lab-map-consent,.lab-map-colour-control,.lab-route-colour-legend,.lab-street-map,.lab-map-passages,.lab-map-point,.lab-map-help,[data-map-status]{display:none!important}.lab-print-route .lab-local-route[hidden]{display:block!important}}

@@ -8,6 +8,8 @@ import {metadata} from '../../lib/running-lab/library.mjs';
 import {interval} from '../../lib/running-lab/splits.mjs';
 import {sensorStats} from '../../lib/running-lab/series.mjs';
 import {LIMITS} from '../../lib/running-lab/model.mjs';
+import {prepareActivity} from '../../lib/running-lab/normalize.mjs';
+import {packMapPoints} from '../../lib/running-lab/map-data.mjs';
 // JSON-like models are validated at import/restore boundaries. Kept out of global site scripts.
 const compact=(analysis:any)=>{const {points,...rest}=analysis;return {...rest,findings:insights(analysis)};};
 self.onmessage=async(event:MessageEvent)=>{
@@ -24,6 +26,9 @@ self.onmessage=async(event:MessageEvent)=>{
   }else if(type==='analyze'){
    validateActivity(payload.model);
    const analysis=analyzeActivity(payload.model,{distances:payload.distances});result={analysis:compact(analysis),meta:metadata(payload.model,analysis)};
+  }else if(type==='map-points'){
+   validateActivity(payload.model);
+   result=packMapPoints(prepareActivity(payload.model).points);
   }else if(type==='compare'){
    payload.models.forEach(validateActivity);
    const analyses=payload.models.map((model:any)=>analyzeActivity(model,{distances:payload.distances}));result={comparison:compareActivities(analyses,payload.mode),analyses:analyses.map(compact)};
@@ -36,6 +41,6 @@ self.onmessage=async(event:MessageEvent)=>{
    for(let i=0;i<data.activities.length;i++){const model=data.activities[i],analysis=analyzeActivity(model,{distances:data.preferences.customDistances});entries.push({model,meta:metadata(model,analysis)});self.postMessage({id,progress:{done:i+1,total:data.activities.length}});}result={entries,preferences:data.preferences};
   }else if(type==='backup')result=await createArchive(payload.activities,payload.preferences);
   else throw new Error('Непозната операция.');
-  self.postMessage({id,result});
+  self.postMessage({id,result},{transfer:result instanceof Float64Array?[result.buffer as ArrayBuffer]:[]});
  }catch(error){self.postMessage({id,error:error instanceof Error?error.message:'Обработката не завърши.'});}
 };
