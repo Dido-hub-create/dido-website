@@ -1,0 +1,10 @@
+---
+import { favoriteUrl } from '../lib/favorites.mjs';
+interface Props { url:string; title:string; compact?:boolean }
+const {url,title,compact=false}=Astro.props;
+const safe=favoriteUrl(url);
+---
+{safe && <button type="button" class:list={['favorite-toggle',{'is-compact':compact}]} data-favorite-url={safe} data-favorite-title={title} aria-pressed="false" aria-label={`Добави в любими: ${title}`} title="Добави в любими" hidden>
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17l-6-4-6 4Z"/></svg>
+  <span data-favorite-label class:list={{'sr-only':compact}}>Запази</span>
+</button>}

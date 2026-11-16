@@ -13,6 +13,7 @@ import { compareArchivedRaces } from "../lib/race-results.mjs";
 import ArchivedRace from "./ArchivedRace.astro";
 import RaceResult from "./RaceResult.astro";
 import Icon from "./Icon.astro";
+import FavoriteButton from './FavoriteButton.astro';
 interface Props {
   archive?: boolean;
   raceId?: string;
@@ -124,6 +125,7 @@ const groups = (archive
                   <div data-completed-results hidden={!archivedRace(race,now)}><RaceResult race={race}/></div>
                   {race.notes && <p class="running-notes">{race.notes}</p>}
                   <div class="running-links">
+                    <FavoriteButton url={race.href} title={race.title} compact={!raceId} />
                     {race.officialUrl && (
                       <a
                         href={race.officialUrl}

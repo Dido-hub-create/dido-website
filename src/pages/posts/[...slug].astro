@@ -8,6 +8,7 @@ import { allPosts, formatDate, usableImage } from "../../lib/posts";
 import { siteIdentity } from "../../lib/site.mjs";
 import { loadVideos, postVideo } from "../../lib/videos.mjs";
 import VideoCard from "../../components/VideoCard.astro";
+import FavoriteButton from '../../components/FavoriteButton.astro';
 export async function getStaticPaths() {
   return (await allPosts()).map((post) => ({
     params: { slug: post.id },
@@ -45,6 +46,7 @@ const gallery = (post.data.gallery ?? [])
           <p class="article-description">{post.data.description}</p>
         )
       }
+      <div class="material-save"><FavoriteButton url={post.href} title={post.data.title} /></div>
     </header>
     {
       post.cover && (

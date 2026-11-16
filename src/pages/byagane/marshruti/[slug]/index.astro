@@ -4,6 +4,7 @@ import FramedImage from "../../../../components/FramedImage.astro";
 import RouteMap from "../../../../components/RouteMap.astro";
 import RouteGallery from "../../../../components/RouteGallery.astro";
 import RouteAnalysis from "../../../../components/RouteAnalysis.astro";
+import FavoriteButton from '../../../../components/FavoriteButton.astro';
 import {
   loadRoutes,
   loadRaces,
@@ -35,6 +36,7 @@ const image = usableImage(route.cover),
         <p class="eyebrow">
           {routeTypes[route.surface as keyof typeof routeTypes]}
         </p><h1>{route.title}</h1>{route.location && <p>{route.location}</p>}
+        <div class="material-save"><FavoriteButton url={route.href} title={route.title} /></div>
       </div>
     </header>{
       image && (

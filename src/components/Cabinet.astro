@@ -1,10 +1,13 @@
 ---
-interface Props { app: {id:string;title:string;description:string;image?:string;online?:string;download?:string;} }
+import FavoriteButton from './FavoriteButton.astro';
+import { applicationPage } from '../lib/applications.mjs';
+interface Props { app: {id:string;category:string;title:string;description:string;image?:string;online?:string;download?:string;} }
 const {app}=Astro.props;
 ---
 <article class="application-card cabinet" id={`application-${app.id}`}>
  {app.image && <div class="app-art"><img src={app.image} alt={app.title} width="1535" height="564" loading="lazy" /></div>}
  <div class="app-copy"><h2>{app.title}</h2><p>{app.description}</p>
+ <div class="app-save"><FavoriteButton url={applicationPage(app)} title={app.title} /></div>
  <div class="cabinet-actions">
  {app.online && <a class="cabinet-action online" href={app.online}><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="5" y="6" width="38" height="28" rx="4"/><path d="M24 34v8m-10 0h20"/><path class="boot" d="m18 16 12 8-12 6z"/></svg><strong>Работи онлайн</strong></a>}
  {app.download && <a class="cabinet-action download" href={app.download} download><svg viewBox="0 0 48 48" aria-hidden="true"><g class="arrow"><path d="M24 5v25m-9-9 9 9 9-9"/></g><path d="M7 31v11h34V31"/></svg><strong>Изтегли</strong></a>}

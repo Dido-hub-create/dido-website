@@ -30,3 +30,6 @@ export function publishedApplications(root=process.cwd(),additional=extra.apps){
 export function applicationCategories(root=process.cwd()){
  const apps=publishedApplications(root);return categories.map(c=>({...c,href:`/prilozheniya/${c.slug}/`,apps:apps.filter(a=>a.category===c.slug)}));
 }
+export function applicationPage(app){
+ return app.online || `/prilozheniya/${app.category}/#application-${app.id}`;
+}

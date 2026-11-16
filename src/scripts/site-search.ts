@@ -1,4 +1,5 @@
 import { prepareSearchIndex, queryWords, searchDocuments } from '../lib/search.mjs';
+import { loadPublicIndex } from '../lib/public-index.mjs';
 
 const dialog=document.querySelector<HTMLDialogElement>('#site-search');
 const trigger=document.querySelector<HTMLButtonElement>('[data-search-open]');
@@ -35,9 +36,7 @@ if(dialog && trigger && input && results && status && retry) {
     message.textContent='Зареждане на търсенето…';retryButton.hidden=true;list.replaceChildren();
     pending=(async()=>{
       try {
-        const response=await fetch('/search-index.json',{cache:'no-cache',signal:AbortSignal.timeout(8000)});
-        if(!response.ok)throw new Error('Unavailable index');
-        index=prepareSearchIndex(await response.json());render();
+        index=await loadPublicIndex();render();
       } catch {
         message.textContent='Търсенето не се зареди. Провери връзката и опитай отново.';
         retryButton.hidden=false;
