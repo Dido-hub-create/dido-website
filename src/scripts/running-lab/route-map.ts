@@ -2,13 +2,13 @@ import {el} from './dom';
 import {svgNode,svgLabel,localPointer} from './svg';
 import {nearest,nearestTime} from './chart-data';
 import {routeLines} from '../../lib/running-lab/map-data.mjs';
-interface MapOptions {range?:[number,number]|null;finishTime?:number|null;onCursor?:(point:any)=>void;colouring?:any;onPick?:(position:{lat:number;lon:number},radiusM:number,pixels:(point:any)=>number,pixelLimit:number)=>void}
+interface MapOptions {width?:number;range?:[number,number]|null;finishTime?:number|null;onCursor?:(point:any)=>void;colouring?:any;onPick?:(position:{lat:number;lon:number},radiusM:number,pixels:(point:any)=>number,pixelLimit:number)=>void}
 export function routeMap(samples:any[],options:MapOptions={}){
  const points=samples.filter(p=>p.lat!==null&&p.lon!==null);
  if(points.length<2)return {node:el('p','Файлът няма GPS геометрия. Времевият и сензорният анализ остават достъпни.'),update:(_point:any)=>{},setRange:(_range:[number,number]|null)=>{}};
  const base=points[0],project=(p:any)=>({x:(((p.lon-base.lon+540)%360)-180)*Math.max(.01,Math.cos(base.lat*Math.PI/180)),y:-p.lat});
  const mapped=points.map(project),minX=Math.min(...mapped.map(p=>p.x)),maxX=Math.max(...mapped.map(p=>p.x)),minY=Math.min(...mapped.map(p=>p.y)),maxY=Math.max(...mapped.map(p=>p.y));
- const width=Math.max(280,(document.querySelector<HTMLElement>('[data-running-lab]')?.clientWidth||innerWidth)-40),height=innerWidth<=600?300:350,padding=35;
+ const width=Math.max(240,options.width??((document.querySelector<HTMLElement>('[data-running-lab]')?.clientWidth||innerWidth)-40)),height=innerWidth<=600?300:350,padding=35;
  const scale=Math.min((width-padding*2)/(maxX-minX||.00001),(height-padding*2)/(maxY-minY||.00001));
  const xy=(p:any)=>{const q=project(p);return {x:width/2+(q.x-(minX+maxX)/2)*scale,y:height/2+(q.y-(minY+maxY)/2)*scale};};
  const wrapper=el('div'),svg=svgNode('svg',{viewBox:`0 0 ${width} ${height}`,role:'group','aria-label':'Локална GPS схема с начало, край, километри и избран участък. Щракни близо до трасето за измерена точка. Север нагоре; без външна карта.','data-local-map':''});
@@ -37,5 +37,5 @@ export function routeMap(samples:any[],options:MapOptions={}){
   options.onPick!(position,Math.min(150,pixelLimit/screenScale/scale*111195.0802),point=>{const p=xy(point);return Math.hypot(p.x-q.x,p.y-q.y)*screenScale;},pixelLimit);
  });}
  const setRange=(range:[number,number]|null)=>selected.setAttribute('d',range?path(range):'');setRange(options.range||null);
- return {node:wrapper,setRange,update:(p:any)=>{if(!p||p.lat===null||p.lon===null)return;const q=xy(p);cursor.setAttribute('cx',String(q.x));cursor.setAttribute('cy',String(q.y));}};
+ return {node:wrapper,setRange,update:(p:any)=>{if(!p||p.lat===null||p.lon===null){cursor.setAttribute('visibility','hidden');return;}cursor.removeAttribute('visibility');const q=xy(p);cursor.setAttribute('cx',String(q.x));cursor.setAttribute('cy',String(q.y));}};
 }

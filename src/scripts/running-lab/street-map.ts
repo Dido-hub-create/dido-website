@@ -6,7 +6,7 @@ import {closestSample,routeLines,validMapPoint} from '../../lib/running-lab/map-
 export const OSM_TILE_URL='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 interface Hooks {
  onPick:(position:{lat:number;lon:number},radiusM:number,pixels:(point:any)=>number,pixelLimit:number)=>void;
- onPoint:(point:any)=>void;onUnavailable:(message:string)=>void;onStatus:(message:string)=>void;onWheelOff:()=>void;
+ onPoint:(point:any)=>void;onUnavailable:(message:string)=>void;onStatus:(message:string)=>void;
 }
 export function createStreetMap(container:HTMLElement,initial:any,initialColouring:any,hooks:Hooks){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -31,7 +31,9 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
   container.dataset.mapReady='ready';hooks.onStatus(failed?'Част от фона не се зареди. Можеш да преминеш към локалната схема.':'OpenStreetMap е включен. Плочките показват само заявената видима област.');
  });
  const latlng=(p:any):L.LatLngTuple=>[p.lat,p.lon];
- const cursor=L.circleMarker([0,0],{radius:7,color:'#fff',weight:3,fillColor:'#ff8a16',fillOpacity:1,interactive:false});
+ const cursorContent=el('span');cursorContent.dataset.streetCursor='';cursorContent.setAttribute('aria-hidden','true');
+ // A DOM marker moves without repainting the Canvas containing a long route.
+ const cursor=L.marker([0,0],{icon:L.divIcon({html:cursorContent,className:'lab-street-cursor',iconSize:[16,16],iconAnchor:[8,8]}),keyboard:false,interactive:false,zIndexOffset:1000});
  function fullRoute(){
   const points=analysis.points.filter(validMapPoint);
   if(points.length)map.fitBounds(L.latLngBounds(points.map(latlng)),{padding:[32,32],maxZoom:16,animate:false});
@@ -67,12 +69,13 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
   drawRange();drawMarkers();
  }
  function update(point:any){
-  cursorPoint=point;if(!validMapPoint(point))return;
-  cursor.setLatLng(latlng(point));if(!map.hasLayer(cursor))cursor.addTo(map);cursor.bringToFront();
+  cursorPoint=point;if(!validMapPoint(point)){if(map.hasLayer(cursor))map.removeLayer(cursor);return;}
+  cursor.setLatLng(latlng(point));if(!map.hasLayer(cursor))cursor.addTo(map);
   container.dataset.cursorDistance=String(point.d);container.dataset.cursorTime=String(point.t??'');
  }
  function wheel(enabled:boolean){if(enabled)map.scrollWheelZoom.enable();else map.scrollWheelZoom.disable();container.dataset.wheel=String(enabled);}
- const leave=()=>{wheel(false);hooks.onWheelOff();};container.addEventListener('pointerleave',leave);
+ // Leaflet listens for wheel events on this container only. Keeping the user's
+ // choice on pointerleave/focus changes cannot hijack scrolling outside it.
  map.on('click',(event:L.LeafletMouseEvent)=>{
   clearTimeout(clickTimer);clickTimer=setTimeout(()=>{
    if(disposed)return;const position={lat:event.latlng.lat,lon:event.latlng.lng},point=event.containerPoint,pixelLimit=event.originalEvent instanceof PointerEvent&&event.originalEvent.pointerType==='touch'?26:18;
@@ -87,8 +90,8 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
  return {
   update,setRange(value:[number,number]|null){range=value;drawRange();},
   setAnalysis(value:any,style:any){analysis=value;colouring=style;draw();if(cursorPoint)update(cursorPoint);},
-  fullRoute,resize(){if(container.clientWidth&&container.clientHeight)map.invalidateSize({pan:false});},wheel,
+  fullRoute,resize(){if(container.clientWidth&&container.clientHeight)map.invalidateSize({pan:true,animate:false,debounceMoveend:true});},wheel,
   showPoint(){if(validMapPoint(cursorPoint))map.panTo(latlng(cursorPoint),{animate:!reduced});},
-  destroy(){disposed=true;clearTimeout(timeout);clearTimeout(clickTimer);container.removeEventListener('pointerleave',leave);map.remove();container.replaceChildren();container.className='lab-street-map';for(const key of ['streetMap','mapReady','zoom','mapCenter','cursorTime','cursorDistance','wheel'])delete container.dataset[key];},
+  destroy(){disposed=true;clearTimeout(timeout);clearTimeout(clickTimer);map.remove();container.replaceChildren();container.className='lab-street-map';for(const key of ['streetMap','mapReady','zoom','mapCenter','cursorTime','cursorDistance','wheel'])delete container.dataset[key];},
  };
 }

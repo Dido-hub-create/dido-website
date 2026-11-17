@@ -4,6 +4,8 @@ import {lineChart,chartValues,nearest,nearestTime} from './charts';
 import type {ChartState} from './line-chart';
 import {AnalysisView} from './analysis-view';
 import {WorkoutMap} from './workout-map';
+import {combinedChart} from './combined-chart';
+import {fontScale} from './svg';
 import {validateDistance} from '../../lib/running-lab/history.mjs';
 import type {LabWorkout,LabSettings} from '../../lib/running-lab/types';
 interface Entry {model:LabWorkout;analysis:any;saved?:boolean;dirty?:boolean}
@@ -15,14 +17,27 @@ export class WorkoutView {
  private entry:Entry|null=null;private cursor:any=null;
  private zoomRange:DistanceRange|null=null;private selection:DistanceRange|null=null;
  private charts:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}[]=[];
+ private primaryChart:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}|null=null;
+ private detailedCharts:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}[]=[];
+ private metrics=new Set(['pace']);private primaryAll=false;private zone='Europe/Sofia';
+ private cursorFrame=0;private pendingPoint:any=null;
  private map:WorkoutMap;
  private states=new Map<string,ChartState>();private details:AnalysisView;
  constructor(private root:HTMLElement,private hooks:Hooks){
-  this.map=new WorkoutMap(this.q('[data-lab-map]'),{onPoint:point=>this.setPoint(point),onFinish:()=>void hooks.run(()=>this.markFinish()),onClearFinish:()=>void hooks.run(()=>this.clearFinish()),loadPoints:()=>hooks.loadMapPoints()});
+  this.map=new WorkoutMap(this.q('[data-lab-map]'),{onPoint:point=>this.selectMapPoint(point),onFinish:()=>void hooks.run(()=>this.markFinish()),onClearFinish:()=>void hooks.run(()=>this.clearFinish()),loadPoints:()=>hooks.loadMapPoints()},this.q('[data-lab-point-info]'));
   window.addEventListener('beforeunload',()=>this.map.destroy());
   this.details=new AnalysisView(root,row=>this.selectSegment(row));
   this.q('[data-lab-axis]').addEventListener('change',()=>this.renderCharts());
-  this.q('[data-lab-pair]').addEventListener('change',()=>this.renderCharts());
+  this.q('[data-lab-pair]').addEventListener('change',()=>{this.renderDetailed();this.syncCurrent();});
+  this.q('[data-lab-layout]').addEventListener('change',()=>this.redraw());
+  this.root.querySelectorAll<HTMLInputElement>('[data-combined-metric]').forEach(input=>input.addEventListener('change',()=>{const key=input.dataset.combinedMetric!;if(input.checked)this.metrics.add(key);else this.metrics.delete(key);this.renderPrimary();this.syncCurrent();}));
+  this.q('[data-combined-scale]').addEventListener('click',()=>{this.primaryAll=!this.primaryAll;this.renderPrimary();this.syncCurrent();});
+  this.q<HTMLDetailsElement>('[data-lab-detail-graphs]').addEventListener('toggle',()=>{this.renderDetailed();this.syncCurrent();});
+  if(typeof ResizeObserver!=='undefined'){
+   let previous=0,frame=0;const observer=new ResizeObserver(entries=>{const width=entries[0].contentRect.width;if(width>0&&Math.abs(width-previous)>1){previous=width;cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>this.redraw());}else if(!width)previous=0;});
+   observer.observe(this.q('[data-lab-workspace]'));window.addEventListener('beforeunload',()=>{observer.disconnect();cancelAnimationFrame(frame);cancelAnimationFrame(this.cursorFrame);});
+  }
+  this.updateLayout();
   for(const selector of ['[data-lab-smoothing]','[data-lab-altitude]'])this.q(selector).addEventListener('change',()=>{
    if(!this.entry)return;if(hooks.isBusy()){this.q<HTMLSelectElement>('[data-lab-smoothing]').value=String(this.entry.model.settings.smoothingM);this.q<HTMLSelectElement>('[data-lab-altitude]').value=this.entry.model.settings.altitudeSource;hooks.status('Изчакай текущата операция или я прекрати.');return;}
    void hooks.run(()=>hooks.changeSettings({smoothingM:Number(this.q<HTMLSelectElement>('[data-lab-smoothing]').value)as 25|50|100|200,altitudeSource:this.q<HTMLSelectElement>('[data-lab-altitude]').value as 'unknown'|'gps'|'barometer'}));
@@ -42,11 +57,11 @@ export class WorkoutView {
  }
  private q<T extends HTMLElement=HTMLElement>(selector:string){return this.root.querySelector<T>(selector)!;}
  private requireEntry(){if(!this.entry)throw new Error('Първо отвори тренировка.');return this.entry;}
- resetView(){this.zoomRange=null;this.selection=null;this.cursor=null;this.q<HTMLInputElement>('[data-lab-range-start]').value='0';this.q<HTMLInputElement>('[data-lab-range-end]').value='';}
+ resetView(){this.zoomRange=null;this.selection=null;this.cursor=null;this.metrics=new Set(['pace']);this.primaryAll=false;cancelAnimationFrame(this.cursorFrame);this.cursorFrame=0;this.pendingPoint=null;this.q<HTMLInputElement>('[data-lab-range-start]').value='0';this.q<HTMLInputElement>('[data-lab-range-end]').value='';}
  render(entry:Entry|null,zone:string){
-  if(entry?.model.id!==this.entry?.model.id)this.resetView();this.entry=entry;
+  if(entry?.model.id!==this.entry?.model.id)this.resetView();this.entry=entry;this.zone=zone;
   this.q('[data-lab-overview]').hidden=!entry;this.q('[data-lab-empty-overview]').hidden=!!entry;this.details.render(entry?.analysis||null,zone);
-  if(!entry){for(const key of ['stats','charts','paired-chart','quality','finish-report','range-result'])this.q(`[data-lab-${key}]`).replaceChildren();this.map.setAnalysis(null);this.charts=[];return;}
+  if(!entry){for(const key of ['stats','charts','paired-chart','combined-chart','quality','finish-report','range-result'])this.q(`[data-lab-${key}]`).replaceChildren();this.map.setAnalysis(null,zone);this.charts=[];this.primaryChart=null;this.detailedCharts=[];return;}
   const a=entry.analysis;
   this.q('[data-lab-workout-name]').textContent=entry.model.name;
   this.q('[data-lab-source]').textContent=`${entry.model.source.format.toUpperCase()} · ${date(a.stats.start,zone)} · ${entry.saved?'записана тренировка':'временен анализ'}${entry.dirty?' · незаписани настройки':''} · GPS ${num(a.quality.geometryCoverage*100,0)}% · спорт: ${entry.model.reported.sport||'не е отчетен във файла'}`;
@@ -60,13 +75,44 @@ export class WorkoutView {
   this.q<HTMLButtonElement>('[data-action="zoom"]').disabled=!(a.stats.distanceM>0);this.q<HTMLButtonElement>('[data-action="range"]').disabled=!(a.stats.distanceM>0&&a.quality.complete&&a.quality.clockReliable);
   this.renderFinish();this.renderCharts();
  }
- redraw(){if(this.entry){this.renderCharts();this.details.redraw();}}
+ redraw(){this.updateLayout();if(this.entry){this.renderCharts();this.details.redraw();}}
+ private updateLayout(){const workspace=this.q('[data-lab-workspace]'),preferred=this.q<HTMLSelectElement>('[data-lab-layout]').value,narrow=innerWidth<1180||fontScale()>1.5||(workspace.clientWidth>0&&workspace.clientWidth<1000);workspace.dataset.effectiveLayout=preferred==='columns'&&!narrow?'columns':'stacked';const hint=this.q('[data-lab-layout-hint]');hint.textContent=narrow&&preferred==='columns'?'За четимост на този екран картата е над графиката. Изборът не се записва между устройства.':'';hint.hidden=!hint.textContent;}
  private state(key:string){if(!this.states.has(key))this.states.set(key,{expanded:false,scale:'typical'});return this.states.get(key)!;}
  private timeAxis(){return this.q<HTMLSelectElement>('[data-lab-axis]').value==='time';}
  private toX(distance:number){const a=this.requireEntry().analysis,p=nearest(a.samples,distance);return this.timeAxis()&&p?(p.t-a.stats.start)/60000:distance/1000;}
  private domain():[number,number]{const a=this.requireEntry().analysis;return this.zoomRange?[this.toX(this.zoomRange.startM),this.toX(this.zoomRange.endM)]:[0,this.timeAxis()?a.stats.elapsedSeconds/60:(a.stats.distanceM||0)/1000];}
- private renderCharts(){
-  if(!this.entry)return;const a=this.entry.analysis,axis=this.timeAxis()?'time':'distance',domain=this.domain(),stack=this.q('[data-lab-charts]');stack.replaceChildren();this.q('[data-lab-paired-chart]').replaceChildren();this.charts=[];
+ private syncCharts(){this.charts=[...(this.primaryChart?[this.primaryChart]:[]),...this.detailedCharts];}
+ private syncCurrent(){
+  if(!this.entry)return;const a=this.entry.analysis,domain=this.domain(),time=this.timeAxis(),at=(p:any)=>time?(p.t-a.stats.start)/60000:p.d/1000;
+  let point=this.pendingPoint||this.cursor||a.samples[0];cancelAnimationFrame(this.cursorFrame);this.cursorFrame=0;this.pendingPoint=null;
+  if(point&&(at(point)<domain[0]||at(point)>domain[1])){
+   const visible=a.samples.filter((p:any)=>at(p)>=domain[0]&&at(p)<=domain[1]),target=Math.max(domain[0],Math.min(domain[1],at(point)));
+   point=(time?nearestTime(visible,a.stats.start+target*60000):nearest(visible,target*1000))||point;
+  }
+  this.setPoint(point);this.paintSelection();
+ }
+ private common(){
+  const a=this.requireEntry().analysis,domain=this.domain(),samples=a.samples.filter((p:any)=>{const x=this.timeAxis()?(p.t-a.stats.start)/60000:p.d/1000;return x>=domain[0]&&x<=domain[1];});
+  return {axis:this.timeAxis()?'изминало време · мин':'дистанция · км',domain,
+   onCursor:(x:number)=>this.queuePoint(this.timeAxis()?nearestTime(samples,a.stats.start+x*60000):nearest(samples,x*1000)),
+   onRange:(left:number,right:number)=>{
+    const first=this.timeAxis()?nearestTime(a.samples,a.stats.start+left*60000)?.d:left*1000,last=this.timeAxis()?nearestTime(a.samples,a.stats.start+right*60000)?.d:right*1000;
+    if(!(last>first)){this.hooks.status('Избраният времеви участък няма положителна измерена дистанция. Ръчен финал може да се избере отделно по време.');this.paintSelection();return;}
+    this.selection={startM:first,endM:last};this.writeRange();this.paintSelection();void this.hooks.run(()=>this.calculateRange());
+   }};
+ }
+ private renderPrimary(){
+  if(!this.entry)return;const a=this.entry.analysis,host=this.q('[data-lab-combined-chart]');
+  this.root.querySelectorAll<HTMLInputElement>('[data-combined-metric]').forEach(input=>{const key=input.dataset.combinedMetric!,available=(key!=='pace'||a.quality.clockReliable)&&a.samples.filter((p:any)=>Number.isFinite(p[key])).length>=2;input.disabled=!available;if(!available)this.metrics.delete(key);input.checked=this.metrics.has(key);input.title=available?'':'Няма достатъчно измервания за този показател.';});
+  const common=this.common(),workspace=this.q('[data-lab-workspace]'),width=host.clientWidth||(workspace.dataset.effectiveLayout==='columns'?this.root.clientWidth/2-36:this.root.clientWidth-32);
+  const chart=combinedChart({analysis:a,metrics:['pace','hr','cad'].filter(key=>this.metrics.has(key)),axis:this.timeAxis()?'time':'distance',domain:common.domain,width:Math.max(230,width),allValues:this.primaryAll,onCursor:common.onCursor,onRange:common.onRange,
+   markers:a.manualFinish?.available?[{x:this.timeAxis()?(a.manualFinish.time-a.stats.start)/60000:a.manualFinish.distanceM/1000,label:'Ръчен финал',finish:true}]:[]});
+  host.replaceChildren(chart.card);this.primaryChart=chart;this.syncCharts();const button=this.q('[data-combined-scale]');button.setAttribute('aria-pressed',String(this.primaryAll));button.textContent=this.primaryAll?'Автоматична скала':'Всички стойности';
+ }
+ private renderDetailed(){
+  if(!this.entry)return;const a=this.entry.analysis,stack=this.q('[data-lab-charts]');stack.replaceChildren();this.q('[data-lab-paired-chart]').replaceChildren();this.detailedCharts=[];
+  if(!this.q<HTMLDetailsElement>('[data-lab-detail-graphs]').open){this.syncCharts();return;}
+  const axis=this.timeAxis()?'time':'distance',common=this.common(),domain=common.domain,width=Math.max(240,(stack.clientWidth||this.root.clientWidth)-32);
   const definitions:SeriesDefinition[]=[{key:'pace',title:'Темпо',unit:'мин/км',color:'#ff9d40',inverse:true},{key:'hr',title:'Пулс',unit:'уд./мин',color:'#f284a6'},{key:'elevation',title:'Височина',unit:'м',color:'#55c4e1'},{key:'cad',title:'Каданс',unit:a.cadenceDisplay?.unit||'отчетени ед./мин',color:'#b5a2ff'}];
   if(a.gradient?.available)definitions.splice(3,0,{key:'grade',title:`Наклон · прозорец ${a.gradient.windowM} м`,unit:'%',color:'#64d3b1'});
   const markers:{x:number;label:string;lap?:boolean;finish?:boolean}[]=a.splits.filter((row:any)=>row.lengthM>=999.999).map((row:any,i:number)=>({x:this.toX(row.endM),label:String(i+1)}));
@@ -74,33 +120,29 @@ export class WorkoutView {
   a.deviceLaps.forEach((row:any,i:number)=>{if(a.quality.clockReliable&&typeof row.end==='number'){const p=nearestTime(a.samples,row.end);if(p)markers.push({x:this.timeAxis()?(row.end-a.stats.start)/60000:p.d/1000,label:`Устр. ${i+1}`,lap:true});}});
   if(a.manualFinish?.available)markers.push({x:this.timeAxis()?(a.manualFinish.time-a.stats.start)/60000:a.manualFinish.distanceM/1000,label:'Ръчен финал',finish:true});
   const points=(key:string)=>(key==='elevation'&&!a.elevation.available?[]:chartValues(a,key,axis)).filter((p:any)=>p.x>=domain[0]&&p.x<=domain[1]);
-  const options=(d:SeriesDefinition)=>({...d,metric:d.key,points:points(d.key),format:d.key==='pace'?(v:number)=>pace(v).replace(' /км',''):undefined});
-  const common={axis:this.timeAxis()?'изминало време · мин':'дистанция · км',domain,markers,onCursor:(x:number)=>this.setPoint(this.timeAxis()?nearestTime(a.samples,a.stats.start+x*60000):nearest(a.samples,x*1000)),onRange:(left:number,right:number)=>{
-   const first=this.timeAxis()?nearestTime(a.samples,a.stats.start+left*60000)?.d:left*1000,last=this.timeAxis()?nearestTime(a.samples,a.stats.start+right*60000)?.d:right*1000;
-   if(!(last>first)){this.hooks.status('Избраният времеви участък няма положителна измерена дистанция. Ръчен финал може да се избере отделно по време.');return;}
-   this.selection={startM:first,endM:last};this.writeRange();this.paintSelection();void this.hooks.run(()=>this.calculateRange());
-  }};
+  const options=(d:SeriesDefinition)=>({...d,metric:d.key,width,points:points(d.key),format:d.key==='pace'?(v:number)=>pace(v).replace(' /км',''):undefined});
   const pair=this.q<HTMLSelectElement>('[data-lab-pair]');
   for(const option of Array.from(pair.options))option.disabled=option.value!=='none'&&(!a.elevation.available||option.value==='grade-pace'&&!a.gradient?.available||option.value==='elevation-hr'&&a.stats.heart.mean===null||option.value.endsWith('pace')&&!a.quality.clockReliable);
   if(pair.selectedOptions[0].disabled)pair.value='none';
-  if(pair.value!=='none'){
-   const [first,second]=pair.value.split('-'),d=definitions.find(d=>d.key===first)!,secondary=definitions.find(d=>d.key===second)!;
-   const chart=lineChart({...options(d),...common,title:`${d.title} + ${secondary.title}`,primaryTitle:d.title,secondary:options(secondary),key:'pair-'+pair.value,state:this.state('pair-'+pair.value),zeroLine:first==='grade'});this.q('[data-lab-paired-chart]').append(chart.card);this.charts.push(chart);
-  }
-  for(const d of definitions){const chart=lineChart({...options(d),...common,key:d.key,state:this.state(d.key),zeroLine:d.key==='grade'});stack.append(chart.card);this.charts.push(chart);}
-  this.map.setAnalysis(a);
-  this.setPoint(this.cursor||a.samples[0]);this.paintSelection();this.renderRangeLabel();
+  if(pair.value!=='none'){const [first,second]=pair.value.split('-'),d=definitions.find(d=>d.key===first)!,secondary=definitions.find(d=>d.key===second)!;const chart=lineChart({...options(d),...common,markers,title:`${d.title} + ${secondary.title}`,primaryTitle:d.title,secondary:options(secondary),key:'pair-'+pair.value,state:this.state('pair-'+pair.value),zeroLine:first==='grade'});this.q('[data-lab-paired-chart]').append(chart.card);this.detailedCharts.push(chart);}
+  for(const d of definitions){const chart=lineChart({...options(d),...common,markers,key:d.key,state:this.state(d.key),zeroLine:d.key==='grade'});stack.append(chart.card);this.detailedCharts.push(chart);}this.syncCharts();
+ }
+ private renderCharts(){
+  if(!this.entry)return;this.updateLayout();this.renderPrimary();this.renderDetailed();this.map.setAnalysis(this.entry.analysis,this.zone);this.syncCurrent();this.renderRangeLabel();
+ }
+ private queuePoint(point:any){if(!point)return;this.pendingPoint=point;if(!this.cursorFrame)this.cursorFrame=requestAnimationFrame(()=>{this.cursorFrame=0;const p=this.pendingPoint;this.pendingPoint=null;if(p)this.setPoint(p);});}
+ private selectMapPoint(point:any){
+  cancelAnimationFrame(this.cursorFrame);this.cursorFrame=0;this.pendingPoint=null;
+  if(this.zoomRange&&(point.d<this.zoomRange.startM||point.d>this.zoomRange.endM)){this.zoomRange=null;this.renderPrimary();this.renderDetailed();this.renderRangeLabel();this.paintSelection();}
+  this.setPoint(point);
  }
  private setPoint(p:any){
-  if(!this.entry||!p)return;this.cursor=p;const a=this.entry.analysis,elevation=a.elevation.available?nearest(a.elevation.samples,p.d):null,grade=a.gradient?.available?nearest(a.gradient.samples,p.d):null,cad=p.cad===null?null:p.cad*(a.cadenceDisplay?.factor||1);
-  const analytic=p.pace===undefined?(a.quality.clockReliable?nearestTime(a.samples,p.t):nearest(a.samples,p.d)):p;
-  this.q('[data-lab-cursor]').textContent=`${num(p.d/1000,3)} км · ${p.t!==null?duration((p.t-a.stats.start)/1000):'Няма време'} · темпо ${pace(analytic?.pace)} · пулс ${num(p.hr)} уд./мин · височина ${num(elevation?.ele??p.z)} м · наклон ${num(grade?.grade!==null&&grade?.grade!==undefined?grade.grade*100:null,2)}% · каданс ${num(cad)} ${a.cadenceDisplay?.unit||'отчетени ед./мин'}`;
-  const x=this.timeAxis()?(p.t-a.stats.start)/60000:p.d/1000;this.charts.forEach(chart=>chart.update(x));this.map.update(p);
+  if(!this.entry||!p)return;this.cursor=p;const a=this.entry.analysis,x=this.timeAxis()?(p.t-a.stats.start)/60000:p.d/1000;this.charts.forEach(chart=>chart.update(x));this.map.update(p);
  }
  private readRange():DistanceRange {const a=this.requireEntry().analysis,startM=Number(this.q<HTMLInputElement>('[data-lab-range-start]').value)*1000,endM=Number(this.q<HTMLInputElement>('[data-lab-range-end]').value)*1000;if(!(startM>=0&&endM>startM&&endM<=a.stats.distanceM+1))throw new Error('Избери валиден диапазон вътре в тренировката.');return {startM,endM:Math.min(endM,a.stats.distanceM)};}
  private writeRange(){if(this.selection){this.q<HTMLInputElement>('[data-lab-range-start]').value=(this.selection.startM/1000).toFixed(3);this.q<HTMLInputElement>('[data-lab-range-end]').value=(this.selection.endM/1000).toFixed(3);}}
  private paintSelection(){const range=this.selection?[this.toX(this.selection.startM),this.toX(this.selection.endM)] as [number,number]:null;this.charts.forEach(chart=>chart.setSelection(range));this.map.setRange(this.selection?[this.selection.startM,this.selection.endM]:null);}
- private renderRangeLabel(){const a=this.requireEntry().analysis,start=this.zoomRange?.startM||0,end=this.zoomRange?.endM??a.stats.distanceM;this.q('[data-lab-visible-range]').textContent=a.stats.distanceM===null?'Показана е цялата времева линия.':`Показан участък: ${km(start)}–${km(end)} км от общо ${km(a.stats.distanceM)} км${this.zoomRange?' · приближен изглед':' · цялата тренировка'}`;}
+ private renderRangeLabel(){const a=this.requireEntry().analysis,start=this.zoomRange?.startM||0,end=this.zoomRange?.endM??a.stats.distanceM;this.q('[data-lab-visible-range]').textContent=a.stats.distanceM===null?'Показана е цялата времева линия.':this.zoomRange?`Показан участък: ${km(start)}–${km(end)} км от общо ${km(a.stats.distanceM)} км`:`Цялата тренировка · ${km(a.stats.distanceM)} км`;}
  zoom(){this.selection=this.readRange();this.zoomRange={...this.selection};this.renderCharts();this.hooks.status('Приближен е само изгледът на графиките. Оригиналният запис не е променен.');}
  resetZoom(){this.zoomRange=null;this.selection=null;const a=this.requireEntry().analysis;this.q<HTMLInputElement>('[data-lab-range-start]').value='0';this.q<HTMLInputElement>('[data-lab-range-end]').value=a.stats.distanceM===null?'':(a.stats.distanceM/1000).toFixed(3);this.q('[data-lab-range-result]').textContent='';this.renderCharts();}
  async calculateRange(){const range=this.readRange();this.selection=range;this.paintSelection();const row=await this.hooks.range(range.startM,range.endM);this.q('[data-lab-range-result]').textContent=row?`Статистика за избрания участък: ${num(row.lengthM)} м · ${duration(row.seconds)} · ${pace(row.pace)} · пулс ${num(row.heart)} уд./мин`:'Недостатъчно надеждни данни за този участък.';}
