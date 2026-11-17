@@ -24,7 +24,7 @@ export class WorkoutView {
  private map:WorkoutMap;
  private states=new Map<string,ChartState>();private details:AnalysisView;
  constructor(private root:HTMLElement,private hooks:Hooks){
-  this.map=new WorkoutMap(this.q('[data-lab-map]'),{onPoint:point=>this.selectMapPoint(point),onFinish:()=>void hooks.run(()=>this.markFinish()),onClearFinish:()=>void hooks.run(()=>this.clearFinish()),loadPoints:()=>hooks.loadMapPoints()},this.q('[data-lab-point-info]'));
+  this.map=new WorkoutMap(this.q('[data-lab-map]'),{onPoint:point=>this.selectMapPoint(point),loadPoints:()=>hooks.loadMapPoints()},this.q('[data-lab-point-info]'),this.q('.lab-finish-details'));
   window.addEventListener('beforeunload',()=>this.map.destroy());
   this.details=new AnalysisView(root,row=>this.selectSegment(row));
   this.q('[data-lab-axis]').addEventListener('change',()=>this.renderCharts());
@@ -105,7 +105,8 @@ export class WorkoutView {
   if(!this.entry)return;const a=this.entry.analysis,host=this.q('[data-lab-combined-chart]');
   this.root.querySelectorAll<HTMLInputElement>('[data-combined-metric]').forEach(input=>{const key=input.dataset.combinedMetric!,available=(key!=='pace'||a.quality.clockReliable)&&a.samples.filter((p:any)=>Number.isFinite(p[key])).length>=2;input.disabled=!available;if(!available)this.metrics.delete(key);input.checked=this.metrics.has(key);input.title=available?'':'Няма достатъчно измервания за този показател.';});
   const common=this.common(),workspace=this.q('[data-lab-workspace]'),width=host.clientWidth||(workspace.dataset.effectiveLayout==='columns'?this.root.clientWidth/2-36:this.root.clientWidth-32);
-  const chart=combinedChart({analysis:a,metrics:['pace','hr','cad'].filter(key=>this.metrics.has(key)),axis:this.timeAxis()?'time':'distance',domain:common.domain,width:Math.max(230,width),allValues:this.primaryAll,onCursor:common.onCursor,onRange:common.onRange,
+  const heightBudget=workspace.dataset.effectiveLayout==='columns'?Math.max(264,Math.min(322,innerHeight*.34)):undefined;
+  const chart=combinedChart({analysis:a,heightBudget,metrics:['pace','hr','cad'].filter(key=>this.metrics.has(key)),axis:this.timeAxis()?'time':'distance',domain:common.domain,width:Math.max(230,width),allValues:this.primaryAll,onCursor:common.onCursor,onRange:common.onRange,
    markers:a.manualFinish?.available?[{x:this.timeAxis()?(a.manualFinish.time-a.stats.start)/60000:a.manualFinish.distanceM/1000,label:'Ръчен финал',finish:true}]:[]});
   host.replaceChildren(chart.card);this.primaryChart=chart;this.syncCharts();const button=this.q('[data-combined-scale]');button.setAttribute('aria-pressed',String(this.primaryAll));button.textContent=this.primaryAll?'Автоматична скала':'Всички стойности';
  }

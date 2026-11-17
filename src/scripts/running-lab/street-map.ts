@@ -2,11 +2,12 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {el} from './dom';
 import {closestSample,routeLines,validMapPoint} from '../../lib/running-lab/map-data.mjs';
+import {followPanOffset,FOLLOW_INTERVAL_MS} from '../../lib/running-lab/map-follow.mjs';
 
 export const OSM_TILE_URL='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 interface Hooks {
  onPick:(position:{lat:number;lon:number},radiusM:number,pixels:(point:any)=>number,pixelLimit:number)=>void;
- onPoint:(point:any)=>void;onUnavailable:(message:string)=>void;onStatus:(message:string)=>void;
+ onPoint:(point:any)=>void;onUnavailable:(message:string)=>void;onStatus:(message:string)=>void;onFollowOff:()=>void;
 }
 export function createStreetMap(container:HTMLElement,initial:any,initialColouring:any,hooks:Hooks){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -17,6 +18,27 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
  const route=L.layerGroup().addTo(map),selected=L.layerGroup().addTo(map),markers=L.layerGroup().addTo(map);
  let analysis=initial,colouring=initialColouring,range:[number,number]|null=null,cursorPoint:any=null,disposed=false,clickTimer:ReturnType<typeof setTimeout>|undefined,timeout:ReturnType<typeof setTimeout>|undefined;
  let loaded=0,failed=0;
+ let following=false,zooming=false,followFrame=0,followTimer:ReturnType<typeof setTimeout>|undefined,lastFollowAt=-Infinity;
+ function cancelFollow(){cancelAnimationFrame(followFrame);followFrame=0;clearTimeout(followTimer);followTimer=undefined;}
+ function queueFollow(){
+  if(!following||disposed||zooming||followFrame||!validMapPoint(cursorPoint))return;
+  followFrame=requestAnimationFrame(()=>{
+   followFrame=0;if(!following||disposed||zooming||!validMapPoint(cursorPoint))return;
+   const position=map.latLngToContainerPoint([cursorPoint.lat,cursorPoint.lon]),size=map.getSize(),offset=followPanOffset(position,{width:size.x,height:size.y});
+   if(!offset)return;
+   const remaining=FOLLOW_INTERVAL_MS-(performance.now()-lastFollowAt);
+   if(remaining>0){if(followTimer===undefined)followTimer=setTimeout(()=>{followTimer=undefined;queueFollow();},remaining);return;}
+   clearTimeout(followTimer);followTimer=undefined;lastFollowAt=performance.now();
+   // Leaflet redraws the viewport on this occasional pan. Route layers remain
+   // intact; regular cursor movement still updates only the DOM marker.
+   map.panBy([offset.x,offset.y],{animate:false});
+  });
+ }
+ function follow(enabled:boolean){following=enabled;container.dataset.follow=String(enabled);cancelFollow();if(enabled){lastFollowAt=-Infinity;queueFollow();}}
+ function manualPan(){if(following){follow(false);hooks.onFollowOff();}}
+ const manualKey=(event:KeyboardEvent)=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))manualPan();};
+ map.on('dragstart',manualPan);container.addEventListener('keydown',manualKey);
+ map.on('zoomstart',()=>{zooming=true;cancelFollow();});
  // Leaflet still uses its map after firing GridLayer's load event. Leave that
  // event stack before removing the map, including when every tile is blocked.
  const unavailable=(message:string)=>queueMicrotask(()=>{if(!disposed)hooks.onUnavailable(message);});
@@ -71,27 +93,29 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
  function update(point:any){
   cursorPoint=point;if(!validMapPoint(point)){if(map.hasLayer(cursor))map.removeLayer(cursor);return;}
   cursor.setLatLng(latlng(point));if(!map.hasLayer(cursor))cursor.addTo(map);
-  container.dataset.cursorDistance=String(point.d);container.dataset.cursorTime=String(point.t??'');
+  container.dataset.cursorDistance=String(point.d);container.dataset.cursorTime=String(point.t??'');queueFollow();
  }
  function wheel(enabled:boolean){if(enabled)map.scrollWheelZoom.enable();else map.scrollWheelZoom.disable();container.dataset.wheel=String(enabled);}
  // Leaflet listens for wheel events on this container only. Keeping the user's
  // choice on pointerleave/focus changes cannot hijack scrolling outside it.
  map.on('click',(event:L.LeafletMouseEvent)=>{
   clearTimeout(clickTimer);clickTimer=setTimeout(()=>{
-   if(disposed)return;const position={lat:event.latlng.lat,lon:event.latlng.lng},point=event.containerPoint,pixelLimit=event.originalEvent instanceof PointerEvent&&event.originalEvent.pointerType==='touch'?26:18;
+   // Following may pan during click debouncing. Reproject the clicked location
+   // in the current viewport so visit picking still uses that same location.
+   if(disposed)return;const position={lat:event.latlng.lat,lon:event.latlng.lng},point=map.latLngToContainerPoint(event.latlng),pixelLimit=event.originalEvent instanceof PointerEvent&&event.originalEvent.pointerType==='touch'?26:18;
    const edge=map.containerPointToLatLng(point.add([pixelLimit,0])),radius=Math.min(150,map.distance(event.latlng,edge));
    hooks.onPick(position,radius,p=>map.latLngToContainerPoint(latlng(p)).distanceTo(point),pixelLimit);
   },250);
  });
  map.on('dblclick',()=>clearTimeout(clickTimer));
- map.on('zoomend',()=>{container.dataset.zoom=String(map.getZoom());drawMarkers();});
+ map.on('zoomend',()=>{container.dataset.zoom=String(map.getZoom());drawMarkers();zooming=false;queueFollow();});
  map.on('moveend',()=>{const center=map.getCenter();container.dataset.mapCenter=`${center.lat},${center.lng}`;});
- fullRoute();draw();tiles.addTo(map);armTimeout();container.dataset.zoom=String(map.getZoom());container.dataset.wheel='false';
+ fullRoute();draw();tiles.addTo(map);armTimeout();container.dataset.zoom=String(map.getZoom());container.dataset.wheel='false';container.dataset.follow='false';
  return {
   update,setRange(value:[number,number]|null){range=value;drawRange();},
   setAnalysis(value:any,style:any){analysis=value;colouring=style;draw();if(cursorPoint)update(cursorPoint);},
-  fullRoute,resize(){if(container.clientWidth&&container.clientHeight)map.invalidateSize({pan:true,animate:false,debounceMoveend:true});},wheel,
+  fullRoute,resize(){if(container.clientWidth&&container.clientHeight){map.invalidateSize({pan:true,animate:false,debounceMoveend:true});queueFollow();}},wheel,follow,
   showPoint(){if(validMapPoint(cursorPoint))map.panTo(latlng(cursorPoint),{animate:!reduced});},
-  destroy(){disposed=true;clearTimeout(timeout);clearTimeout(clickTimer);map.remove();container.replaceChildren();container.className='lab-street-map';for(const key of ['streetMap','mapReady','zoom','mapCenter','cursorTime','cursorDistance','wheel'])delete container.dataset[key];},
+  destroy(){disposed=true;cancelFollow();clearTimeout(timeout);clearTimeout(clickTimer);container.removeEventListener('keydown',manualKey);map.remove();container.replaceChildren();container.className='lab-street-map';for(const key of ['streetMap','mapReady','zoom','mapCenter','cursorTime','cursorDistance','wheel','follow'])delete container.dataset[key];},
  };
 }

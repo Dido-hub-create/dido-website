@@ -3,24 +3,25 @@ import {routeMap} from './route-map';
 import {PointPanel} from './point-panel';
 import {measuredPointIndex,passageCandidates,routeColouring,streetMapPossible,validMapPoint,unpackMapPoints} from '../../lib/running-lab/map-data.mjs';
 type StreetController=ReturnType<typeof import('./street-map').createStreetMap>;
-interface Hooks {onPoint:(point:any)=>void;onFinish:()=>void;onClearFinish:()=>void;loadPoints:()=>Promise<Float64Array>}
+interface Hooks {onPoint:(point:any)=>void;loadPoints:()=>Promise<Float64Array>}
 
 export class WorkoutMap {
  private analysis:any=null;private index:any=null;private colouring:any=null;private current:any=null;private range:[number,number]|null=null;
  private measurements:any[]|null=null;private pointsPromise:Promise<void>|null=null;
- private consentGranted=false;private wheelWanted=false;private zone='Europe/Sofia';
+ private consentGranted=false;private wheelWanted=false;private followWanted=false;private followPaused=false;private zone='Europe/Sofia';
  private local=routeMap([]);private street:StreetController|null=null;private request=0;private candidates:any[]=[];private page=0;private chosen='';
  private controls=el('div',undefined,'lab-map-controls');private localButton=el('button','Локална GPS схема');private streetButton=el('button','Истинска карта');
  private consent=el('div',undefined,'lab-map-consent');private accept=el('button','Разрешавам OpenStreetMap');
  private localHost=el('div',undefined,'lab-local-route');private streetHost=el('div',undefined,'lab-street-map');
  private status=el('p',undefined,'lab-muted');private options=el('div',undefined,'lab-map-controls lab-street-options');
  private full=el('button','Цял маршрут');private wheelButton=el('button','Включи колелцето');private showPoint=el('button','Към точката');
+ private followButton=el('button','Следвай точката');
  private colourSelect=el('select');private legend=el('div',undefined,'lab-route-colour-legend');
- private choices=el('div',undefined,'lab-map-passages');private pointInfo:PointPanel;private finishButton=el('button','Ръчен финал от тази точка');
- private clearFinishButton=el('button','Премахни ръчния финал');
+ private choices=el('div',undefined,'lab-map-passages');private pointInfo:PointPanel;private finishButton:HTMLButtonElement;
+ private clearFinishButton:HTMLButtonElement;
  private forget=el('button','Отмени разрешението за фон');
- constructor(private host:HTMLElement,private hooks:Hooks,pointHost:HTMLElement){
-  this.pointInfo=new PointPanel();
+ constructor(private host:HTMLElement,private hooks:Hooks,pointHost:HTMLElement,finishHost:HTMLElement){
+  this.pointInfo=new PointPanel();this.finishButton=finishHost.querySelector<HTMLButtonElement>('[data-map-finish]')!;this.clearFinishButton=finishHost.querySelector<HTMLButtonElement>('[data-map-clear-finish]')!;
   this.localButton.dataset.mapMode='local';this.streetButton.dataset.mapMode='street';this.accept.dataset.mapAccept='';this.consent.dataset.mapConsent='';
   this.controls.setAttribute('role','group');this.controls.setAttribute('aria-label','Режим на GPS картата');this.controls.append(this.localButton,this.streetButton);
   const consentText=el('p','OpenStreetMap ще получава заявки за видимата географска област и IP адреса на браузъра. Файловете, точките, сензорите и библиотеката остават тук. Разрешението важи за тази тренировка до отмяна, смяна на записа или презареждане.');
@@ -28,29 +29,28 @@ export class WorkoutMap {
   this.consent.append(consentText,policy,this.accept);this.consent.hidden=true;this.streetHost.hidden=true;
   this.status.dataset.mapStatus='';this.status.setAttribute('role','status');this.status.setAttribute('aria-live','polite');
   this.full.dataset.mapFit='';this.wheelButton.dataset.mapWheel='';this.showPoint.dataset.mapShowPoint='';
-  this.options.append(this.full,this.wheelButton,this.showPoint);this.options.hidden=true;
+  this.followButton.dataset.mapFollow='';this.followButton.title='Премества картата само край ръба, без промяна на мащаба. Ръчното местене изключва следването.';
+  this.options.append(this.full,this.wheelButton,this.followButton,this.showPoint);this.options.hidden=true;
   const colourLabel=el('label','Оцветяване на маршрута','lab-map-colour-control');this.colourSelect.dataset.mapColour='';
   for(const [value,label]of [['single','Единен цвят'],['pace','Темпо'],['grade','Наклон'],['hr','Отчетен пулс']])this.colourSelect.append(new Option(label,value));colourLabel.append(this.colourSelect);
   this.choices.dataset.mapPassages='';this.choices.hidden=true;this.choices.setAttribute('role','group');this.choices.setAttribute('aria-label','Избор на преминаване или измерена GPS точка');
   this.finishButton.dataset.mapFinish='';
   this.clearFinishButton.dataset.mapClearFinish='';this.clearFinishButton.disabled=true;
-  const help=el('p','Плъзгане за местене, два пръста за приближаване. Изборът за колелцето се запазва в тази тренировка; извън картата колелцето превърта страницата. Щракни близо до трасето; при застъпване избери преминаване. Схемата не прави външни заявки.','lab-muted');
+  const help=el('p','Плъзгане за местене, два пръста за приближаване. Колелцето запазва избора ти; извън картата превърта страницата. „Следвай точката“ мести истинската карта само близо до ръба, без автоматичен zoom. Ръчно плъзгане или стрелки изключват следването; включи го от бутона при желание. Локалната схема показва цялото трасе без външни заявки. При застъпване избери преминаване.','lab-muted');
   const markerLegend=el('p','С · начало (зелено кръгче). Ф · край на оригинала (оранжев квадрат). Р · ръчен финал (жълт ромб). Оранжева следа · избран диапазон.','lab-muted');markerLegend.classList.add('lab-marker-legend');
   const licence=el('a','Leaflet · BSD-2-Clause');licence.href='/licenses/leaflet.txt';help.append(document.createTextNode(' '),licence);
-  const finishActions=el('div',undefined,'lab-map-controls');finishActions.append(this.finishButton,this.clearFinishButton);
   const viewport=el('div',undefined,'lab-map-viewport');viewport.append(this.localHost,this.streetHost,this.consent,this.choices);
   const tools=el('details',undefined,'lab-map-tools');tools.append(el('summary','Карта, цветове и поверителност'),colourLabel,this.legend,markerLegend,help,this.forget);
   this.forget.dataset.mapForget='';this.forget.disabled=true;
-  help.classList.add('lab-map-help');this.host.replaceChildren(this.controls,this.status,this.options,viewport,tools);pointHost.replaceChildren(this.pointInfo.node,finishActions);
-  this.host.querySelectorAll('button').forEach(button=>button.type='button');finishActions.querySelectorAll('button').forEach(button=>button.type='button');this.setModes(false);this.setWheel(false);this.finishButton.disabled=true;
+  help.classList.add('lab-map-help');this.host.replaceChildren(this.controls,this.status,this.options,viewport,tools);pointHost.replaceChildren(this.pointInfo.node);
+  this.host.querySelectorAll('button').forEach(button=>button.type='button');this.setModes(false);this.setWheel(false);this.setFollow(false);this.finishButton.disabled=true;
   this.localButton.addEventListener('click',()=>this.disableStreet('Локална GPS схема · без външни картографски заявки.'));
   this.streetButton.addEventListener('click',()=>{if(!this.street){this.choices.hidden=true;if(this.consentGranted){void this.enableStreet();return;}this.consent.hidden=!this.consent.hidden;this.streetButton.setAttribute('aria-expanded',String(!this.consent.hidden));if(!this.consent.hidden)this.accept.focus({preventScroll:true});}});
   this.accept.addEventListener('click',()=>{this.consentGranted=true;this.forget.disabled=false;this.host.dataset.mapPermission='true';void this.enableStreet();});
   this.forget.addEventListener('click',()=>{this.consentGranted=false;this.forget.disabled=true;this.host.dataset.mapPermission='false';this.disableStreet('Разрешението за външен фон е отменено. Схемата остава достъпна.');});
   this.full.addEventListener('click',()=>this.street?.fullRoute());this.showPoint.addEventListener('click',()=>this.street?.showPoint());
   this.wheelButton.addEventListener('click',()=>{const enabled=this.wheelButton.getAttribute('aria-pressed')!=='true';this.street?.wheel(enabled);this.setWheel(enabled);});
-  this.finishButton.addEventListener('click',()=>hooks.onFinish());
-  this.clearFinishButton.addEventListener('click',()=>hooks.onClearFinish());
+  this.followButton.addEventListener('click',()=>{this.setFollow(!this.followWanted);this.status.textContent=this.followWanted?'Следването е включено. Картата се мести край ръба; мащабът се запазва.':'Следването е изключено. GPS маркерът продължава да се обновява.';});
   this.choices.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();this.choices.hidden=true;if(this.street)this.streetHost.focus();else this.localButton.focus();}});
   this.colourSelect.addEventListener('change',()=>{if(!this.analysis)return;this.colouring=routeColouring(this.analysis,this.colourSelect.value);this.renderLegend();this.renderLocal();this.street?.setAnalysis(this.mapAnalysis(),this.colouring);});
   window.addEventListener('offline',this.offline);
@@ -58,6 +58,7 @@ export class WorkoutMap {
  private offline=()=>{if(this.street)this.disableStreet('Няма интернет. Върнахме локалната GPS схема; всички локални анализи остават достъпни.');};
  private setModes(street:boolean){this.localButton.setAttribute('aria-pressed',String(!street));this.streetButton.setAttribute('aria-pressed',String(street));this.options.hidden=!street;this.localHost.hidden=street;this.streetHost.hidden=!street;}
  private setWheel(enabled:boolean){this.wheelWanted=enabled;this.wheelButton.setAttribute('aria-pressed',String(enabled));this.wheelButton.textContent=enabled?'Колелце: включено':'Включи колелцето';}
+ private setFollow(enabled:boolean){this.followWanted=enabled;this.followPaused=false;this.followButton.setAttribute('aria-pressed',String(enabled));this.followButton.textContent=enabled?'Следване: включено':'Следвай точката';this.street?.follow(enabled);}
  private disableStreet(message:string){
   this.request++;this.street?.destroy();this.street=null;this.streetHost.replaceChildren();this.consent.hidden=true;this.streetButton.setAttribute('aria-expanded','false');this.accept.disabled=false;this.setModes(false);this.status.textContent=message;
  }
@@ -82,15 +83,16 @@ export class WorkoutMap {
    if(!this.streetHost.clientWidth){this.disableStreet('Картата остана изключена, защото прегледът е затворен. Можеш да я включиш отново.');return;}
    this.street=createStreetMap(this.streetHost,this.mapAnalysis(),this.colouring,{
     onPick:(position,radius,pixels,limit)=>this.pick(position,radius,pixels,limit),onPoint:point=>this.choose(point,'Избрана измерена точка от маркер'),
-    onUnavailable:message=>{if(token===this.request)this.disableStreet(message);},onStatus:message=>{if(token===this.request)this.status.textContent=message;},
+    onUnavailable:message=>{if(token===this.request)this.disableStreet(message);},onStatus:message=>{if(token===this.request)this.status.textContent=message+(this.followPaused?' Следването е спряно след ръчно местене.':'');},
+    onFollowOff:()=>{if(token===this.request){this.setFollow(false);this.followPaused=true;this.status.textContent='Следването е изключено след ръчно местене. Включи го от „Следвай точката“ при желание.';}},
    });
-   this.street.wheel(this.wheelWanted);this.street.setRange(this.range);if(this.current)this.street.update(this.current);this.accept.disabled=false;
+   this.street.wheel(this.wheelWanted);this.street.setRange(this.range);if(this.current)this.street.update(this.current);this.street.follow(this.followWanted);this.accept.disabled=false;
   }catch{if(token===this.request)this.disableStreet('Картата не се зареди. Локалната GPS схема остава достъпна. Опитай отново при налична връзка.');}
  }
  setAnalysis(analysis:any,zone='Europe/Sofia'){
   this.zone=zone;
   const changed=this.analysis!==analysis,newActivity=this.analysis?.id!==analysis?.id;
-  if(newActivity){this.consentGranted=false;this.forget.disabled=true;this.host.dataset.mapPermission='false';this.setWheel(false);this.disableStreet('Нова тренировка · фонът и колелцето са изключени до твой избор.');this.measurements=null;this.index=null;this.pointsPromise=null;this.current=null;this.range=null;this.candidates=[];this.chosen='';this.choices.hidden=true;}
+  if(newActivity){this.consentGranted=false;this.forget.disabled=true;this.host.dataset.mapPermission='false';this.setWheel(false);this.setFollow(false);this.disableStreet('Фонът, колелцето и следването са изключени за новата тренировка.');this.measurements=null;this.index=null;this.pointsPromise=null;this.current=null;this.range=null;this.candidates=[];this.chosen='';this.choices.hidden=true;}
   this.analysis=analysis;
   if(!analysis){this.index=null;this.localHost.replaceChildren();this.pointInfo.clear();this.finishButton.disabled=true;this.clearFinishButton.disabled=true;return;}
   if(changed){this.colouring=routeColouring(analysis,this.colourSelect.value);this.colourSelect.value=this.colouring.mode;
@@ -101,8 +103,8 @@ export class WorkoutMap {
  }
  private renderLocal(){
   if(!this.analysis)return;
-  const width=this.localHost.clientWidth||this.host.clientWidth||(innerWidth>=1180?560:innerWidth-64);
-  this.local=routeMap(this.analysis.samples,{width,range:this.range,finishTime:this.analysis.manualFinish?.available?this.analysis.manualFinish.time:null,colouring:this.colouring,onCursor:point=>this.choose(point,'Избрана измерена точка от километров маркер'),onPick:(position,radius,pixels,limit)=>this.pick(position,radius,pixels,limit)});
+  const width=this.localHost.clientWidth||this.host.clientWidth||(innerWidth>=1180?560:innerWidth-64),height=parseFloat(getComputedStyle(this.streetHost).height);
+  this.local=routeMap(this.analysis.samples,{width,height:Number.isFinite(height)?height:undefined,range:this.range,finishTime:this.analysis.manualFinish?.available?this.analysis.manualFinish.time:null,colouring:this.colouring,onCursor:point=>this.choose(point,'Избрана измерена точка от километров маркер'),onPick:(position,radius,pixels,limit)=>this.pick(position,radius,pixels,limit)});
   this.localHost.replaceChildren(this.local.node);if(this.current)this.local.update(this.current);
  }
  private renderLegend(){

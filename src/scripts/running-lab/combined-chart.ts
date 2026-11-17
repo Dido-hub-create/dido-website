@@ -4,7 +4,7 @@ import {chartValues} from './chart-data';
 import {visualScale,axisTicks} from '../../lib/running-lab/chart-scale.mjs';
 
 export interface CombinedOptions {
- analysis:any;metrics:string[];axis:'time'|'distance';domain:[number,number];width:number;allValues:boolean;
+ analysis:any;metrics:string[];axis:'time'|'distance';domain:[number,number];width:number;heightBudget?:number;allValues:boolean;
  onCursor:(x:number)=>void;onRange:(start:number,end:number)=>void;
  markers?:{x:number;label:string;finish?:boolean}[];
 }
@@ -13,7 +13,8 @@ export function combinedChart(options:CombinedOptions){
  const {analysis:a,domain:[minX,maxX]}=options,node=el('figure',undefined,'lab-chart-card lab-combined-chart'),id=chartId();node.dataset.combinedChart='';
  const font=fontScale(),width=Math.max(230,options.width),left=Math.max(56,font*49),right=16,bottom=35*font;
  const multiline=width<420||font>1.5;
- const laneHeight=Math.max((multiline?104:88)*font,options.metrics.length===1?168:options.metrics.length===2?104:88),top=8*font,height=top+laneHeight*options.metrics.length+bottom;
+ const top=8*font,preferred=Math.max((multiline?104:88)*font,options.metrics.length===1?168:options.metrics.length===2?104:88);
+ const laneHeight=options.heightBudget?Math.max((multiline?104:76)*font,Math.min(preferred,(options.heightBudget-top-bottom)/Math.max(1,options.metrics.length))):preferred,height=top+laneHeight*options.metrics.length+bottom;
  let updateCursor=(_x:number)=>{},updateSelection=(_range:[number,number]|null)=>{};
  if(!options.metrics.length||!(maxX>minX)){
   node.append(el('p','Включи наличен показател, за да разгледаш графиката.','lab-empty'));
