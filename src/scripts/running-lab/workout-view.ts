@@ -1,12 +1,13 @@
 import {el,num,km,pace,duration,date,parseDuration} from './dom';
 import {overviewStats,metricCards} from './views';
-import {lineChart,routeMap,chartValues,nearest,nearestTime} from './charts';
+import {lineChart,chartValues,nearest,nearestTime} from './charts';
 import type {ChartState} from './line-chart';
 import {AnalysisView} from './analysis-view';
+import {WorkoutMap} from './workout-map';
 import {validateDistance} from '../../lib/running-lab/history.mjs';
 import type {LabWorkout,LabSettings} from '../../lib/running-lab/types';
 interface Entry {model:LabWorkout;analysis:any;saved?:boolean;dirty?:boolean}
-interface Hooks {run:(job:()=>Promise<void>)=>Promise<void>;status:(message:string)=>void;isBusy:()=>boolean;changeSettings:(settings:Partial<LabSettings>)=>Promise<void>;range:(start:number,end:number)=>Promise<any>}
+interface Hooks {run:(job:()=>Promise<void>)=>Promise<void>;status:(message:string)=>void;isBusy:()=>boolean;changeSettings:(settings:Partial<LabSettings>)=>Promise<void>;range:(start:number,end:number)=>Promise<any>;loadMapPoints:()=>Promise<Float64Array>}
 interface DistanceRange {startM:number;endM:number}
 interface SeriesDefinition {key:string;title:string;unit:string;color:string;inverse?:boolean}
 
@@ -14,9 +15,11 @@ export class WorkoutView {
  private entry:Entry|null=null;private cursor:any=null;
  private zoomRange:DistanceRange|null=null;private selection:DistanceRange|null=null;
  private charts:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}[]=[];
- private map={update:(_point:any)=>{},setRange:(_range:[number,number]|null)=>{}};
+ private map:WorkoutMap;
  private states=new Map<string,ChartState>();private details:AnalysisView;
  constructor(private root:HTMLElement,private hooks:Hooks){
+  this.map=new WorkoutMap(this.q('[data-lab-map]'),{onPoint:point=>this.setPoint(point),onFinish:()=>void hooks.run(()=>this.markFinish()),onClearFinish:()=>void hooks.run(()=>this.clearFinish()),loadPoints:()=>hooks.loadMapPoints()});
+  window.addEventListener('beforeunload',()=>this.map.destroy());
   this.details=new AnalysisView(root,row=>this.selectSegment(row));
   this.q('[data-lab-axis]').addEventListener('change',()=>this.renderCharts());
   this.q('[data-lab-pair]').addEventListener('change',()=>this.renderCharts());
@@ -43,7 +46,7 @@ export class WorkoutView {
  render(entry:Entry|null,zone:string){
   if(entry?.model.id!==this.entry?.model.id)this.resetView();this.entry=entry;
   this.q('[data-lab-overview]').hidden=!entry;this.q('[data-lab-empty-overview]').hidden=!!entry;this.details.render(entry?.analysis||null,zone);
-  if(!entry){for(const key of ['stats','charts','paired-chart','map','quality','finish-report','range-result'])this.q(`[data-lab-${key}]`).replaceChildren();this.charts=[];return;}
+  if(!entry){for(const key of ['stats','charts','paired-chart','quality','finish-report','range-result'])this.q(`[data-lab-${key}]`).replaceChildren();this.map.setAnalysis(null);this.charts=[];return;}
   const a=entry.analysis;
   this.q('[data-lab-workout-name]').textContent=entry.model.name;
   this.q('[data-lab-source]').textContent=`${entry.model.source.format.toUpperCase()} · ${date(a.stats.start,zone)} · ${entry.saved?'записана тренировка':'временен анализ'}${entry.dirty?' · незаписани настройки':''} · GPS ${num(a.quality.geometryCoverage*100,0)}% · спорт: ${entry.model.reported.sport||'не е отчетен във файла'}`;
@@ -85,12 +88,13 @@ export class WorkoutView {
    const chart=lineChart({...options(d),...common,title:`${d.title} + ${secondary.title}`,primaryTitle:d.title,secondary:options(secondary),key:'pair-'+pair.value,state:this.state('pair-'+pair.value),zeroLine:first==='grade'});this.q('[data-lab-paired-chart]').append(chart.card);this.charts.push(chart);
   }
   for(const d of definitions){const chart=lineChart({...options(d),...common,key:d.key,state:this.state(d.key),zeroLine:d.key==='grade'});stack.append(chart.card);this.charts.push(chart);}
-  const map=routeMap(a.samples,{range:this.selection?[this.selection.startM,this.selection.endM]:null,finishTime:a.manualFinish?.available?a.manualFinish.time:null,onCursor:p=>this.setPoint(p)});this.q('[data-lab-map]').replaceChildren(map.node);this.map=map;
+  this.map.setAnalysis(a);
   this.setPoint(this.cursor||a.samples[0]);this.paintSelection();this.renderRangeLabel();
  }
  private setPoint(p:any){
   if(!this.entry||!p)return;this.cursor=p;const a=this.entry.analysis,elevation=a.elevation.available?nearest(a.elevation.samples,p.d):null,grade=a.gradient?.available?nearest(a.gradient.samples,p.d):null,cad=p.cad===null?null:p.cad*(a.cadenceDisplay?.factor||1);
-  this.q('[data-lab-cursor]').textContent=`${num(p.d/1000,3)} км · ${p.t!==null?duration((p.t-a.stats.start)/1000):'Няма време'} · темпо ${pace(p.pace)} · пулс ${num(p.hr)} уд./мин · височина ${num(elevation?.ele??p.z)} м · наклон ${num(grade?.grade!==null&&grade?.grade!==undefined?grade.grade*100:null,2)}% · каданс ${num(cad)} ${a.cadenceDisplay?.unit||'отчетени ед./мин'}`;
+  const analytic=p.pace===undefined?(a.quality.clockReliable?nearestTime(a.samples,p.t):nearest(a.samples,p.d)):p;
+  this.q('[data-lab-cursor]').textContent=`${num(p.d/1000,3)} км · ${p.t!==null?duration((p.t-a.stats.start)/1000):'Няма време'} · темпо ${pace(analytic?.pace)} · пулс ${num(p.hr)} уд./мин · височина ${num(elevation?.ele??p.z)} м · наклон ${num(grade?.grade!==null&&grade?.grade!==undefined?grade.grade*100:null,2)}% · каданс ${num(cad)} ${a.cadenceDisplay?.unit||'отчетени ед./мин'}`;
   const x=this.timeAxis()?(p.t-a.stats.start)/60000:p.d/1000;this.charts.forEach(chart=>chart.update(x));this.map.update(p);
  }
  private readRange():DistanceRange {const a=this.requireEntry().analysis,startM=Number(this.q<HTMLInputElement>('[data-lab-range-start]').value)*1000,endM=Number(this.q<HTMLInputElement>('[data-lab-range-end]').value)*1000;if(!(startM>=0&&endM>startM&&endM<=a.stats.distanceM+1))throw new Error('Избери валиден диапазон вътре в тренировката.');return {startM,endM:Math.min(endM,a.stats.distanceM)};}
