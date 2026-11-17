@@ -1,5 +1,7 @@
 # Running Lab — компактен анализ и „Следвай точката“
 
+Следващият етап — плаващи настройки над картата, още 50 px за картата и компактен мобилен GPS панел — има актуален [отчет с измервания и screenshots „преди/след“](RUNNING-LAB-CONTROLS.md). Следващите резултати са запазени за предходния етап.
+
 Продължение в същия клон `feat/dido-running-lab-workspace` и [PR #14](https://github.com/Dido-hub-create/dido-website/pull/14). [Cloudflare preview](https://feat-dido-running-lab-worksp.dido-website.pages.dev/byagane/running-lab/). Не се променят production, съдържанието, аналитичните алгоритми, CMS, Analytics, форматът на архивите или библиотеката. Няма нови зависимости.
 
 ## Какво е пренаредено

@@ -4,6 +4,7 @@ import {lineChart,chartValues,nearest,nearestTime} from './charts';
 import type {ChartState} from './line-chart';
 import {AnalysisView} from './analysis-view';
 import {WorkoutMap} from './workout-map';
+import {ControlHelp} from './control-help';
 import {combinedChart} from './combined-chart';
 import {fontScale} from './svg';
 import {validateDistance} from '../../lib/running-lab/history.mjs';
@@ -21,11 +22,13 @@ export class WorkoutView {
  private detailedCharts:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}[]=[];
  private metrics=new Set(['pace']);private primaryAll=false;private zone='Europe/Sofia';
  private cursorFrame=0;private pendingPoint:any=null;
- private map:WorkoutMap;
+ private map:WorkoutMap;private help:ControlHelp;
  private states=new Map<string,ChartState>();private details:AnalysisView;
  constructor(private root:HTMLElement,private hooks:Hooks){
-  this.map=new WorkoutMap(this.q('[data-lab-map]'),{onPoint:point=>this.selectMapPoint(point),loadPoints:()=>hooks.loadMapPoints()},this.q('[data-lab-point-info]'),this.q('.lab-finish-details'));
-  window.addEventListener('beforeunload',()=>this.map.destroy());
+  this.help=new ControlHelp(root);this.map=new WorkoutMap(this.q('[data-lab-map]'),{onPoint:point=>this.selectMapPoint(point),loadPoints:()=>hooks.loadMapPoints()},this.q('[data-lab-point-info]'),this.q('.lab-finish-details'),this.help);
+  for(const [selector,key]of [['[data-combined-scale]','scale'],['[data-action="reset-zoom"]','reset']] as const)this.help.attach(this.q<HTMLButtonElement>(selector),key);
+  const chartHelp=this.q<HTMLButtonElement>('[data-lab-chart-help]');this.help.prepare(chartHelp);chartHelp.addEventListener('click',()=>this.help.open(chartHelp));
+  window.addEventListener('beforeunload',()=>{this.map.destroy();this.help.destroy();});
   this.details=new AnalysisView(root,row=>this.selectSegment(row));
   this.q('[data-lab-axis]').addEventListener('change',()=>this.renderCharts());
   this.q('[data-lab-pair]').addEventListener('change',()=>{this.renderDetailed();this.syncCurrent();});
@@ -57,7 +60,7 @@ export class WorkoutView {
  }
  private q<T extends HTMLElement=HTMLElement>(selector:string){return this.root.querySelector<T>(selector)!;}
  private requireEntry(){if(!this.entry)throw new Error('Първо отвори тренировка.');return this.entry;}
- resetView(){this.zoomRange=null;this.selection=null;this.cursor=null;this.metrics=new Set(['pace']);this.primaryAll=false;cancelAnimationFrame(this.cursorFrame);this.cursorFrame=0;this.pendingPoint=null;this.q<HTMLInputElement>('[data-lab-range-start]').value='0';this.q<HTMLInputElement>('[data-lab-range-end]').value='';}
+ resetView(){this.help.close();this.zoomRange=null;this.selection=null;this.cursor=null;this.metrics=new Set(['pace']);this.primaryAll=false;cancelAnimationFrame(this.cursorFrame);this.cursorFrame=0;this.pendingPoint=null;this.q<HTMLInputElement>('[data-lab-range-start]').value='0';this.q<HTMLInputElement>('[data-lab-range-end]').value='';}
  render(entry:Entry|null,zone:string){
   if(entry?.model.id!==this.entry?.model.id)this.resetView();this.entry=entry;this.zone=zone;
   this.q('[data-lab-overview]').hidden=!entry;this.q('[data-lab-empty-overview]').hidden=!!entry;this.details.render(entry?.analysis||null,zone);
