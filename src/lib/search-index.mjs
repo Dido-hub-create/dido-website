@@ -36,6 +36,7 @@ export async function buildSearchIndex({ posts=[], root=process.cwd() }={}) {
   add('/byagane/sastezaniya/','Състезания и архив','Бягане','Календар, предстоящи стартове, резултати и класирания от състезания.');
   add('/byagane/marshruti/','Моите маршрути','Бягане','Публични GPX маршрути, карти и височинни профили.');
   add('/byagane/analiz/','GPX анализатор и калкулатор за темпо','Инструмент','Сравнение на две или три трасета по километри. Височини, изкачвания, спускания и калкулатор за темпо.');
+  add('/byagane/running-lab/','DIDO Running Lab','Инструмент','Лаборатория за анализ на бягането. Локален GPX, TCX и FIT анализ, лична библиотека, сравнение на тренировки и GPS рекорди без качване на файлове.');
   for(const category of categories) {
     const records=category.slug==='byagane' ? [
       `Лични рекорди: 1 км ${site.records.oneKm}, 5 км ${site.records.fiveKm}, 10 км ${site.records.tenKm}, полумаратон ${site.records.halfMarathon}.`
