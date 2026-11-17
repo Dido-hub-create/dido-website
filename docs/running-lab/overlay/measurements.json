@@ -1,0 +1,283 @@
+{
+  "viewports": [
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "workspace": {
+        "x": 270,
+        "y": 28.421875,
+        "width": 1380,
+        "height": 739.53125,
+        "top": 28.421875,
+        "right": 1650,
+        "bottom": 767.953125,
+        "left": 270
+      },
+      "gps": {
+        "x": 949.15625,
+        "y": 28.421875,
+        "width": 700.828125,
+        "height": 98.65625,
+        "top": 28.421875,
+        "right": 1649.984375,
+        "bottom": 127.078125,
+        "left": 949.15625
+      },
+      "chart": {
+        "x": 962.15625,
+        "y": 148.078125,
+        "width": 674.828125,
+        "height": 352,
+        "top": 148.078125,
+        "right": 1636.984375,
+        "bottom": 500.078125,
+        "left": 962.15625
+      },
+      "plotHeight": 275,
+      "mode": "overlay",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "workspace": {
+        "x": 32,
+        "y": 27.5,
+        "width": 1376,
+        "height": 739.53125,
+        "top": 27.5,
+        "right": 1408,
+        "bottom": 767.03125,
+        "left": 32
+      },
+      "gps": {
+        "x": 709.21875,
+        "y": 27.5,
+        "width": 698.78125,
+        "height": 98.65625,
+        "top": 27.5,
+        "right": 1408,
+        "bottom": 126.15625,
+        "left": 709.21875
+      },
+      "chart": {
+        "x": 722.21875,
+        "y": 147.15625,
+        "width": 672.78125,
+        "height": 336,
+        "top": 147.15625,
+        "right": 1395,
+        "bottom": 483.15625,
+        "left": 722.21875
+      },
+      "plotHeight": 259,
+      "mode": "overlay",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "workspace": {
+        "x": 32,
+        "y": 27.953125,
+        "width": 1302,
+        "height": 712.53125,
+        "top": 27.953125,
+        "right": 1334,
+        "bottom": 740.484375,
+        "left": 32
+      },
+      "gps": {
+        "x": 673.296875,
+        "y": 27.953125,
+        "width": 660.6875,
+        "height": 98.65625,
+        "top": 27.953125,
+        "right": 1333.984375,
+        "bottom": 126.609375,
+        "left": 673.296875
+      },
+      "chart": {
+        "x": 686.296875,
+        "y": 147.609375,
+        "width": 634.6875,
+        "height": 294,
+        "top": 147.609375,
+        "right": 1320.984375,
+        "bottom": 441.609375,
+        "left": 686.296875
+      },
+      "plotHeight": 217,
+      "mode": "overlay",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "workspace": {
+        "x": 18,
+        "y": 28.140625,
+        "width": 324,
+        "height": 1645.890625,
+        "top": 28.140625,
+        "right": 342,
+        "bottom": 1674.03125,
+        "left": 18
+      },
+      "gps": {
+        "x": 18,
+        "y": 641.203125,
+        "width": 324,
+        "height": 176.046875,
+        "top": 641.203125,
+        "right": 342,
+        "bottom": 817.25,
+        "left": 18
+      },
+      "chart": {
+        "x": 29,
+        "y": 840.25,
+        "width": 302,
+        "height": 459,
+        "top": 840.25,
+        "right": 331,
+        "bottom": 1299.25,
+        "left": 29
+      },
+      "plotHeight": 61,
+      "mode": "lanes",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "workspace": {
+        "x": 18,
+        "y": 27.921875,
+        "width": 354,
+        "height": 1651.234375,
+        "top": 27.921875,
+        "right": 372,
+        "bottom": 1679.15625,
+        "left": 18
+      },
+      "gps": {
+        "x": 18,
+        "y": 659.453125,
+        "width": 354,
+        "height": 176.046875,
+        "top": 659.453125,
+        "right": 372,
+        "bottom": 835.5,
+        "left": 18
+      },
+      "chart": {
+        "x": 29,
+        "y": 858.5,
+        "width": 332,
+        "height": 459,
+        "top": 858.5,
+        "right": 361,
+        "bottom": 1317.5,
+        "left": 29
+      },
+      "plotHeight": 61,
+      "mode": "lanes",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "workspace": {
+        "x": 18,
+        "y": 28.21875,
+        "width": 394,
+        "height": 1591.75,
+        "top": 28.21875,
+        "right": 412,
+        "bottom": 1619.96875,
+        "left": 18
+      },
+      "gps": {
+        "x": 18,
+        "y": 616.28125,
+        "width": 394,
+        "height": 176.046875,
+        "top": 616.28125,
+        "right": 412,
+        "bottom": 792.328125,
+        "left": 18
+      },
+      "chart": {
+        "x": 29,
+        "y": 815.328125,
+        "width": 372,
+        "height": 459,
+        "top": 815.328125,
+        "right": 401,
+        "bottom": 1274.328125,
+        "left": 29
+      },
+      "plotHeight": 61,
+      "mode": "lanes",
+      "overflow": false
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "workspace": {
+        "x": 32,
+        "y": 28.328125,
+        "width": 780,
+        "height": 1232.046875,
+        "top": 28.328125,
+        "right": 812,
+        "bottom": 1260.375,
+        "left": 32
+      },
+      "gps": {
+        "x": 32,
+        "y": 457.859375,
+        "width": 780,
+        "height": 172.140625,
+        "top": 457.859375,
+        "right": 812,
+        "bottom": 630,
+        "left": 32
+      },
+      "chart": {
+        "x": 47,
+        "y": 657,
+        "width": 750,
+        "height": 395,
+        "top": 657,
+        "right": 797,
+        "bottom": 1052,
+        "left": 47
+      },
+      "plotHeight": 58,
+      "mode": "lanes",
+      "overflow": false
+    }
+  ],
+  "fitZoom": "14",
+  "lowZoom": 11,
+  "lowSize": 14.1,
+  "lowLabels": 6,
+  "highZoom": "17",
+  "highSize": "20"
+}

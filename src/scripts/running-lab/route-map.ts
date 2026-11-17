@@ -1,6 +1,7 @@
 import {el} from './dom';
 import {svgNode,svgLabel,localPointer} from './svg';
 import {nearest,nearestTime} from './chart-data';
+import {spacedKilometres} from '../../lib/running-lab/kilometre-markers.mjs';
 import {routeLines} from '../../lib/running-lab/map-data.mjs';
 interface MapOptions {width?:number;height?:number;range?:[number,number]|null;finishTime?:number|null;onCursor?:(point:any)=>void;colouring?:any;onPick?:(position:{lat:number;lon:number},radiusM:number,pixels:(point:any)=>number,pixelLimit:number)=>void}
 export function routeMap(samples:any[],options:MapOptions={}){
@@ -16,12 +17,13 @@ export function routeMap(samples:any[],options:MapOptions={}){
  if(options.colouring)for(const line of routeLines(samples,options.colouring)){const data=line.points.map((p:any,i:number)=>{const q=xy(p);return `${i?'L':'M'}${q.x.toFixed(2)} ${q.y.toFixed(2)}`;}).join('');svg.append(svgNode('path',{d:data,stroke:line.style.color,'stroke-width':3.2,fill:'none','data-route-colour':line.style.key,...(line.style.dashed?{'stroke-dasharray':'6 4'}:{})}));}
  else svg.append(svgNode('path',{d:path(),stroke:'#64b8df','stroke-width':2.8,fill:'none'}));
  const selected=svgNode('path',{d:'',stroke:'#ffb35c','stroke-width':5,fill:'none','data-route-selection':''});svg.append(selected);
- const occupied=new Set<string>(),count=Math.floor(samples.at(-1).d/1000),stride=Math.max(1,Math.ceil(count/18));
- for(let km=1;km<=count;km+=stride){const p=nearest(samples,km*1000);if(!p||p.lat===null||p.lon===null)continue;const q=xy(p),group=svgNode('g',{role:'button',tabindex:0,'aria-label':`Покажи километър ${km}`,'data-route-km':km});
-  group.append(svgNode('circle',{cx:q.x,cy:q.y,r:13,fill:'transparent',stroke:'none'}),svgNode('circle',{cx:q.x,cy:q.y,r:4,fill:'#132940',stroke:'#c2e5f8','stroke-width':1.5}));
-  const cell=`${Math.round(q.x/30)}:${Math.round(q.y/25)}`;if(!occupied.has(cell)){occupied.add(cell);svgLabel(group,q.x+7,q.y-7,String(km));}
+ const candidates=[];
+ for(let km=1,count=Math.floor(samples.at(-1).d/1000);km<=count;km++){const point=nearest(samples,km*1000);if(point&&point.lat!==null&&point.lon!==null)candidates.push({km,...xy(point),point});}
+ for(const {km,point:p,x:qx,y:qy}of spacedKilometres(candidates,11)){const q={x:qx,y:qy},group=svgNode('g',{role:'button',tabindex:0,'aria-label':`Покажи километър ${km}`,'data-route-km':km});
+  group.append(svgNode('circle',{cx:q.x,cy:q.y,r:14,fill:'transparent',stroke:'none'}),svgNode('circle',{cx:q.x,cy:q.y,r:7,fill:'#f5faf9',stroke:'#49617a','stroke-width':.8,'fill-opacity':.94}));
+  const label=svgLabel(group,q.x,q.y+3,String(km),'middle');label.style.fill='#173044';label.style.fontSize='9px';label.style.fontWeight='750';
   const title=svgNode('title');title.textContent=`Километър ${km}; приблизителна позиция от графичната серия`;group.append(title);
-  group.addEventListener('click',event=>{event.stopPropagation();options.onCursor?.(p);});group.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();options.onCursor?.(p);}});svg.append(group);
+  group.addEventListener('click',event=>{if(options.onPick)return;event.stopPropagation();options.onCursor?.(p);});group.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();options.onCursor?.(p);}});svg.append(group);
  }
  const start=xy(points[0]),end=xy(points.at(-1));
  svg.append(svgNode('circle',{cx:start.x,cy:start.y,r:9,fill:'#132b27',stroke:'#63e4ad','stroke-width':3,'data-route-start':''}),svgNode('rect',{x:end.x-5,y:end.y-5,width:10,height:10,fill:'#ffad63',stroke:'#132940','stroke-width':1.5,'data-route-end':''}));

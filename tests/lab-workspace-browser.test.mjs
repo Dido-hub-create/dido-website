@@ -33,7 +33,7 @@ test('Lab workspace: 5/10/21 km, both layouts, all viewport widths, separate uni
  try{
   for(const distance of [5000,10000,21000]){
    await upload(page,{laps:1,lapDistance:distance});assert.equal(await page.locator('[data-lab-detail-graphs]').getAttribute('open'),null);assert.equal(await page.locator('[data-lab-charts] svg').count(),0);
-   assert.equal(await page.locator('[data-combined-lane="pace"]').count(),1);assert.equal(await page.locator('[data-combined-lane="hr"]').count(),0);
+   assert.equal(await page.locator('[data-combined-lane="pace"]').count(),1);assert.equal(await page.locator('[data-combined-lane="hr"]').count(),1);
    for(const metric of ['hr','cad'])await page.locator(`[data-combined-metric="${metric}"]`).check();
    const units=await page.locator('[data-combined-lane]').evaluateAll(nodes=>nodes.map(n=>[n.dataset.combinedLane,n.dataset.unit]));assert.deepEqual(units,[['pace','мин/км'],['hr','уд./мин'],['cad','стъпки/мин']]);
    const ranges=await page.locator('[data-combined-lane]').evaluateAll(nodes=>nodes.map(n=>[Number(n.dataset.yMin),Number(n.dataset.yMax)]));assert.ok(ranges.every(([min,max])=>max>min));assert.notDeepEqual(ranges[0],ranges[1]);

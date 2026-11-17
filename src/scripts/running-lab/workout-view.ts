@@ -7,6 +7,7 @@ import {WorkoutMap} from './workout-map';
 import {ControlHelp} from './control-help';
 import {combinedChart} from './combined-chart';
 import {fontScale} from './svg';
+import {reliefAvailable} from '../../lib/running-lab/relief-view.mjs';
 import {validateDistance} from '../../lib/running-lab/history.mjs';
 import type {LabWorkout,LabSettings} from '../../lib/running-lab/types';
 interface Entry {model:LabWorkout;analysis:any;saved?:boolean;dirty?:boolean}
@@ -18,9 +19,9 @@ export class WorkoutView {
  private entry:Entry|null=null;private cursor:any=null;
  private zoomRange:DistanceRange|null=null;private selection:DistanceRange|null=null;
  private charts:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}[]=[];
- private primaryChart:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}|null=null;
+ private primaryChart:{update:(x:number,point?:any)=>void;setSelection:(range:[number,number]|null)=>void}|null=null;
  private detailedCharts:{update:(x:number)=>void;setSelection:(range:[number,number]|null)=>void}[]=[];
- private metrics=new Set(['pace']);private primaryAll=false;private zone='Europe/Sofia';
+ private metrics=new Set(['pace','hr']);private primaryMode:'overlay'|'lanes'|null=null;private primaryAll=false;private zone='Europe/Sofia';
  private cursorFrame=0;private pendingPoint:any=null;
  private map:WorkoutMap;private help:ControlHelp;
  private states=new Map<string,ChartState>();private details:AnalysisView;
@@ -34,6 +35,7 @@ export class WorkoutView {
   this.q('[data-lab-pair]').addEventListener('change',()=>{this.renderDetailed();this.syncCurrent();});
   this.q('[data-lab-layout]').addEventListener('change',()=>this.redraw());
   this.root.querySelectorAll<HTMLInputElement>('[data-combined-metric]').forEach(input=>input.addEventListener('change',()=>{const key=input.dataset.combinedMetric!;if(input.checked)this.metrics.add(key);else this.metrics.delete(key);this.renderPrimary();this.syncCurrent();}));
+  this.q<HTMLSelectElement>('[data-combined-view]').addEventListener('change',()=>{this.primaryMode=this.q<HTMLSelectElement>('[data-combined-view]').value as 'overlay'|'lanes';this.renderPrimary();this.syncCurrent();});
   this.q('[data-combined-scale]').addEventListener('click',()=>{this.primaryAll=!this.primaryAll;this.renderPrimary();this.syncCurrent();});
   this.q<HTMLDetailsElement>('[data-lab-detail-graphs]').addEventListener('toggle',()=>{this.renderDetailed();this.syncCurrent();});
   if(typeof ResizeObserver!=='undefined'){
@@ -60,7 +62,7 @@ export class WorkoutView {
  }
  private q<T extends HTMLElement=HTMLElement>(selector:string){return this.root.querySelector<T>(selector)!;}
  private requireEntry(){if(!this.entry)throw new Error('Първо отвори тренировка.');return this.entry;}
- resetView(){this.help.close();this.zoomRange=null;this.selection=null;this.cursor=null;this.metrics=new Set(['pace']);this.primaryAll=false;cancelAnimationFrame(this.cursorFrame);this.cursorFrame=0;this.pendingPoint=null;this.q<HTMLInputElement>('[data-lab-range-start]').value='0';this.q<HTMLInputElement>('[data-lab-range-end]').value='';}
+ resetView(){this.help.close();this.zoomRange=null;this.selection=null;this.cursor=null;this.metrics=new Set(['pace','hr']);this.primaryMode=null;this.primaryAll=false;cancelAnimationFrame(this.cursorFrame);this.cursorFrame=0;this.pendingPoint=null;this.q<HTMLInputElement>('[data-lab-range-start]').value='0';this.q<HTMLInputElement>('[data-lab-range-end]').value='';}
  render(entry:Entry|null,zone:string){
   if(entry?.model.id!==this.entry?.model.id)this.resetView();this.entry=entry;this.zone=zone;
   this.q('[data-lab-overview]').hidden=!entry;this.q('[data-lab-empty-overview]').hidden=!!entry;this.details.render(entry?.analysis||null,zone);
@@ -106,10 +108,11 @@ export class WorkoutView {
  }
  private renderPrimary(){
   if(!this.entry)return;const a=this.entry.analysis,host=this.q('[data-lab-combined-chart]');
-  this.root.querySelectorAll<HTMLInputElement>('[data-combined-metric]').forEach(input=>{const key=input.dataset.combinedMetric!,available=(key!=='pace'||a.quality.clockReliable)&&a.samples.filter((p:any)=>Number.isFinite(p[key])).length>=2;input.disabled=!available;if(!available)this.metrics.delete(key);input.checked=this.metrics.has(key);input.title=available?'':'Няма достатъчно измервания за този показател.';});
+  this.root.querySelectorAll<HTMLInputElement>('[data-combined-metric]').forEach(input=>{const key=input.dataset.combinedMetric!,available=key==='elevation'?reliefAvailable(a):(key!=='pace'||a.quality.clockReliable)&&a.samples.filter((p:any)=>Number.isFinite(p[key])).length>=2;input.disabled=!available;if(!available)this.metrics.delete(key);input.checked=this.metrics.has(key);input.title=available?'':key==='elevation'?'Релефът е недостъпен: '+(a.elevation.reason||'Недостатъчни надеждни височини.'):'Няма достатъчно измервания за този показател.';});
   const common=this.common(),workspace=this.q('[data-lab-workspace]'),width=host.clientWidth||(workspace.dataset.effectiveLayout==='columns'?this.root.clientWidth/2-36:this.root.clientWidth-32);
-  const heightBudget=workspace.dataset.effectiveLayout==='columns'?Math.max(264,Math.min(322,innerHeight*.34)):undefined;
-  const chart=combinedChart({analysis:a,heightBudget,metrics:['pace','hr','cad'].filter(key=>this.metrics.has(key)),axis:this.timeAxis()?'time':'distance',domain:common.domain,width:Math.max(230,width),allValues:this.primaryAll,onCursor:common.onCursor,onRange:common.onRange,
+  const heightBudget=workspace.dataset.effectiveLayout==='columns'?Math.max(294,Math.min(352,innerHeight*.34+30)):undefined;
+  const mode=this.primaryMode||(innerWidth>=1180&&fontScale()<=1.5?'overlay':'lanes');this.q<HTMLSelectElement>('[data-combined-view]').value=mode;
+  const chart=combinedChart({analysis:a,mode,heightBudget,metrics:['pace','hr','cad','elevation'].filter(key=>this.metrics.has(key)),axis:this.timeAxis()?'time':'distance',domain:common.domain,width:Math.max(230,width),allValues:this.primaryAll,onCursor:common.onCursor,onRange:common.onRange,
    markers:a.manualFinish?.available?[{x:this.timeAxis()?(a.manualFinish.time-a.stats.start)/60000:a.manualFinish.distanceM/1000,label:'Ръчен финал',finish:true}]:[]});
   host.replaceChildren(chart.card);this.primaryChart=chart;this.syncCharts();const button=this.q('[data-combined-scale]');button.setAttribute('aria-pressed',String(this.primaryAll));button.textContent=this.primaryAll?'Автоматична скала':'Всички стойности';
  }
@@ -141,7 +144,7 @@ export class WorkoutView {
   this.setPoint(point);
  }
  private setPoint(p:any){
-  if(!this.entry||!p)return;this.cursor=p;const a=this.entry.analysis,x=this.timeAxis()?(p.t-a.stats.start)/60000:p.d/1000;this.charts.forEach(chart=>chart.update(x));this.map.update(p);
+  if(!this.entry||!p)return;this.cursor=p;const a=this.entry.analysis,x=this.timeAxis()?(p.t-a.stats.start)/60000:p.d/1000;this.primaryChart?.update(x,p);this.detailedCharts.forEach(chart=>chart.update(x));this.map.update(p);
  }
  private readRange():DistanceRange {const a=this.requireEntry().analysis,startM=Number(this.q<HTMLInputElement>('[data-lab-range-start]').value)*1000,endM=Number(this.q<HTMLInputElement>('[data-lab-range-end]').value)*1000;if(!(startM>=0&&endM>startM&&endM<=a.stats.distanceM+1))throw new Error('Избери валиден диапазон вътре в тренировката.');return {startM,endM:Math.min(endM,a.stats.distanceM)};}
  private writeRange(){if(this.selection){this.q<HTMLInputElement>('[data-lab-range-start]').value=(this.selection.startM/1000).toFixed(3);this.q<HTMLInputElement>('[data-lab-range-end]').value=(this.selection.endM/1000).toFixed(3);}}

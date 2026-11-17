@@ -55,9 +55,12 @@ test('cabinet online and standalone document: CRUD, reload, topics, confirmed JS
  await show.locator('.cabinet-action.online').hover();
  assert.equal(await show.locator('.online .boot').evaluate(el=>getComputedStyle(el).animationName),'none');
  await show.emulateMedia({reducedMotion:'no-preference'});
+ // The browser applies media/style changes asynchronously, especially under load.
  await show.locator('.cabinet-action.online').hover();
+ await show.waitForFunction(()=>getComputedStyle(document.querySelector('.online .boot')).animationName!=='none');
  assert.notEqual(await show.locator('.online .boot').evaluate(el=>getComputedStyle(el).animationName),'none');
  await show.locator('.cabinet-action.download').hover();
+ await show.waitForFunction(()=>getComputedStyle(document.querySelector('.download .arrow')).animationName!=='none');
  assert.notEqual(await show.locator('.download .arrow').evaluate(el=>getComputedStyle(el).animationName),'none');
  assert.ok(await show.locator('.cabinet-action').evaluateAll(links=>links.every(el=>el.getBoundingClientRect().height>=44)));
  const getting=show.waitForEvent('download');await show.locator('.cabinet-action.download').click();const downloaded=await getting;
