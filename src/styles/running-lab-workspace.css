@@ -8,6 +8,9 @@
 .lab-point-panel h4{font-size:.84rem;margin:0 0 6px;line-height:1.45;color:#ffcc98}
 .lab-point-panel dl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 12px;margin:0}.lab-point-panel dl>div{min-width:0}
 .lab-point-panel dt{font-size:.7rem;line-height:1.4;color:#b6c9df;overflow-wrap:anywhere}.lab-point-panel dd{margin:2px 0 0;font-size:.91rem;line-height:1.35;font-weight:750;font-variant-numeric:tabular-nums;color:#eef5ff;overflow-wrap:anywhere}
+@media(min-width:1180px){.lab-workspace[data-effective-layout=columns] .lab-point-panel{padding:8px 12px;border-left:1px solid #38516a}.lab-workspace[data-effective-layout=columns] .lab-point-panel h4{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}}
+.lab-metric-elevation{color:#b0cfba}.running-lab .lab-metric-switches .lab-combined-mode{margin-left:auto;min-width:0}.lab-combined-mode select{font-size:.76rem;min-height:36px;padding:6px;max-width:100%}.running-lab .lab-relief-readout{display:block;min-height:1.4em;color:#dbe8df;font-size:.73rem;line-height:1.4;overflow-wrap:anywhere;margin:4px 0;font-variant-numeric:tabular-nums}
+@media(pointer:coarse),(max-width:1179px){.lab-combined-mode select{min-height:44px}}
 .lab-point-host .lab-map-controls{margin:8px 0 0}.lab-point-host .lab-map-controls button{font-size:.75rem;padding:8px 10px;flex:1 1 160px}
 .lab-metric-switches{display:flex;flex-wrap:wrap;gap:0 16px;border:0;padding:0;margin:0;min-width:0}.lab-metric-switches legend{font-size:.72rem;color:#b7cce4;margin-bottom:0}
 .running-lab .lab-metric-switches label{flex-direction:row;align-items:center;gap:7px;min-height:44px;font-size:.8rem;line-height:1.3}.lab-metric-switches input{margin:0}.lab-metric-switches label:has(input:disabled){opacity:.6}

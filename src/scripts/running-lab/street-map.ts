@@ -2,6 +2,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {el} from './dom';
 import {closestSample,routeLines,validMapPoint} from '../../lib/running-lab/map-data.mjs';
+import {kilometreMarkerSize,spacedKilometres} from '../../lib/running-lab/kilometre-markers.mjs';
 import {followPanOffset,FOLLOW_INTERVAL_MS} from '../../lib/running-lab/map-follow.mjs';
 
 export const OSM_TILE_URL='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -15,7 +16,8 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
  container.setAttribute('role','region');container.setAttribute('aria-label','Интерактивна карта. Стрелки за местене, плюс и минус за приближаване.');container.dataset.streetMap='';
  L.control.zoom({zoomInTitle:'Приближи картата',zoomOutTitle:'Отдалечи картата',zoomInText:'+',zoomOutText:'−'}).addTo(map);
  map.attributionControl.setPrefix('<a href="https://leafletjs.com/">Leaflet</a>');
- const route=L.layerGroup().addTo(map),selected=L.layerGroup().addTo(map),markers=L.layerGroup().addTo(map);
+ const route=L.layerGroup().addTo(map),selected=L.layerGroup().addTo(map),markers=L.layerGroup().addTo(map),kilometres=L.layerGroup().addTo(map);
+ const kmLayers=new Map<number,{marker:L.Marker;content:HTMLElement}>();
  let analysis=initial,colouring=initialColouring,range:[number,number]|null=null,cursorPoint:any=null,disposed=false,clickTimer:ReturnType<typeof setTimeout>|undefined,timeout:ReturnType<typeof setTimeout>|undefined;
  let loaded=0,failed=0;
  let following=false,zooming=false,followFrame=0,followTimer:ReturnType<typeof setTimeout>|undefined,lastFollowAt=-Infinity;
@@ -66,15 +68,30 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
   const icon=L.divIcon({html:content,className:'lab-street-marker lab-street-marker-'+kind,iconSize:[27,27],iconAnchor:anchor});
   L.marker(latlng(point),{icon,title:label,alt:label,keyboard:true,zIndexOffset:kind==='finish'?300:100}).bindTooltip(el('span',label)).on('click',()=>hooks.onPoint(point)).addTo(markers);
  }
- function drawMarkers(){
-  markers.clearLayers();const points=analysis.points.filter(validMapPoint);if(!points.length)return;
-  const count=Math.floor((analysis.stats.distanceM||0)/1000),stride=Math.max(1,Math.ceil(count/16)),occupied=new Set<string>();
-  for(let km=1;km<=count;km+=stride){const p=closestSample(analysis.points,km*1000);if(!validMapPoint(p))continue;
-   const xy=map.latLngToContainerPoint(latlng(p)),cell=`${Math.round(xy.x/30)}:${Math.round(xy.y/28)}`;
-   if(occupied.has(cell))continue;occupied.add(cell);
-   const content=el('span',String(km)),label=`Километър ${km} · измерена точка`;
-   L.marker(latlng(p),{icon:L.divIcon({html:content,className:'lab-street-km',iconSize:[24,24],iconAnchor:[12,12]}),title:label,alt:label,keyboard:true}).bindTooltip(el('span',label)).on('click',()=>hooks.onPoint(p)).addTo(markers);
+ function pickPosition(position:L.LatLng,pixelLimit:number){
+  const pixel=map.latLngToContainerPoint(position),edge=map.containerPointToLatLng(pixel.add([pixelLimit,0]));
+  hooks.onPick({lat:position.lat,lon:position.lng},Math.min(150,map.distance(position,edge)),p=>map.latLngToContainerPoint(latlng(p)).distanceTo(pixel),pixelLimit);
+ }
+ function drawKilometres(){
+  const zoom=map.getZoom(),size=kilometreMarkerSize(zoom),candidates=[];
+  for(let km=1,count=Math.floor((analysis.stats.distanceM||0)/1000);km<=count;km++){
+   const point=closestSample(analysis.points,km*1000);if(!validMapPoint(point))continue;
+   const xy=map.latLngToLayerPoint(latlng(point));candidates.push({km,x:xy.x,y:xy.y,point});
   }
+  const visible=spacedKilometres(candidates,zoom),keys=new Set(visible.map((p:any)=>p.km));
+  for(const [km,row]of kmLayers)if(!keys.has(km)){kilometres.removeLayer(row.marker);kmLayers.delete(km);}
+  for(const {km,point}of visible){
+   let row=kmLayers.get(km);
+   if(!row){const content=el('span',String(km)),label=`Километър ${km} · измерена точка`;content.dataset.streetKm=String(km);
+    const marker=L.marker(latlng(point),{icon:L.divIcon({html:content,className:'lab-street-km',iconSize:[28,28],iconAnchor:[14,14]}),title:label,alt:label,keyboard:true}).bindTooltip(el('span',label)).on('click',(event:L.LeafletMouseEvent)=>{const original=event.originalEvent;pickPosition(original instanceof MouseEvent?map.mouseEventToLatLng(original):L.latLng(latlng(point)),matchMedia('(pointer:coarse)').matches?26:18);}).addTo(kilometres);row={marker,content};kmLayers.set(km,row);
+   }
+   row.content.style.setProperty('--km-size',size+'px');row.content.style.setProperty('--km-font',Math.max(9,Math.min(11,size*.56))+'px');
+  }
+  container.dataset.kmSize=String(size);container.dataset.kmCount=String(visible.length);
+ }
+ function drawMarkers(){
+  markers.clearLayers();kilometres.clearLayers();kmLayers.clear();const points=analysis.points.filter(validMapPoint);if(!points.length)return;
+  drawKilometres();
   marker(points[0],'Начало на оригиналния запис','start','С',[31,31]);
   marker(points.at(-1),'Край на оригиналния запис','end','Ф',[-4,31]);
   if(analysis.manualFinish?.available)marker(closestSample(analysis.points,analysis.manualFinish.time,'t'),'Ръчно посочен финал · отделен от края на оригинала','finish','Р',[13,-4]);
@@ -108,7 +125,7 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
   },250);
  });
  map.on('dblclick',()=>clearTimeout(clickTimer));
- map.on('zoomend',()=>{container.dataset.zoom=String(map.getZoom());drawMarkers();zooming=false;queueFollow();});
+ map.on('zoomend',()=>{container.dataset.zoom=String(map.getZoom());drawKilometres();zooming=false;queueFollow();});
  map.on('moveend',()=>{const center=map.getCenter();container.dataset.mapCenter=`${center.lat},${center.lng}`;});
  fullRoute();draw();tiles.addTo(map);armTimeout();container.dataset.zoom=String(map.getZoom());container.dataset.wheel='false';container.dataset.follow='false';
  return {
@@ -116,6 +133,6 @@ export function createStreetMap(container:HTMLElement,initial:any,initialColouri
   setAnalysis(value:any,style:any){analysis=value;colouring=style;draw();if(cursorPoint)update(cursorPoint);},
   fullRoute,resize(){if(container.clientWidth&&container.clientHeight){map.invalidateSize({pan:true,animate:false,debounceMoveend:true});queueFollow();}},wheel,follow,
   showPoint(){if(validMapPoint(cursorPoint))map.panTo(latlng(cursorPoint),{animate:!reduced});},
-  destroy(){disposed=true;cancelFollow();clearTimeout(timeout);clearTimeout(clickTimer);container.removeEventListener('keydown',manualKey);map.remove();container.replaceChildren();container.className='lab-street-map';for(const key of ['streetMap','mapReady','zoom','mapCenter','cursorTime','cursorDistance','wheel','follow'])delete container.dataset[key];},
+  destroy(){disposed=true;cancelFollow();clearTimeout(timeout);clearTimeout(clickTimer);container.removeEventListener('keydown',manualKey);map.remove();container.replaceChildren();container.className='lab-street-map';for(const key of ['streetMap','mapReady','zoom','mapCenter','cursorTime','cursorDistance','wheel','follow','kmSize','kmCount'])delete container.dataset[key];},
  };
 }

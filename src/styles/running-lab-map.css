@@ -15,7 +15,7 @@
 .lab-street-marker span{display:flex;align-items:center;justify-content:center;width:27px;height:27px;border:3px solid #fff;box-shadow:0 1px 5px #12233880;font-size:13px;font-weight:800;color:#071b27}
 .lab-street-marker-start span{border-radius:50%;background:#59dfad}.lab-street-marker-end span{border-radius:4px;background:#ff9d40}
 .lab-street-marker-finish span{border-radius:4px;background:#ffe28b;outline:2px solid #5b4104;transform:rotate(45deg)}.lab-street-marker-finish b{transform:rotate(-45deg)}
-.lab-street-km{border:1px solid #142c45;background:#162e49;color:#fff;border-radius:50%;text-align:center;line-height:22px;font-size:11px;font-weight:700;box-shadow:0 1px 4px #fff9}
+.lab-street-km{background:transparent;border:0}.lab-street-km span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;box-sizing:border-box;width:var(--km-size,16px);height:var(--km-size,16px);border:1px solid #49617a99;background:#f5faf9ed;color:#173044;border-radius:50%;font-size:var(--km-font,10px);font-weight:750;line-height:1;box-shadow:0 1px 2px #17304433;transition:width .16s ease,height .16s ease,font-size .16s ease}@media(prefers-reduced-motion:reduce){.lab-street-km span{transition:none}}
 .lab-street-map .leaflet-marker-icon:focus-visible{outline:3px solid #df6615;outline-offset:4px}
 .lab-map-point{padding:13px 15px;border-left:3px solid #ff9d40;background:#172e43;color:#e5effe;font-size:.85rem;overflow-wrap:anywhere}
 .lab-map-help{font-size:.78rem!important}

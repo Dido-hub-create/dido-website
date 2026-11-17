@@ -1,5 +1,7 @@
 # Running Lab — настройки на картата и компактен мобилен GPS панел
 
+Следващото надграждане след сливането на PR #14 — обща графика, релеф и адаптивни километрови маркери — е описано в [RUNNING-LAB-OVERLAY.md](RUNNING-LAB-OVERLAY.md). Числата по-долу са за предходния етап.
+
 Продължение в съществуващия [PR #14](https://github.com/Dido-hub-create/dido-website/pull/14), клон `feat/dido-running-lab-workspace`. [Cloudflare preview](https://feat-dido-running-lab-worksp.dido-website.pages.dev/byagane/running-lab/). Проверки: 17.11.2026.
 
 ## Промени

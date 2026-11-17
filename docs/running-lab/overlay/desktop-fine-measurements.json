@@ -1,0 +1,39 @@
+{
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "workspace": {
+    "x": 32,
+    "y": 27.5,
+    "width": 1376,
+    "height": 715.53125,
+    "top": 27.5,
+    "right": 1408,
+    "bottom": 743.03125,
+    "left": 32
+  },
+  "gps": {
+    "x": 709.21875,
+    "y": 27.5,
+    "width": 698.78125,
+    "height": 98.65625,
+    "top": 27.5,
+    "right": 1408,
+    "bottom": 126.15625,
+    "left": 709.21875
+  },
+  "chart": {
+    "x": 722.21875,
+    "y": 147.15625,
+    "width": 672.78125,
+    "height": 336,
+    "top": 147.15625,
+    "right": 1395,
+    "bottom": 483.15625,
+    "left": 722.21875
+  },
+  "plotHeight": 259,
+  "mode": "overlay",
+  "overflow": false
+}
