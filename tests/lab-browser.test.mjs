@@ -9,6 +9,7 @@ import {gpx,fit,tcx} from './helpers/lab-fixtures.mjs';
 const enabled=!!(process.env.DIDO_BROWSER_MODULE&&process.env.DIDO_BROWSER_URL),base=process.env.DIDO_BROWSER_URL;
 const fixture=(name,options={},day='01')=>({name,mimeType:'application/octet-stream',buffer:Buffer.from(gpx(options).replace('Тестово бягане',name.replace('.gpx','')).replaceAll('2026-01-01','2026-01-'+day))});
 const binary=(name,buffer)=>({name,mimeType:'application/octet-stream',buffer:Buffer.from(buffer)});
+const frame=page=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
 const idle=page=>page.locator('[data-lab-job]').waitFor({state:'hidden',timeout:90000});
 const nav=(page,name)=>page.locator(`[data-tab="${name}"]`).click();
 const action=async(page,name)=>{await page.locator(`[data-action="${name}"]`).first().click();await idle(page);};
@@ -36,24 +37,24 @@ test('Running Lab browser: explicit saves, library, charts, 2–3 comparisons, r
   assert.equal((await database(page)).length,0,'imports are temporary until an explicit confirmed save');
   await dialogAction(page,'save-selected',false);assert.equal((await database(page)).length,0);
   await dialogAction(page,'save-selected');assert.equal((await database(page)).length,3);
-  await action(page,'open-preview');
+  await action(page,'open-preview');await page.locator('[data-lab-detail-graphs] > summary').click();await page.locator('[data-lab-charts] svg').first().waitFor({state:'attached'});
   assert.equal(await page.locator('[data-lab-charts] svg').count(),5);assert.match(await page.locator('[data-lab-stats]').textContent(),/5 km/);
   const chart=page.locator('[data-lab-charts] svg').first();await chart.scrollIntoViewIfNeeded();const box=await chart.boundingBox();
-  const before=await page.locator('[data-lab-map-cursor]').getAttribute('cy');await page.mouse.move(box.x+box.width*.65,box.y+70);
+  const before=await page.locator('[data-lab-map-cursor]').getAttribute('cy');await page.mouse.move(box.x+box.width*.65,box.y+70);await frame(page);
   assert.notEqual(await page.locator('[data-lab-map-cursor]').getAttribute('cy'),before);
   const cursors=await page.locator('[data-lab-charts] .lab-cursor-line').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('x1')));assert.equal(new Set(cursors).size,1,'all charts share the cursor');
-  await chart.focus();await chart.press('Home');assert.match(await page.locator('[data-lab-cursor]').textContent(),/^0 км/);await chart.press('End');assert.match(await page.locator('[data-lab-cursor]').textContent(),/^5 км/);
-  await page.locator('[data-lab-range-start]').fill('1');await page.locator('[data-lab-range-end]').fill('2');await action(page,'range');assert.match(await page.locator('[data-lab-range-result]').textContent(),/1.?000 м.*0:05:00/);
+  await chart.focus();await chart.press('Home');await frame(page);assert.match(await page.locator('[data-point-field=distance]').textContent(),/^0 км/);await chart.press('End');await frame(page);assert.match(await page.locator('[data-point-field=distance]').textContent(),/^5 км/);
+  await page.locator('.lab-range-details > summary').click();await page.locator('[data-lab-range-start]').fill('1');await page.locator('[data-lab-range-end]').fill('2');await action(page,'range');assert.match(await page.locator('[data-lab-range-result]').textContent(),/1.?000 м.*0:05:00/);
   const oldPath=await chart.locator('path').getAttribute('d');await action(page,'zoom');assert.notEqual(await page.locator('[data-lab-charts] svg path').first().getAttribute('d'),oldPath);await action(page,'reset-zoom');
   await page.locator('[data-lab-axis]').selectOption('time');assert.match(await page.locator('[data-lab-charts] svg').first().getAttribute('aria-label'),/мин/);await page.locator('[data-lab-axis]').selectOption('distance');
-  await page.locator('[data-lab-smoothing]').selectOption('50');await idle(page);assert.equal((await database(page,'activities'))[0].settings.smoothingM,100,'settings are not saved automatically');
+  await page.locator('.lab-overview-settings > summary').click();await page.locator('[data-lab-smoothing]').selectOption('50');await idle(page);assert.equal((await database(page,'activities'))[0].settings.smoothingM,100,'settings are not saved automatically');
   await dialogAction(page,'save-active');assert.ok((await database(page,'activities')).some(row=>row.settings.smoothingM===50));
   await page.locator('[data-lab-smoothing]').selectOption('100');await idle(page);await dialogAction(page,'save-active');
   for(const width of [320,390,768,1440]){
    await page.setViewportSize({width,height:1000});await page.waitForTimeout(220);await nav(page,'overview');
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'no page overflow at '+width);
    const svg=page.locator('[data-lab-charts] svg').first();await svg.scrollIntoViewIfNeeded();const b=await svg.boundingBox();
-   await page.touchscreen.tap(b.x+b.width*.55,b.y+85);assert.match(await page.locator('[data-lab-cursor]').textContent(),/наклон/);
+   await page.touchscreen.tap(b.x+b.width*.55,b.y+85);assert.match(await page.locator('[data-lab-cursor]').textContent(),/наклон/i);
    if(width===390){const cdp=await context.newCDPSession(page);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:0,x:b.x+b.width*.35,y:b.y+85}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:0,x:b.x+b.width*.75,y:b.y+85}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();await idle(page);assert.match(await page.locator('[data-lab-range-result]').textContent(),/м/);}
    if([390,1440].includes(width)){await page.evaluate(()=>document.activeElement?.blur());await page.waitForFunction(()=>document.querySelector('.skip-link').getBoundingClientRect().bottom<0);await page.locator('[data-panel="overview"]').screenshot({path:`${shots}/overview-${width}.png`});await page.locator('[data-lab-charts]').screenshot({path:`${shots}/charts-${width}.png`});}
   }
@@ -100,7 +101,7 @@ test('Running Lab browser: no IndexedDB, local-only requests, cancellation and b
  const browser=await launch();let context;
  try{
   context=await browser.newContext();await context.addInitScript(()=>{Object.defineProperty(window,'indexedDB',{get(){throw new DOMException('Denied','SecurityError');}});});const page=await context.newPage();await page.goto(base+'/byagane/running-lab/');await page.locator('[data-lab-storage]').waitFor({state:'visible'});
-  await upload(page,[fixture('Без хранилище.gpx')]);assert.equal(await page.locator('[data-lab-previews] article').count(),1);await action(page,'open-preview');assert.equal(await page.locator('[data-lab-charts] svg').count(),5);await action(page,'save-active');assert.match(await page.locator('[data-lab-status]').textContent(),/не е достъпна/);await context.close();
+  await upload(page,[fixture('Без хранилище.gpx')]);assert.equal(await page.locator('[data-lab-previews] article').count(),1);await action(page,'open-preview');await page.locator('[data-lab-detail-graphs] > summary').click();await page.locator('[data-lab-charts] svg').first().waitFor({state:'attached'});assert.equal(await page.locator('[data-lab-charts] svg').count(),5);await action(page,'save-active');assert.match(await page.locator('[data-lab-status]').textContent(),/не е достъпна/);await context.close();
   context=await browser.newContext();const cancel=await context.newPage();await ready(cancel);
   const batch=Array.from({length:80},(_,i)=>fixture(`Партида ${i}.gpx`,{distance:5000,offset:i}));await cancel.locator('[data-lab-files]').setInputFiles(batch);await cancel.locator('[data-action="cancel"]').click();await idle(cancel);assert.match(await cancel.locator('[data-lab-status]').textContent(),/прекратен/);assert.equal((await database(cancel)).length,0);
   const pending=await cancel.locator('[data-lab-previews] article').count();if(pending)cancel.once('dialog',dialog=>dialog.accept());await upload(cancel,[binary('real-wire.fit',fit({developer:true}))]);assert.equal(await cancel.locator('[data-lab-previews] article').count(),1,'worker can restart after cancellation');await context.close();

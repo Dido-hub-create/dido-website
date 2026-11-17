@@ -5,7 +5,7 @@ export interface PlotPoint {x:number;y:number|null;run?:number}
 export interface ChartState {expanded:boolean;scale:'typical'|'all'}
 interface PlotSeries {title:string;unit:string;points:PlotPoint[];color:string;metric?:string;inverse?:boolean;format?:(value:number)=>string}
 export interface GraphOptions extends PlotSeries {
- key?:string;primaryTitle?:string;axis:string;domain?:[number,number];state?:ChartState;secondary?:PlotSeries;zeroLine?:boolean;
+ key?:string;width?:number;primaryTitle?:string;axis:string;domain?:[number,number];state?:ChartState;secondary?:PlotSeries;zeroLine?:boolean;
  markers?:{x:number;label:string;lap?:boolean;finish?:boolean}[];
  onCursor?:(x:number)=>void;onRange?:(a:number,b:number)=>void;
 }
@@ -29,7 +29,7 @@ export function lineChart(options:GraphOptions){
    plot.append(el('p','Няма достатъчно надеждни измервания за тази графика.','lab-muted'));expand.disabled=all.disabled=true;updateCursor=()=>{};updateSelection=()=>{};return;
   }
   expand.disabled=all.disabled=false;
-  const scale=fontScale(),width=Math.max(280,(document.querySelector<HTMLElement>('[data-running-lab]')?.clientWidth||innerWidth)-32);
+  const scale=fontScale(),width=Math.max(240,options.width??((document.querySelector<HTMLElement>('[data-running-lab]')?.clientWidth||innerWidth)-32));
   const height=(state.expanded?(innerWidth<=600?340:390):(innerWidth<=600?225:270))+Math.round((scale-1)*45);
   const left=Math.max(56,scale*48),right=options.secondary?Math.max(56,scale*48):Math.max(20,scale*14),top=25*scale,bottom=42*scale,plotW=width-left-right,plotH=height-top-bottom;
   const primary=visualScale(options.points,{mode:state.scale,metric:options.metric,includeZero:options.zeroLine})!;
@@ -77,7 +77,7 @@ export function lineChart(options:GraphOptions){
   svg.addEventListener('pointerup',()=>{if(start!==null&&Math.abs(last-start)>(maxX-minX)*.01)options.onRange?.(Math.min(start,last),Math.max(start,last));start=null;});
   svg.addEventListener('pointercancel',()=>{start=null;updateSelection(selectionValue);});
   svg.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();last=event.key==='Home'?minX:event.key==='End'?maxX:Math.max(minX,Math.min(maxX,last+(event.key==='ArrowRight'?1:-1)*(maxX-minX)/100));options.onCursor?.(last);});
-  updateCursor=value=>{const xx=x(Math.max(minX,Math.min(maxX,value)));cursor.setAttribute('x1',String(xx));cursor.setAttribute('x2',String(xx));};
+  updateCursor=value=>{const xx=x(Math.max(minX,Math.min(maxX,value)));cursor.setAttribute('visibility',Number.isFinite(value)&&value>=minX&&value<=maxX?'visible':'hidden');cursor.setAttribute('x1',String(xx));cursor.setAttribute('x2',String(xx));};
   updateSelection=range=>{const a=range?Math.max(minX,Math.min(maxX,range[0])):minX,b=range?Math.max(minX,Math.min(maxX,range[1])):minX;selection.setAttribute('x',String(x(a)));selection.setAttribute('width',String(Math.max(0,x(b)-x(a))));};
   if(cursorValue!==undefined)updateCursor(cursorValue);updateSelection(selectionValue);
  }

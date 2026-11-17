@@ -1,0 +1,225 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "workspace": {
+      "x": 32,
+      "y": -0.5,
+      "width": 1376,
+      "height": 757.53125,
+      "top": -0.5,
+      "right": 1408,
+      "bottom": 757.03125,
+      "left": 32
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 43,
+        "y": 148.03125,
+        "width": 637.21875,
+        "height": 540,
+        "top": 148.03125,
+        "right": 680.21875,
+        "bottom": 688.03125,
+        "left": 43
+      },
+      "[data-map-point]": {
+        "x": 709.21875,
+        "y": -0.5,
+        "width": 698.78125,
+        "height": 128.140625,
+        "top": -0.5,
+        "right": 1408,
+        "bottom": 127.640625,
+        "left": 709.21875
+      },
+      "[data-combined-svg]": {
+        "x": 722.21875,
+        "y": 148.640625,
+        "width": 672.78125,
+        "height": 306,
+        "top": 148.640625,
+        "right": 1395,
+        "bottom": 454.640625,
+        "left": 722.21875
+      },
+      ".lab-metric-switches": {
+        "x": 722.21875,
+        "y": 486.65625,
+        "width": 672.78125,
+        "height": 44,
+        "top": 486.65625,
+        "right": 1395,
+        "bottom": 530.65625,
+        "left": 722.21875
+      },
+      ".lab-primary-controls": {
+        "x": 722.21875,
+        "y": 530.65625,
+        "width": 672.78125,
+        "height": 44,
+        "top": 530.65625,
+        "right": 1395,
+        "bottom": 574.65625,
+        "left": 722.21875
+      }
+    },
+    "svgFont": 12,
+    "valueFont": 14.56,
+    "overflow": false,
+    "gpsHeight": 128.140625,
+    "settingsHeight": 50
+  },
+  {
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "workspace": {
+      "x": 32,
+      "y": -0.046875,
+      "width": 1302,
+      "height": 730.53125,
+      "top": -0.046875,
+      "right": 1334,
+      "bottom": 730.484375,
+      "left": 32
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 43,
+        "y": 148.484375,
+        "width": 601.296875,
+        "height": 513,
+        "top": 148.484375,
+        "right": 644.296875,
+        "bottom": 661.484375,
+        "left": 43
+      },
+      "[data-map-point]": {
+        "x": 673.296875,
+        "y": -0.046875,
+        "width": 660.6875,
+        "height": 128.140625,
+        "top": -0.046875,
+        "right": 1333.984375,
+        "bottom": 128.09375,
+        "left": 673.296875
+      },
+      "[data-combined-svg]": {
+        "x": 686.296875,
+        "y": 149.09375,
+        "width": 634.6875,
+        "height": 271,
+        "top": 149.09375,
+        "right": 1320.984375,
+        "bottom": 420.09375,
+        "left": 686.296875
+      },
+      ".lab-metric-switches": {
+        "x": 686.296875,
+        "y": 452.109375,
+        "width": 634.6875,
+        "height": 44,
+        "top": 452.109375,
+        "right": 1320.984375,
+        "bottom": 496.109375,
+        "left": 686.296875
+      },
+      ".lab-primary-controls": {
+        "x": 686.296875,
+        "y": 496.109375,
+        "width": 634.6875,
+        "height": 44,
+        "top": 496.109375,
+        "right": 1320.984375,
+        "bottom": 540.109375,
+        "left": 686.296875
+      }
+    },
+    "svgFont": 12,
+    "valueFont": 14.56,
+    "overflow": false,
+    "gpsHeight": 128.140625,
+    "settingsHeight": 50
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "workspace": {
+      "x": 18,
+      "y": -0.078125,
+      "width": 354,
+      "height": 1552.046875,
+      "top": -0.078125,
+      "right": 372,
+      "bottom": 1551.96875,
+      "left": 18
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 29,
+        "y": 216.984375,
+        "width": 332,
+        "height": 354.46875,
+        "top": 216.984375,
+        "right": 361,
+        "bottom": 571.453125,
+        "left": 29
+      },
+      "[data-map-point]": {
+        "x": 18,
+        "y": 652.453125,
+        "width": 354,
+        "height": 228.609375,
+        "top": 652.453125,
+        "right": 372,
+        "bottom": 881.0625,
+        "left": 18
+      },
+      "[data-combined-svg]": {
+        "x": 29,
+        "y": 904.0625,
+        "width": 332,
+        "height": 355,
+        "top": 904.0625,
+        "right": 361,
+        "bottom": 1259.0625,
+        "left": 29
+      },
+      ".lab-metric-switches": {
+        "x": 29,
+        "y": 1291.078125,
+        "width": 332,
+        "height": 88,
+        "top": 1291.078125,
+        "right": 361,
+        "bottom": 1379.078125,
+        "left": 29
+      },
+      ".lab-primary-controls": {
+        "x": 29,
+        "y": 1379.078125,
+        "width": 332,
+        "height": 95,
+        "top": 1379.078125,
+        "right": 361,
+        "bottom": 1474.078125,
+        "left": 29
+      }
+    },
+    "svgFont": 12,
+    "valueFont": 15.68,
+    "overflow": false,
+    "gpsHeight": 228.609375,
+    "settingsHeight": 50
+  },
+  {
+    "openedSettingsHeight": 388.21875,
+    "openedWorkspaceHeight": 1095.75
+  }
+]

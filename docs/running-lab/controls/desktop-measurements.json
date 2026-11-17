@@ -1,0 +1,497 @@
+[
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "workspace": {
+      "x": 270,
+      "y": 0.421875,
+      "width": 1380,
+      "height": 715.53125,
+      "top": 0.421875,
+      "right": 1650,
+      "bottom": 715.953125,
+      "left": 270
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 281,
+        "y": 114.953125,
+        "width": 639.15625,
+        "height": 590,
+        "top": 114.953125,
+        "right": 920.15625,
+        "bottom": 704.953125,
+        "left": 281
+      },
+      "[data-map-point]": {
+        "x": 949.15625,
+        "y": 0.421875,
+        "width": 700.828125,
+        "height": 128.140625,
+        "top": 0.421875,
+        "right": 1649.984375,
+        "bottom": 128.5625,
+        "left": 949.15625
+      },
+      "[data-combined-svg]": {
+        "x": 962.15625,
+        "y": 149.5625,
+        "width": 674.828125,
+        "height": 307,
+        "top": 149.5625,
+        "right": 1636.984375,
+        "bottom": 456.5625,
+        "left": 962.15625
+      },
+      "[data-workspace-map]": {
+        "x": 270,
+        "y": 0.421875,
+        "width": 661.15625,
+        "height": 715.53125,
+        "top": 0.421875,
+        "right": 931.15625,
+        "bottom": 715.953125,
+        "left": 270
+      },
+      "[data-workspace-chart]": {
+        "x": 949.15625,
+        "y": 138.5625,
+        "width": 700.828125,
+        "height": 502.015625,
+        "top": 138.5625,
+        "right": 1649.984375,
+        "bottom": 640.578125,
+        "left": 949.15625
+      }
+    },
+    "buttons": [
+      {
+        "width": 132.34375,
+        "height": 32
+      },
+      {
+        "width": 120.421875,
+        "height": 32
+      },
+      {
+        "width": 162.890625,
+        "height": 32
+      },
+      {
+        "width": 101.484375,
+        "height": 32
+      },
+      {
+        "width": 132.359375,
+        "height": 32
+      },
+      {
+        "width": 128.265625,
+        "height": 32
+      },
+      {
+        "width": 100.109375,
+        "height": 32
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "workspace": {
+      "x": 32,
+      "y": -0.5,
+      "width": 1376,
+      "height": 715.53125,
+      "top": -0.5,
+      "right": 1408,
+      "bottom": 715.03125,
+      "left": 32
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 43,
+        "y": 114.03125,
+        "width": 637.21875,
+        "height": 590,
+        "top": 114.03125,
+        "right": 680.21875,
+        "bottom": 704.03125,
+        "left": 43
+      },
+      "[data-map-point]": {
+        "x": 709.21875,
+        "y": -0.5,
+        "width": 698.78125,
+        "height": 128.140625,
+        "top": -0.5,
+        "right": 1408,
+        "bottom": 127.640625,
+        "left": 709.21875
+      },
+      "[data-combined-svg]": {
+        "x": 722.21875,
+        "y": 148.640625,
+        "width": 672.78125,
+        "height": 306,
+        "top": 148.640625,
+        "right": 1395,
+        "bottom": 454.640625,
+        "left": 722.21875
+      },
+      "[data-workspace-map]": {
+        "x": 32,
+        "y": -0.5,
+        "width": 659.21875,
+        "height": 715.53125,
+        "top": -0.5,
+        "right": 691.21875,
+        "bottom": 715.03125,
+        "left": 32
+      },
+      "[data-workspace-chart]": {
+        "x": 709.21875,
+        "y": 137.640625,
+        "width": 698.78125,
+        "height": 501.015625,
+        "top": 137.640625,
+        "right": 1408,
+        "bottom": 638.65625,
+        "left": 709.21875
+      }
+    },
+    "buttons": [
+      {
+        "width": 132.34375,
+        "height": 32
+      },
+      {
+        "width": 120.421875,
+        "height": 32
+      },
+      {
+        "width": 162.890625,
+        "height": 32
+      },
+      {
+        "width": 101.484375,
+        "height": 32
+      },
+      {
+        "width": 132.359375,
+        "height": 32
+      },
+      {
+        "width": 128.265625,
+        "height": 32
+      },
+      {
+        "width": 100.109375,
+        "height": 32
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 780
+    },
+    "workspace": {
+      "x": 32,
+      "y": -0.5,
+      "width": 1376,
+      "height": 700.53125,
+      "top": -0.5,
+      "right": 1408,
+      "bottom": 700.03125,
+      "left": 32
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 43,
+        "y": 114.03125,
+        "width": 637.21875,
+        "height": 575,
+        "top": 114.03125,
+        "right": 680.21875,
+        "bottom": 689.03125,
+        "left": 43
+      },
+      "[data-map-point]": {
+        "x": 709.21875,
+        "y": -0.5,
+        "width": 698.78125,
+        "height": 128.140625,
+        "top": -0.5,
+        "right": 1408,
+        "bottom": 127.640625,
+        "left": 709.21875
+      },
+      "[data-combined-svg]": {
+        "x": 722.21875,
+        "y": 148.640625,
+        "width": 672.78125,
+        "height": 271,
+        "top": 148.640625,
+        "right": 1395,
+        "bottom": 419.640625,
+        "left": 722.21875
+      },
+      "[data-workspace-map]": {
+        "x": 32,
+        "y": -0.5,
+        "width": 659.21875,
+        "height": 700.53125,
+        "top": -0.5,
+        "right": 691.21875,
+        "bottom": 700.03125,
+        "left": 32
+      },
+      "[data-workspace-chart]": {
+        "x": 709.21875,
+        "y": 137.640625,
+        "width": 698.78125,
+        "height": 466.015625,
+        "top": 137.640625,
+        "right": 1408,
+        "bottom": 603.65625,
+        "left": 709.21875
+      }
+    },
+    "buttons": [
+      {
+        "width": 132.34375,
+        "height": 32
+      },
+      {
+        "width": 120.421875,
+        "height": 32
+      },
+      {
+        "width": 162.890625,
+        "height": 32
+      },
+      {
+        "width": 101.484375,
+        "height": 32
+      },
+      {
+        "width": 132.359375,
+        "height": 32
+      },
+      {
+        "width": 128.265625,
+        "height": 32
+      },
+      {
+        "width": 100.109375,
+        "height": 32
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "workspace": {
+      "x": 32,
+      "y": -0.046875,
+      "width": 1302,
+      "height": 688.53125,
+      "top": -0.046875,
+      "right": 1334,
+      "bottom": 688.484375,
+      "left": 32
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 43,
+        "y": 114.484375,
+        "width": 601.296875,
+        "height": 563,
+        "top": 114.484375,
+        "right": 644.296875,
+        "bottom": 677.484375,
+        "left": 43
+      },
+      "[data-map-point]": {
+        "x": 673.296875,
+        "y": -0.046875,
+        "width": 660.6875,
+        "height": 128.140625,
+        "top": -0.046875,
+        "right": 1333.984375,
+        "bottom": 128.09375,
+        "left": 673.296875
+      },
+      "[data-combined-svg]": {
+        "x": 686.296875,
+        "y": 149.09375,
+        "width": 634.6875,
+        "height": 271,
+        "top": 149.09375,
+        "right": 1320.984375,
+        "bottom": 420.09375,
+        "left": 686.296875
+      },
+      "[data-workspace-map]": {
+        "x": 32,
+        "y": -0.046875,
+        "width": 623.296875,
+        "height": 688.53125,
+        "top": -0.046875,
+        "right": 655.296875,
+        "bottom": 688.484375,
+        "left": 32
+      },
+      "[data-workspace-chart]": {
+        "x": 673.296875,
+        "y": 138.09375,
+        "width": 660.6875,
+        "height": 466.015625,
+        "top": 138.09375,
+        "right": 1333.984375,
+        "bottom": 604.109375,
+        "left": 673.296875
+      }
+    },
+    "buttons": [
+      {
+        "width": 132.34375,
+        "height": 32
+      },
+      {
+        "width": 120.421875,
+        "height": 32
+      },
+      {
+        "width": 162.890625,
+        "height": 32
+      },
+      {
+        "width": 101.484375,
+        "height": 32
+      },
+      {
+        "width": 132.359375,
+        "height": 32
+      },
+      {
+        "width": 128.265625,
+        "height": 32
+      },
+      {
+        "width": 100.109375,
+        "height": 32
+      }
+    ],
+    "overflow": false
+  },
+  {
+    "viewport": {
+      "width": 1366,
+      "height": 650
+    },
+    "workspace": {
+      "x": 32,
+      "y": -0.046875,
+      "width": 1302,
+      "height": 604.15625,
+      "top": -0.046875,
+      "right": 1334,
+      "bottom": 604.109375,
+      "left": 32
+    },
+    "rects": {
+      "[data-street-map]": {
+        "x": 43,
+        "y": 114.484375,
+        "width": 601.296875,
+        "height": 445,
+        "top": 114.484375,
+        "right": 644.296875,
+        "bottom": 559.484375,
+        "left": 43
+      },
+      "[data-map-point]": {
+        "x": 673.296875,
+        "y": -0.046875,
+        "width": 660.6875,
+        "height": 128.140625,
+        "top": -0.046875,
+        "right": 1333.984375,
+        "bottom": 128.09375,
+        "left": 673.296875
+      },
+      "[data-combined-svg]": {
+        "x": 686.296875,
+        "y": 149.09375,
+        "width": 634.6875,
+        "height": 271,
+        "top": 149.09375,
+        "right": 1320.984375,
+        "bottom": 420.09375,
+        "left": 686.296875
+      },
+      "[data-workspace-map]": {
+        "x": 32,
+        "y": -0.046875,
+        "width": 623.296875,
+        "height": 570.53125,
+        "top": -0.046875,
+        "right": 655.296875,
+        "bottom": 570.484375,
+        "left": 32
+      },
+      "[data-workspace-chart]": {
+        "x": 673.296875,
+        "y": 138.09375,
+        "width": 660.6875,
+        "height": 466.015625,
+        "top": 138.09375,
+        "right": 1333.984375,
+        "bottom": 604.109375,
+        "left": 673.296875
+      }
+    },
+    "buttons": [
+      {
+        "width": 132.34375,
+        "height": 32
+      },
+      {
+        "width": 120.421875,
+        "height": 32
+      },
+      {
+        "width": 162.890625,
+        "height": 32
+      },
+      {
+        "width": 101.484375,
+        "height": 32
+      },
+      {
+        "width": 132.359375,
+        "height": 32
+      },
+      {
+        "width": 128.265625,
+        "height": 32
+      },
+      {
+        "width": 100.109375,
+        "height": 32
+      }
+    ],
+    "overflow": false
+  }
+]
